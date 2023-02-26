@@ -1,13 +1,14 @@
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
-import {Parallax,ParallaxLayer} from '@react-spring/parallax'
+import { ParallaxProvider } from 'react-scroll-parallax';
+
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
-    <Parallax pages={4}>
+    <ParallaxProvider>
   <Component {...pageProps} />
-  </Parallax>
+  </ParallaxProvider>
   </>
   )
 }
