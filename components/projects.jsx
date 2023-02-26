@@ -20,12 +20,11 @@ export default function Projects(){
             projectList.map((proj,i) =>
                 <Parallax
                 translateY={['30vh','-30vh']}
-                translateX={['0vh', '0vh']}
-                scale={[0.6,1.4]}
-                easing="easeInQuad"
+                translateX={['5vh', '0vh']}
+                scale={[0.7,1.3]}
                 >
                     <Tilt>
-                <div href="" className="project">
+                <div href="" className="project name">
                     <p>{proj.name}</p>
                 </div>
                 </Tilt>

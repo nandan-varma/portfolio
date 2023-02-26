@@ -28,9 +28,11 @@ body,html,.__next {
   justify-content: center;
   flex-direction: column;
   margin: 0%;
+  height:70vh;
 }
 
 .project{
+  user-select: none;
   background-color: rgb(215, 215, 215);
   font-size: 10vw;
   height: 80vh;

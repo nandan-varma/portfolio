@@ -3,9 +3,6 @@ import { Inter } from 'next/font/google'
 // import { Parallax } from 'react-parallax';
 import { Parallax } from 'react-scroll-parallax'
 import Tilt from 'react-parallax-tilt'
-
-import cloud1 from '../public/BW.jpg'
-import NavBar from '../components/navbar'
 import Projects from '../components/projects'
 const inter = Inter({ subsets: ['latin'] })
 
