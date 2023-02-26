@@ -1684,6 +1684,11 @@ react-is@^16.13.1:
   resolved "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
+react-parallax-tilt@^1.7.107:
+  version "1.7.107"
+  resolved "https://registry.yarnpkg.com/react-parallax-tilt/-/react-parallax-tilt-1.7.107.tgz#08733ed5aceb59e712d30612b666b3dd23120473"
+  integrity sha512-rrKZEdjeJ3dzbRRYsXN4n/6Q4bO/9ElgkGeprFKCWUVaNTgTZgA2th1vFY7uuLE57v0Tp8xNUS+PpdRy/cu5PQ==
+
 react-parallax@^3.5.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/react-parallax/-/react-parallax-3.5.1.tgz#73071679371b7738e21ffac8daa0bc3cb7e5174d"

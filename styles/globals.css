@@ -23,11 +23,17 @@ body,html,.__next {
 }
 
 .name {
-  height:100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+}
+
+.project{
+  height: 50vh;
+  width: 40rem;
+  margin:0px;
+  border: 2px dotted black;
 }
 
 .contact{
@@ -48,9 +54,9 @@ body,html,.__next {
 }
 
 .reveal-text {
-  margin-top: 20px;
+  margin-top: 40vh;
   position: relative;
-  font-size: 40px;
+  font-size: 6rem;
   user-select: none;
   animation-name: reveal-text;
   color: #000;
