@@ -19,8 +19,8 @@ export default function Projects(){
         {
             projectList.map((proj,i) =>
                 <Parallax
-                translateY={['25vh','-25vh']}
-                translateX={['vh', '0vh']}
+                translateY={['30vh','-30vh']}
+                translateX={['0vh', '0vh']}
                 scale={[0.6,1.4]}
                 easing="easeInQuad"
                 >
