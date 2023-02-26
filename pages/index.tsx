@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import Link from 'next/link'
+import {Parallax,ParallaxLayer} from '@react-spring/parallax'
+import cloud1 from '../public/BW.jpg'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,7 +19,8 @@ export default function Home() {
       </Head>
       <main>
         {/* <Navigation></Navigation> */}
-        <div className='name'>
+        <ParallaxLayer
+        speed={1}><div className='name'>
           <h1 className='intro'>
             Under Construction by
           </h1>
@@ -25,7 +28,15 @@ export default function Home() {
             Nandan Varma
           </h1>
           <Link className='contact' href="mailto:nandanvarma@icloud.com">Contact Me</Link>
-        </div>
+        </div></ParallaxLayer>
+        <ParallaxLayer offset={1}
+        factor={2}
+        style={{
+          backgroundImage: `url(${cloud1})`,
+          backgroundSize: 'cover',
+        }}></ParallaxLayer>
+        <ParallaxLayer></ParallaxLayer>
+        
       </main>
     </>
   )
