@@ -16,7 +16,7 @@
 
 .reveal-text,
 .reveal-text:after {
-  animation-delay: 2s;
+  animation-delay: 0.5s;
   animation-iteration-count: 1;
   animation-duration: 800ms;
   animation-fill-mode: both;
