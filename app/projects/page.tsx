@@ -69,12 +69,12 @@ export default async function ProjectsPage() {
 											<span>SOON</span>
 										)}
 									</div>
-									<span className="text-zinc-500 text-xs  flex items-center gap-1">
+									{/* <span className="text-zinc-500 text-xs  flex items-center gap-1">
 										<Eye className="w-4 h-4" />{" "}
 										{Intl.NumberFormat("en-US", { notation: "compact" }).format(
 											views[featured.slug] ?? 0,
 										)}
-									</span>
+									</span> */}
 								</div>
 
 								<h2
