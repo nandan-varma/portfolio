@@ -9,11 +9,11 @@ export const metadata: Metadata = {
 		default: "nandanvarma.com",
 		template: "%s | nandanvarma.com",
 	},
-	description: "Software engineer at upstash.com and founder of planetfall.io",
+	description: "Software engineer with too much time",
 	openGraph: {
 		title: "Nandan Varma",
 		description:
-			"Software engineer at upstash.com and founder of planetfall.io",
+			"Software engineer with too much time",
 		url: "https://nandanvarma.com",
 		siteName: "nandanvarma.com",
 		images: [
@@ -37,10 +37,10 @@ export const metadata: Metadata = {
 			"max-snippet": -1,
 		},
 	},
-	twitter: {
-		title: "Nandan Varma",
-		card: "summary_large_image",
-	},
+	// twitter: {
+	// 	title: "nandanvarma",
+	// 	card: "summary_large_image",
+	// },
 	icons: {
 		shortcut: "/favicon.png",
 	},
