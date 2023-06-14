@@ -1,5 +1,5 @@
 "use client";
-import { Github, Mail, Twitter , Linkedin } from "lucide-react";
+import { Phone, Github, Mail, Twitter , Linkedin } from "lucide-react";
 import Link from "next/link";
 import { Navigation } from "../components/nav";
 import { Card } from "../components/card";
@@ -15,6 +15,12 @@ const socials = [
 		icon: <Mail size={20} />,
 		href: "mailto:nandanvarma@icloud.com",
 		label: "Email",
+		handle: "",
+	},
+	{
+		icon: <Phone size={20} />,
+		href: "tel:8639846030",
+		label: "Phone",
 		handle: "",
 	},
 	{
