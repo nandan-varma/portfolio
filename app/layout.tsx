@@ -9,11 +9,11 @@ export const metadata: Metadata = {
 		default: "nandanvarma.com",
 		template: "%s | nandanvarma.com",
 	},
-	description: "Developer",
+	description: "Software Developer",
 	openGraph: {
 		title: "Nandan Varma",
 		description:
-			"Developer",
+			" Software Developer",
 		url: "https://nandanvarma.com",
 		siteName: "nandanvarma.com",
 		images: [
