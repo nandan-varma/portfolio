@@ -13,7 +13,7 @@ export default async function ProjectsPage() {
 		(project) => project.slug === "productivity",
 	)!;
 	const top2 = allProjects.find((project) => project.slug === "music")!;
-	const top3 = allProjects.find((project) => project.slug === "podcasts")!;
+	const top3 = allProjects.find((project) => project.slug === "handwriting")!;
 	const sorted = allProjects
 		.filter((p) => p.published)
 		.filter(
