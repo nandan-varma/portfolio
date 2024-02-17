@@ -10,10 +10,10 @@ export const revalidate = 60;
 export default async function ProjectsPage() {
 
 	const featured = allProjects.find(
-		(project) => project.slug === "productivity",
+		(project) => project.slug === "chat",
 	)!;
-	const top2 = allProjects.find((project) => project.slug === "music")!;
-	const top3 = allProjects.find((project) => project.slug === "handwriting")!;
+	const top2 = allProjects.find((project) => project.slug === "productivity")!;
+	const top3 = allProjects.find((project) => project.slug === "music")!;
 	const sorted = allProjects
 		.filter((p) => p.published)
 		.filter(
@@ -36,9 +36,9 @@ export default async function ProjectsPage() {
 					<h2 className="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl">
 						Projects
 					</h2>
-					<p className="mt-4 text-zinc-400">
+					{/* <p className="mt-4 text-zinc-400">
 						Some of the projects are from work and some are on my own time.
-					</p>
+					</p> */}
 				</div>
 				<div className="w-full h-px bg-zinc-800" />
 
