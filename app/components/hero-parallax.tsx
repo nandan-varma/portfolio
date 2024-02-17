@@ -111,13 +111,8 @@ export const Header = () => {
       <h1 className="text-2xl md:text-7xl font-bold dark:text-white">
         Nandan Varma <br /> 
       </h1>
-      <h2 className="text-lg md:text-3xl font-bold dark:text-white">
-        Software Developer
-      </h2>
       <p className="max-w-2xl text-base md:text-xl mt-8 dark:text-neutral-200">
-        We build beautiful products with the latest technologies and frameworks.
-        We are a team of passionate developers and designers that love to build
-        amazing products.
+        Software Developer
       </p>
     </div>
   );
