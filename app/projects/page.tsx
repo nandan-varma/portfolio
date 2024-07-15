@@ -10,7 +10,7 @@ export const revalidate = 60;
 export default async function ProjectsPage() {
 
 	const featured = allProjects.find(
-		(project) => project.slug === "chat",
+		(project) => project.slug === "calendar",
 	)!;
 	const top2 = allProjects.find((project) => project.slug === "productivity")!;
 	const top3 = allProjects.find((project) => project.slug === "music")!;
