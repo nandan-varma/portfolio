@@ -44,8 +44,8 @@ export default async function ProjectsPage() {
 
 				<div className="grid grid-cols-1 gap-8 mx-auto lg:grid-cols-2 ">
 					<Card>
-						<Link href={`/projects/${featured.slug}`}>
-							<article className="relative h-full w-full p-4 md:p-8">
+						<Link className="" href={`/projects/${featured.slug}`}>
+							<article className="relative h-full w-full p-4 md:p-8" tabIndex={-1}>
 								<div className="flex justify-between gap-2 items-center">
 									<div className="text-xs text-zinc-100">
 										{featured.date ? (
@@ -70,7 +70,7 @@ export default async function ProjectsPage() {
 									{featured.description}
 								</p>
 								<div className="absolute bottom-4 md:bottom-8">
-								<p className="text-zinc-200 hover:text-zinc-50 hidden lg:block">
+									<p className="text-zinc-200 hover:text-zinc-50 hidden lg:block">
 										Read more <span aria-hidden="true">&rarr;</span>
 									</p>
 								</div>
@@ -92,7 +92,7 @@ export default async function ProjectsPage() {
 					<div className="grid grid-cols-1 gap-4">
 						{sorted
 							.filter((_, i) => i % 3 === 0)
-							.map((project,index) => (
+							.map((project, index) => (
 								<Card key={project.slug}>
 									<Article project={project} views={0} />
 								</Card>
