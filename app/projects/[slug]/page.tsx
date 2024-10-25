@@ -13,6 +13,9 @@ type Props = {
 	};
 };
 
+export const metadata = {
+	title: "Project Description",
+};
 
 export async function generateStaticParams(): Promise<Props["params"][]> {
 	return allProjects

@@ -7,6 +7,12 @@ import { LoadAnimation } from "../components/animation";
 import { Article } from "./article";
 
 export const revalidate = 60;
+
+export const metadata = {
+	title: "Projects",
+	description: "Projects by Nandan Varma",
+};
+
 export default async function ProjectsPage() {
 
 	const featured = allProjects.find(
