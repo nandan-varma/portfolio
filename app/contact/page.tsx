@@ -4,6 +4,11 @@ import Link from "next/link";
 import { Navigation } from "../components/nav";
 import { Card } from "../components/card";
 
+export const metadata = {
+	title: "Contact",
+	description: "Contact Details of Nandan Varma",
+};
+
 const socials = [
 	// {
 	// 	icon: <Twitter size={20} />,
