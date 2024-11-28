@@ -1,8 +1,14 @@
 import { allProjects } from "contentlayer/generated";
 
 export async function GET() {
-  const projectNames = allProjects.map(project => project.title);
-  return new Response(JSON.stringify(projectNames), {
+  const projects = allProjects.map(project => ({
+    title: project.title,
+    description: project.description,
+    date: project.date,
+    repository: project.repository,
+    url: project.url
+  }));
+  return new Response(JSON.stringify(projects), {
     headers: { "Content-Type": "application/json" },
   });
 }
