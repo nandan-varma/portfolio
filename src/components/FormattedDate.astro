@@ -1,0 +1,21 @@
+---
+interface Props {
+	date: Date;
+}
+
+// date is in format "2021-10-15"
+const { date } = Astro.props;
+const formattedDate = new Date(date);
+
+console.log(date);
+---
+
+<time datetime={formattedDate.toISOString()}>
+	{
+		formattedDate.toLocaleDateString('en-us', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		})
+	}
+</time>
