@@ -1,0 +1,31 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+type Props = CollectionEntry<'project'>['data'];
+
+const { title, description, date, repository, url, published } = Astro.props;
+---
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+</head>
+<body>
+    <article>
+        <header>
+            <h1>{title}</h1>
+            <p><strong>Published on:</strong> {new Date(date).toLocaleDateString()}</p>
+        </header>
+        <section>
+            <p>{description}</p>
+            <p><strong>Repository:</strong> <a href={repository} target="_blank" rel="noopener noreferrer">{repository}</a></p>
+            <p><strong>Live URL:</strong> <a href={url} target="_blank" rel="noopener noreferrer">{url}</a></p>
+        </section>
+        <footer>
+            <p><strong>Status:</strong> {published ? 'Published' : 'Unpublished'}</p>
+        </footer>
+    </article>
+</body>
+</html>
