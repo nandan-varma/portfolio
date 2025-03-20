@@ -2,14 +2,17 @@ import { Eye, View } from "lucide-react";
 import type { Project } from "../content.config";
 
 interface Props {
+	id: string;
   project: Project;
   views: number;
 }
 
 
-export const Article: React.FC<Props> = ({ project, views }) => {
+
+
+export const Article: React.FC<Props> = ({id, project, views }) => {
 	return (
-		<a href={`/project/${project.title}`}>
+		<a href={`/projects/${id}`}>
 			<article className="p-4 md:p-8" tabIndex={-1}>
 				<div className="flex justify-between gap-2 items-center">
 					<span className="text-xs duration-1000 text-zinc-200 group-hover:text-white group-hover:border-zinc-200 drop-shadow-orange">

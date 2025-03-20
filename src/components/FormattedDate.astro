@@ -7,7 +7,6 @@ interface Props {
 const { date } = Astro.props;
 const formattedDate = new Date(date);
 
-console.log(date);
 ---
 
 <time datetime={formattedDate.toISOString()}>

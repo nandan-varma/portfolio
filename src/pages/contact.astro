@@ -1,0 +1,73 @@
+---
+import { Card } from "@/components/Card";
+import { Navigation } from "@/components/Navigation";
+
+import BaseHead from "../components/BaseHead.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+
+import { Mail, Github, Linkedin } from "lucide-react";
+
+const socials = [
+  {
+	icon: Mail,
+	href: "mailto:contact@nandanvarma.com",
+	label: "Email",
+	handle: "contact@nandanvarma.com",
+  },
+  {
+	icon: Github,
+	href: "https://github.com/nandan-varma",
+	label: "Github",
+	handle: "nandan-varma",
+  },
+  {
+	icon: Linkedin,
+	href: "https://www.linkedin.com/in/nandanvarma/",
+	label: "LinkedIn",
+	handle: "nandanvarma",
+  }
+];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+    <body class="bg-gradient-to-tl from-black via-neutral-900 to-black">
+        <Navigation client:load/>
+		<div class="container flex items-center justify-center min-h-screen px-4 mx-auto">
+			<div class="grid w-full grid-cols-1 gap-6 mx-auto mt-32 sm:mt-0 sm:grid-cols-3 lg:gap-16">
+				{socials.map((s) => (
+					<Card client:load>
+						<a
+							href={s.href}
+							target="_blank"
+							class="p-4 relative flex flex-col items-center gap-4 duration-700 group md:gap-8 md:py-24  lg:pb-48  md:p-16"
+						>
+							<span
+								class="absolute w-px h-2/3"
+								aria-hidden="true"
+							/>
+							<span class="relative z-10 flex items-center justify-center w-20 h-20 text-sm duration-1000 border rounded-full text-zinc-200 group-hover:text-white group-hover:bg-zinc-900 border-zinc-500 bg-zinc-900 group-hover:border-zinc-200 drop-shadow-orange">
+								<s.icon size={32} />
+							</span>
+							<div class="z-10 flex flex-col items-center">
+								<span class="text-xl font-medium duration-150 lg:text-xl text-zinc-200 group-hover:text-white font-display">
+									{s.handle}
+								</span>
+								<span class="mt-4 text-sm text-center duration-1000 text-zinc-400 group-hover:text-zinc-200">
+									{s.label}
+								</span>
+							</div>
+						</a>
+					</Card>
+				))}
+			</div>
+		</div>
+	</body>
+</html>
+
+<style>
+/* Add any additional styles here */
+</style>
