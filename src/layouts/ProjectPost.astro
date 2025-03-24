@@ -8,7 +8,14 @@ const { title, description, date, repository, url, published } = Astro.props;
 ---
 
 <html lang="en">
-    <head> </head>
+    <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Parkinsans:wght@300..800&display=swap"
+            rel="stylesheet"
+        />
+    </head>
     <body>
         <header
             class="relative isolate overflow-hidden bg-gradient-to-tl from-black via-zinc-900 to-black"
@@ -109,3 +116,9 @@ const { title, description, date, repository, url, published } = Astro.props;
         <slot />
     </body>
 </html>
+
+<style>
+    .font-display {
+        font-family: "Lora", serif;
+    }
+</style>
