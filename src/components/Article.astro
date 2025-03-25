@@ -1,7 +1,5 @@
 ---
-import { Eye, View } from "lucide-react";
 import type { Project } from "../content.config";
-import { ClientRouter } from "astro:transitions";
 
 interface Props {
   id: string;
@@ -12,7 +10,6 @@ interface Props {
 const { id, project, views } = Astro.props;
 ---
 
-<ClientRouter />
 
 <a href={`/projects/${id}`}>
   <article class="p-4 md:p-8" tabindex={-1}>
@@ -35,11 +32,13 @@ const { id, project, views } = Astro.props;
     </div>
     <h2
     class="z-20 text-xl font-medium duration-1000 lg:text-3xl text-zinc-200 group-hover:text-white font-display"
-    transition:name={project.title}
+    transition:name={`project-title-${project.title}`}
     >
       {project.title}
     </h2>
-    <p class="z-20 mt-4 text-sm duration-1000 text-zinc-400 group-hover:text-zinc-200">
+    <p class="z-20 mt-4 text-sm duration-1000 text-zinc-400 group-hover:text-zinc-200"
+    transition:name={`project-desc-${project.title}`}
+    >
       {project.description}
     </p>
   </article>

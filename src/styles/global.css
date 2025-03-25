@@ -129,11 +129,12 @@
  */
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+	* {
+		@apply border-border outline-ring/50;
 	}
-  body {
-    @apply bg-background text-foreground;
+
+	body {
+		@apply bg-background text-foreground;
 	}
 }
 
@@ -141,52 +142,50 @@
 /* theme */
 
 @layer base {
-    :root {
-      --background: 0 0% 0%;
-      --foreground: 0 0% 100%;
-      --card: 0 0% 0%;
-      --card-foreground: 0 0% 100%;
-      --popover: 0 0% 0%;
-      --popover-foreground: 0 0% 100%;
-      --primary: 0 0% 0%;
-      --primary-foreground: 0 0% 100%;
-      --secondary: 0 0% 22%;
-      --secondary-foreground: 0 0% 100%;
-      --muted: 0 0% 80%;
-      --muted-foreground: 0 0% 100%;
-      --accent: 0 0% 69%;
-      --accent-foreground: 0 0% 0%;
-      --destructive: 0 62% 30%;
-      --destructive-foreground: 0 0% 10%;
-      --border: 0 0% 60%;
-      --input: 0 0% 80%;
-      --ring: 0 0% 60%;
-      --radius: 0.5rem;
-    }
-   
-    .dark {
-      --background: 0 0% 0%;
-      --foreground: 0 0% 100%;
-      --card: 0 0% 0%;
-      --card-foreground: 0 0% 100%;
-      --popover: 0 0% 0%;
-      --popover-foreground: 0 0% 100%;
-      --primary: 0 0% 0%;
-      --primary-foreground: 0 0% 100%;
-      --secondary: 0 0% 22%;
-      --secondary-foreground: 0 0% 100%;
-      --muted: 0 0% 80%;
-      --muted-foreground: 0 0% 100%;
-      --accent: 0 0% 69%;
-      --accent-foreground: 0 0% 0%;
-      --destructive: 0 62% 30%;
-      --destructive-foreground: 0 0% 10%;
-      --border: 0 0% 60%;
-      --input: 0 0% 80%;
-      --ring: 0 0% 60%;
-    }
-  }
+	:root {
+		--background: 0 0% 0%;
+		--foreground: 0 0% 100%;
+		--card: 0 0% 0%;
+		--card-foreground: 0 0% 100%;
+		--popover: 0 0% 0%;
+		--popover-foreground: 0 0% 100%;
+		--primary: 0 0% 0%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 0 0% 22%;
+		--secondary-foreground: 0 0% 100%;
+		--muted: 0 0% 80%;
+		--muted-foreground: 0 0% 100%;
+		--accent: 0 0% 69%;
+		--accent-foreground: 0 0% 0%;
+		--destructive: 0 62% 30%;
+		--destructive-foreground: 0 0% 10%;
+		--border: 0 0% 60%;
+		--input: 0 0% 80%;
+		--ring: 0 0% 60%;
+		--radius: 0.5rem;
+	}
 
-  /* mdx styles */
+	.dark {
+		--background: 0 0% 0%;
+		--foreground: 0 0% 100%;
+		--card: 0 0% 0%;
+		--card-foreground: 0 0% 100%;
+		--popover: 0 0% 0%;
+		--popover-foreground: 0 0% 100%;
+		--primary: 0 0% 0%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 0 0% 22%;
+		--secondary-foreground: 0 0% 100%;
+		--muted: 0 0% 80%;
+		--muted-foreground: 0 0% 100%;
+		--accent: 0 0% 69%;
+		--accent-foreground: 0 0% 0%;
+		--destructive: 0 62% 30%;
+		--destructive-foreground: 0 0% 10%;
+		--border: 0 0% 60%;
+		--input: 0 0% 80%;
+		--ring: 0 0% 60%;
+	}
+}
 
-  
+/* mdx styles */
