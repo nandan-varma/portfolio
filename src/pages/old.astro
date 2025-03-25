@@ -1,0 +1,90 @@
+---
+import { ClientRouter } from "astro:transitions";
+import BaseHead from "../components/BaseHead.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+
+const navigation = [
+	{ name: "Projects", href: "/projects" },
+	{ name: "Contact", href: "/contact" },
+];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<ClientRouter />
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Parkinsans:wght@300..800&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+
+	</head>
+	<body class="parkinsans-font">
+		<div
+			class="flex flex-col items-center justify-center font-bold w-screen h-screen overflow-hidden bg-gradient-to-tl from-black via-neutral-900 to-black"
+		>
+			<nav class="my-16" aria-label="Main Navigation">
+				<ul class="flex items-center justify-center gap-4">
+					{
+						navigation.map((item) => (
+							<li>
+								<a
+									href={item.href}
+									transition:name={item.name}
+									class="text-2xl duration-500 text-zinc-500 hover:text-neutral-100"
+								>
+									{item.name}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</nav>
+
+			<h1 class="text-6xl text-center glow">
+				Nandan Varma
+			</h1>
+
+			<div class="my-16 text-center">
+				<h2 class="text-2xl text-zinc-500">Software Developer</h2>
+			</div>
+		</div>
+	</body>
+</html>
+
+<style>
+	.lora-font {
+		font-family: "Lora", serif;
+		font-optical-sizing: auto;
+		font-style: normal;
+	}
+
+	.parkinsans-font {
+		font-family: "Parkinsans", sans-serif;
+		font-optical-sizing: auto;
+		font-style: normal;
+	}
+
+	.source-sans-font {
+		font-family: "Source Sans 3", sans-serif;
+		font-optical-sizing: auto;
+		font-style: normal;
+	}
+
+	@keyframes glow {
+		0% {
+			color: grey;
+			text-shadow: 0 0 0px rgba(255, 255, 255, 0);
+		}
+
+		100% {
+			color: white;
+			text-shadow: 0 0 24px rgba(255, 255, 255, 1);
+			letter-spacing: 0.3rem;
+		}
+	}
+
+	.glow {
+		animation: glow 2s forwards;
+	}
+</style>
