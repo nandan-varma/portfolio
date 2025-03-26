@@ -21,7 +21,7 @@
 
 <script>
     function animateWater() {
-        document.addEventListener("astro:page-load", () => {
+        document.addEventListener("DOMContentLoaded", () => {
             const canvas = document.getElementById(
                 "waterCanvas",
             ) as HTMLCanvasElement | null;
@@ -31,9 +31,14 @@
             const ctx = canvas.getContext("2d");
 
             // Set canvas dimensions
+            let waterLevel = canvas.height;
+
             const setCanvasDimensions = () => {
+                // console.log("Setting canvas dimensions");
+                // console.log(window.innerWidth, window.innerHeight);
                 canvas.width = window.innerWidth;
                 canvas.height = window.outerHeight;
+                waterLevel = canvas.height;
             };
 
             setCanvasDimensions();
@@ -43,7 +48,6 @@
             const dropletRadius = 10;
             const gravity = 0.3;
             const perspectiveRatio = 0.4; // Vertical compression for perspective
-            const waterLevel = canvas.height;
             let splashParticles: {
                 x: number;
                 y: number;
@@ -98,6 +102,14 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = "white";
                 ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+                if (canvas.width === 0 || canvas.height === 0) {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    waterLevel = canvas.height;
+                    // console.log("Canvas dimensions set to window dimensions");
+                    // console.log(canvas.width, canvas.height);
+                }
 
                 // Get image data
                 const imageData = ctx.getImageData(
@@ -631,6 +643,8 @@
     }
 
     document.addEventListener("astro:page-load", animateWater);
-    document.addEventListener("astro:after-swap", animateWater);
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) animateWater();
+    });
     animateWater();
 </script>
