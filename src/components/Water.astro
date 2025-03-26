@@ -28,7 +28,7 @@
             if (!canvas) {
                 return;
             }
-            const ctx = canvas.getContext("2d");
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
             // Set canvas dimensions
             let waterLevel = canvas.height;
@@ -641,12 +641,6 @@
             animate();
         });
     }
-
-    document.addEventListener("astro:page-load", animateWater);
-    document.addEventListener("astro:after-swap", animateWater);
-    document.addEventListener("astro:before-preparation",animateWater);
-    document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) animateWater();
-    });
+    
     animateWater();
 </script>

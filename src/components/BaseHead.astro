@@ -1,9 +1,9 @@
 ---
 // Import the global.css file here so that it is included on
 // all pages through the use of the <BaseHead /> component.
-import '../styles/global.css';
-import { SITE_TITLE } from '../consts';
-import { ClientRouter } from 'astro:transitions';
+import "../styles/global.css";
+import { SITE_TITLE } from "../consts";
+import { ClientRouter } from "astro:transitions";
 
 interface Props {
 	title: string;
@@ -13,7 +13,7 @@ interface Props {
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image = '/og.png' } = Astro.props;
+const { title, description, image = "/og.png" } = Astro.props;
 ---
 
 <!-- Global Metadata -->
@@ -25,15 +25,15 @@ const { title, description, image = '/og.png' } = Astro.props;
 	rel="alternate"
 	type="application/rss+xml"
 	title={SITE_TITLE}
-	href={new URL('rss.xml', Astro.site)}
+	href={new URL("rss.xml", Astro.site)}
 />
 <meta name="generator" content={Astro.generator} />
 
 <!-- Additional Icons -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="manifest" href="/site.webmanifest" />
 
 <!-- Font preloads -->
 
@@ -60,9 +60,19 @@ const { title, description, image = '/og.png' } = Astro.props;
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
 
 <!-- view transitions -->
- <ClientRouter />
+<ClientRouter />
 
- <!-- analytics -->
- <script is:inline defer data-domain="nandanvarma.com" src="https://plausible.nandanvarma.com/js/script.outbound-links.js"></script>
- <script is:inline>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
- 
+<!-- analytics -->
+<script
+	is:inline
+	defer
+	data-domain="nandanvarma.com"
+	src="https://plausible.nandanvarma.com/js/script.outbound-links.tagged-events.js"
+></script>
+<script is:inline>
+	window.plausible =
+		window.plausible ||
+		function () {
+			(window.plausible.q = window.plausible.q || []).push(arguments);
+		};
+</script>
