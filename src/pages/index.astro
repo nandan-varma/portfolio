@@ -2,14 +2,12 @@
 import Water from "@/components/Water.astro";
 import BaseHead from "../components/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
-import { ClientRouter } from "astro:transitions";
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<ClientRouter />
 	</head>
 	<body class="m-0 p-0 flex flex-col min-h-screen relative">
 		<div id="background" class="fixed inset-0 w-full h-full -z-10">

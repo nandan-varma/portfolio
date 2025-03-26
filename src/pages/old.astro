@@ -1,5 +1,4 @@
 ---
-import { ClientRouter } from "astro:transitions";
 import BaseHead from "../components/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 
@@ -12,12 +11,7 @@ const navigation = [
 <!doctype html>
 <html lang="en">
 	<head>
-		<ClientRouter />
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Parkinsans:wght@300..800&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-
 	</head>
 	<body class="parkinsans-font">
 		<div
@@ -41,9 +35,7 @@ const navigation = [
 				</ul>
 			</nav>
 
-			<h1 class="text-6xl text-center glow">
-				Nandan Varma
-			</h1>
+			<h1 class="text-6xl text-center glow">Nandan Varma</h1>
 
 			<div class="my-16 text-center">
 				<h2 class="text-2xl text-zinc-500">Software Developer</h2>

@@ -5,6 +5,7 @@ import "@/styles/global.css";
 import "@/styles/mdx.css";
 
 import { render } from "astro:content";
+import BaseHead from "@/components/BaseHead.astro";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("project");
@@ -19,8 +20,15 @@ const post = Astro.props;
 const { Content } = await render(post);
 ---
 
-<ProjectPost {...post.data}>
-	<article class="w-3xl py-4 mx-auto prose prose-zinc prose-quoteless max-w-full">
-		<Content class="mdx"/>
-	</article>
-</ProjectPost>
+<html lang="en">
+	<head>
+		<BaseHead title={post.data.title} description={post.data.description} />
+	</head>
+	<body></body><ProjectPost {...post.data}>
+		<article
+			class="w-3xl py-4 mx-auto prose prose-zinc prose-quoteless max-w-full"
+		>
+			<Content class="mdx" />
+		</article>
+	</ProjectPost>
+</html>
