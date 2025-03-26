@@ -2,16 +2,16 @@
 import Navigation from "@/components/Navigation.astro";
 import BaseHead from "../components/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
-import { ClientRouter } from "astro:transitions";
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<ClientRouter />
 	</head>
-	<body class="bg-gradient-to-tl from-black via-neutral-900 to-black bg-fixed">
+	<body
+		class="bg-gradient-to-tl from-black via-neutral-900 to-black bg-fixed"
+	>
 		<Navigation />
 		<div class="relative pb-16">
 			<div
