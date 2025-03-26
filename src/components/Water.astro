@@ -21,7 +21,7 @@
 
 <script>
     function animateWater() {
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("astro:page-load", () => {
             const canvas = document.getElementById(
                 "waterCanvas",
             ) as HTMLCanvasElement | null;
@@ -644,6 +644,7 @@
 
     document.addEventListener("astro:page-load", animateWater);
     document.addEventListener("astro:after-swap", animateWater);
+    document.addEventListener("astro:before-preparation",animateWater);
     document.addEventListener("visibilitychange", () => {
         if (!document.hidden) animateWater();
     });
