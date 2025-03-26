@@ -643,6 +643,7 @@
     }
 
     document.addEventListener("astro:page-load", animateWater);
+    document.addEventListener("astro:after-swap", animateWater);
     document.addEventListener("visibilitychange", () => {
         if (!document.hidden) animateWater();
     });
