@@ -24,11 +24,13 @@ const { Content } = await render(post);
 	<head>
 		<BaseHead title={post.data.title} description={post.data.description} />
 	</head>
-	<body></body><ProjectPost {...post.data}>
-		<article
-			class="w-3xl py-4 mx-auto prose prose-zinc prose-quoteless max-w-full"
-		>
-			<Content class="mdx" />
-		</article>
-	</ProjectPost>
+	<body>
+		<ProjectPost {...post.data}>
+			<article
+				class="w-3xl py-4 mx-auto prose prose-zinc prose-quoteless max-w-full"
+			>
+				<Content class="mdx" />
+			</article>
+		</ProjectPost>
+	</body>
 </html>
