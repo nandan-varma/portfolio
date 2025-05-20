@@ -14,6 +14,15 @@ const projectSchema = z.object({
 	published: z.boolean(),
 })
 
+const blogSchema = z.object({
+	title: z.string(),
+	description: z.string(),
+	// Transform string to Date object
+	date: z.string(),
+	updatedDate: z.coerce.date().optional(),
+	draft: z.boolean().optional()
+})
+
 const project = defineCollection({
 	// Load Markdown and MDX files in the `src/content/project/` directory.
 	loader: glob({ base: './src/content/project', pattern: '**/*.{md,mdx}' }),
@@ -21,8 +30,14 @@ const project = defineCollection({
 	schema: projectSchema,
 });
 
-export const collections = { project };
+const blog = defineCollection({
+	loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
+	schema: blogSchema
+})
+
+export const collections = { project, blog };
 
 export type Project = z.infer<typeof projectSchema>;
+export type Blog = z.infer<typeof blogSchema>;
 
 
