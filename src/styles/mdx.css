@@ -1,6 +1,9 @@
 .mdx {
     display: block;
     max-width: 100%;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 h1 {
