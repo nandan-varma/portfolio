@@ -189,3 +189,32 @@
 }
 
 /* mdx styles */
+
+/* Mobile responsiveness fixes */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+img, picture, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure tables don't overflow on mobile */
+table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}

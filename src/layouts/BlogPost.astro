@@ -2,10 +2,9 @@
 import type { CollectionEntry } from "astro:content";
 import "@/styles/global.css";
 
-type Props = CollectionEntry<"project">["data"];
+type Props = CollectionEntry<"blog">["data"];
 
-const { title, description, date, emoji, repository, url, published } =
-    Astro.props;
+const { title, description, date } = Astro.props;
 ---
 
 <header
@@ -42,7 +41,7 @@ const { title, description, date, emoji, repository, url, published } =
             </div>
 
             <a
-                href="/projects"
+                href="/blog"
                 class="white-back duration-200 hover:font-medium text-white hover:text-zinc-300"
                 transition:name={"nav-back"}
             >
@@ -80,31 +79,6 @@ const { title, description, date, emoji, repository, url, published } =
                 >
                     {description}
                 </p>
-            </div>
-
-            <div class="mx-auto mt-10 max-w-2xl lg:max-w-none">
-                <div
-                    class="grid grid-cols-1 gap-y-6 gap-x-8 text-base font-semibold leading-7 text-white sm:grid-cols-2 md:flex lg:gap-x-10"
-                >
-                    {
-                        repository && (
-                            <a
-                                target="_blank"
-                                href={`https://github.com/${repository}`}
-                                class="white-back"
-                            >
-                                GitHub <span aria-hidden="true">&rarr;</span>
-                            </a>
-                        )
-                    }
-                    {
-                        url && (
-                            <a target="_blank" href={url} class="white-back">
-                                Website <span aria-hidden="true">&rarr;</span>
-                            </a>
-                        )
-                    }
-                </div>
             </div>
         </div>
     </div>

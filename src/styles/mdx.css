@@ -1,6 +1,9 @@
 .mdx {
     display: block;
     max-width: 100%;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 h1 {
@@ -85,7 +88,7 @@ p {
 
 ul,
 ol {
-    margin-top: 1.5rem;
+    /* margin-top: 1.5rem; */
     margin-left: 1.5rem;
 }
 

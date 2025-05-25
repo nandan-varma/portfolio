@@ -1,6 +1,6 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
-import ProjectPost from "../../layouts/ProjectPost.astro";
+import BlogPost from "../../layouts/BlogPost.astro";
 import "@/styles/global.css";
 import "@/styles/mdx.css";
 
@@ -8,13 +8,13 @@ import { render } from "astro:content";
 import BaseHead from "@/components/BaseHead.astro";
 
 export async function getStaticPaths() {
-	const posts = await getCollection("project");
+	const posts = await getCollection("blog");
 	return posts.map((post) => ({
 		params: { slug: post.id },
 		props: post,
 	}));
 }
-type Props = CollectionEntry<"project">;
+type Props = CollectionEntry<"blog">;
 
 const post = Astro.props;
 const { Content } = await render(post);
@@ -25,12 +25,12 @@ const { Content } = await render(post);
 		<BaseHead title={post.data.title} description={post.data.description} />
 	</head>
 	<body>
-		<ProjectPost {...post.data}>
+		<BlogPost {...post.data}>
 			<article
 				class="w-full md:w-3xl py-4 mx-auto prose prose-zinc prose-quoteless max-w-full px-4 sm:px-6"
 			>
 				<Content class="mdx" />
 			</article>
-		</ProjectPost>
+		</BlogPost>
 	</body>
 </html>
