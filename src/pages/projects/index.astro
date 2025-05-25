@@ -10,9 +10,9 @@ const projects = (await getCollection("project"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
 	.map((post) => post);
 
-const featured = projects.find((project) => project.data.title === "Friday");
-const top2 = projects.find((project) => project.data.title === "Productivity");
-const top3 = projects.find((project) => project.data.title === "Chess Online");
+const featured = projects.find((project) => project.data.title === "Replog");
+const top2 = projects.find((project) => project.data.title === "Friday");
+const top3 = projects.find((project) => project.data.title === "Productivity");
 
 const sorted = projects.sort((a, b) => {
 	if (a.data.date && b.data.date) {
