@@ -1,8 +1,9 @@
 ---
 title: How I am building a Fitness App
-description: Explaining how I build a fitness app in React Native
-date: "2021-10-15"
+description: Explaining how I am building a fitness app in React Native
+date: "2025-05-25"
 draft: false
+tags: ["development", "react-native", "fitness", "app-development"]
 ---
 
 ## Contents
@@ -10,7 +11,6 @@ draft: false
 *   [Introduction](#introduction)
     *   [Why](#why)
     *   [How](#how)
-*   [Requirements](#requirements)
 *   [Features](#features)
 *   [Demo](#demo)
 *   [Final Thoughts](#final-thoughts)
@@ -20,36 +20,64 @@ draft: false
 Just like all my other [projects](/projects), I like to combine my hobbies with my work.
 I like to listen to music, so I made a [music app](/projects/music).
 I like play chess, so I made a [chess app](/projects/chess).
-\*cough\* I dont like to hand write my assignments, so I made a [handwriting app](/projects/handwriting) to write my assignments.
-I like to work out, so I am making a fitness app.
+\*cough\* I dont like to hand write my assignments, so I made a [handwritten pdf gen app](/projects/handwriting) to write my assignments.
+I like to workout, so I am making a fitness app.
 
-## Why
+# Why
 
 I have used a lot of fitness apps in the past,
 I have liked some features of some apps and disliked some features of other apps.
 So as a developer, I thought to myself, why not build my own fitness app?
-So I decided to build my own fitness app that focuses on the features I think are important.
+So I decided to build my own fitness app that focuses on the features I think are important while being privacy focused and open source.
 
-## How
+# Features
 
-Lets start with the tech stack.
+Let's talk about the features I want to implement in this app.
+
+**Non-functional requirements:**
+- Simple and intuitive UI
+- Privacy focused
+- Open source
+- Cross platform
+- Offline support
+- Lightweight
+
+**Functional requirements:**
+- Display all exercises with important information with images and descriptions
+- Track workouts and exercises
+- Track progress over time
+- Set goals and reminders
+- Create custom workout plans
+- Calendar view to see past workouts
+- AI assistance for workout suggestions
+
+# How
+Now, Lets start with the tech stack I am using to build this app.
 I am using React Native for the App because It is a cross platform framework
-and allows me to use all the benifits of npm packages with great community support.
+and allows me to use all the benifits of great TS/JS packages and community support.
 - [Expo](https://expo.dev) to routing and building the app.
-- a sqlite database to store the data locally on the device for offline access and making it typesafe using [Drizzle ORM](https://orm.drizzle.team/).
-- [EAS](https://expo.dev/eas) to build and give over-the-air updates for both Android and iOS.
+- a sqlite database to store the data locally on the device for offline access and making it typesafe using [Drizzle ORM](https://orm.drizzle.team/) for schema, querying and migrations.
+- [EAS](https://expo.dev/eas) to build and give OTA(over-the-air) updates for both Android and iOS.
 - [NativeWind](https://www.nativewind.dev) for styling the app.
 - [Expo SecureStore](https://docs.expo.dev/versions/latest/sdk/securestore/) to securely store user data.
+- [React Native Reusables](https://rnr-docs.vercel.app/) for reusable components and utilities.
 - All of this with [TypeScript](https://www.typescriptlang.org) for type safety and better developer experience.
 
-## Demo
+# Demo
+
+Here is a quick demo of the app I have built so far.
+<br/>
 
 <video width="320" height="240" controls>
   <source src="https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlJUhuiIdzxiZ8RUlHQfDceV5yaEgCuWMr0Y2P" type="video/mp4"/>
 </video>
 
-## Final Thoughts
+*UI is subject to change as I am still working on it.
+
+# Final Thoughts
 
 I am really excited to build this app and I hope you are too.
-I will be updating this blog post with more features and updates as I go along.
+I have been developing and writing this app on my weekend free time after college, so it is a slow process.
+I will be writing follow up posts on the progress of this app and the features I am implementing.
 I will also be posting updates on my [webpage](/) and [linkedIn](https://www.linkedin.com/in/nandanvarma/) page.
+If you want to see code for this app, you can check out the [GitHub repository](https://www.github.com/nandan-varma/replog).
