@@ -15,5 +15,7 @@
       ]
     },
     "strictNullChecks": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }
