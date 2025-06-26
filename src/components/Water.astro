@@ -48,6 +48,12 @@
             const dropletRadius = 10;
             const gravity = 0.3;
             const perspectiveRatio = 0.4; // Vertical compression for perspective
+            
+            // Time-based animation variables
+            let lastFrameTime = performance.now();
+            const targetFPS = 60;
+            const frameTime = 1000 / targetFPS; // Target frame time in milliseconds
+            
             let splashParticles: {
                 x: number;
                 y: number;
@@ -75,7 +81,7 @@
             }[] = [];
             // default values
             const maxDroplets = canvas.width / 5; // Maximum number of droplets
-            const dropletSpawnRate = 0.1; // Chance of spawning a droplet each frame
+            const dropletSpawnRate = 0.01; // Chance of spawning a droplet per millisecond
 
             // Text variables
             const text = "Nandan Varma";
@@ -181,14 +187,14 @@
             }
 
             // Create a new droplet
-            function createDroplet() {
+            function createDroplet(deltaTime: number) {
                 if (!ctx || !canvas) {
                     return;
                 }
 
                 if (
                     droplets.length < maxDroplets &&
-                    Math.random() < dropletSpawnRate
+                    Math.random() < dropletSpawnRate * deltaTime
                 ) {
                     const x = Math.random() * canvas.width;
                     droplets.push({
@@ -235,10 +241,18 @@
             }
 
             // Animation loop
-            function animate() {
+            function animate(currentTime: number = performance.now()) {
                 if (!ctx || !canvas) {
                     return;
                 }
+                
+                // Calculate delta time
+                const deltaTime = currentTime - lastFrameTime;
+                lastFrameTime = currentTime;
+                
+                // Normalize delta time to target FPS
+                const normalizedDelta = deltaTime / frameTime;
+                
                 // Clear canvas
                 ctx.fillStyle = "black";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -247,16 +261,16 @@
                 drawWaterSurface();
 
                 // Possibly create a new droplet
-                createDroplet();
+                createDroplet(deltaTime);
 
                 // Update and draw droplets
-                updateDroplets();
+                updateDroplets(normalizedDelta);
 
                 // Update and draw splash particles
-                updateSplashParticles();
+                updateSplashParticles(normalizedDelta);
 
                 // Update and draw ripples
-                updateRipples();
+                updateRipples(normalizedDelta);
 
                 // Draw the text
                 drawText();
@@ -353,16 +367,16 @@
                 }
             }
 
-            function updateDroplets() {
+            function updateDroplets(deltaMultiplier: number) {
                 if (!ctx || !canvas) {
                     return;
                 }
                 for (let i = 0; i < droplets.length; i++) {
                     const droplet = droplets[i];
 
-                    // Apply gravity
-                    droplet.velocity += gravity;
-                    droplet.y += droplet.velocity;
+                    // Apply gravity with delta time
+                    droplet.velocity += gravity * deltaMultiplier;
+                    droplet.y += droplet.velocity * deltaMultiplier;
 
                     // Draw shadow on water surface
                     //   if (droplet.y < waterLevel) {
@@ -454,17 +468,17 @@
                 }
             }
 
-            function updateSplashParticles() {
+            function updateSplashParticles(deltaMultiplier: number) {
                 if (!ctx || !canvas) {
                     return;
                 }
                 for (let i = 0; i < splashParticles.length; i++) {
                     const particle = splashParticles[i];
 
-                    // Update position
-                    particle.x += particle.vx;
-                    particle.y += particle.vy;
-                    particle.vy += particle.gravity;
+                    // Update position with delta time
+                    particle.x += particle.vx * deltaMultiplier;
+                    particle.y += particle.vy * deltaMultiplier;
+                    particle.vy += particle.gravity * deltaMultiplier;
 
                     // Check for collision with text
                     const collision = checkTextCollision(
@@ -493,8 +507,8 @@
                     ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity})`;
                     ctx.fill();
 
-                    // Fade out
-                    particle.opacity -= 0.02;
+                    // Fade out with delta time
+                    particle.opacity -= 0.02 * deltaMultiplier;
 
                     // Remove faded particles
                     if (particle.opacity <= 0) {
@@ -504,7 +518,7 @@
                 }
             }
 
-            function updateRipples() {
+            function updateRipples(deltaMultiplier: number) {
                 if (!ctx || !canvas) {
                     return;
                 }
@@ -589,11 +603,11 @@
                     ctx.stroke();
                     ctx.shadowBlur = 0;
 
-                    // Update ripple
-                    ripple.radius += ripple.speed;
+                    // Update ripple with delta time
+                    ripple.radius += ripple.speed * deltaMultiplier;
                     // Fade out faster as they get larger or if collided
                     ripple.opacity -=
-                        0.005 + ripple.radius / 500 + (collided ? 0.02 : 0);
+                        (0.005 + ripple.radius / 500 + (collided ? 0.02 : 0)) * deltaMultiplier;
 
                     // Remove faded ripples
                     if (ripple.opacity <= 0) {
