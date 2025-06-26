@@ -1,0 +1,45 @@
+---
+title: See before you sync
+description: I have spedup my application without changing the stack.
+date: "2025-06-15"
+draft: true
+tags: ["development", "database", "caching"]
+---
+
+I have been working on 
+
+You all know why we use a database, to store data.
+I did the same by using hosted postgresql database in the us-west, while I am working on my new calendar application. I have asked bunch of my friends try it and give suggestions and feedback.
+
+As you might have guessed by now, I care a lot about performance. To find out what was slow, I checked which API calls and server actions were taking the most time.
+
+I have seen an issue which was expected and one which was not.
+
+Expected :
+- My Google Calendar API calls takes a lot of time as I am hitting Google's APIs, that too as a unverified application ( waiting for verfication. but you know how it is. )  
+
+Unexpected :
+- Some database calls taking a lot of time for simple sql queries.
+
+I then immediately implemented simple cache layer to my database queries using redis for my most repeated sql queries using [orm](https://orm.drizzle.team/docs/cache).
+but the issue still persists.
+
+So I did some digging for the reason and saw that deploying a application and database in us-west is not a great idea when most of my friends who tried this are from India.
+
+So I went back to the drawing board and brainstormed some solutions. Let's first go through them and then I will explain the solution that actually works.
+
+Ideas that dont work :
+- maybe I can **sync** and purge google calendar events in my database to eliminate multiple calls ?
+- maybe I can implement database sharding for multiple regions and **sync** them ?
+- maybe I can just periodically **sync** repeated queries to cache ?
+
+Yes, syncing is the issue but not near my application, not my database, not my cache, It needs to be even more closer to the user, their browser.
+
+So, I started on searching for sync layers for my application. Many caught my eye but I am going with Tanstack Query's [Caching](https://tanstack.com/query/v4/docs/framework/react/guides/caching) feature.
+
+I have considered other options like manually implementing a cache layer using localStorage, but less code is better code, so I went with the Tanstack Query's caching feature.
+
+This have added benifit of faster loading of data in the browser, and also reduced the number of calls to my server.
+I am in the process of implementing this and maybe update this post with some results.
+
+Now the application is going to get some fun animations,
