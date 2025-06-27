@@ -1,0 +1,20 @@
+---
+import { PythonEditor } from "@/components/python";
+import BaseHead from "../components/BaseHead.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <BaseHead
+            title={SITE_TITLE}
+            description={SITE_DESCRIPTION}
+            image="/og/index.png"
+        />
+    </head>
+    <body>
+        {/* simple python runner */}
+        <PythonEditor className="w-full" client:load />
+    </body>
+</html>

@@ -4,7 +4,7 @@ import "@/styles/global.css";
 
 type Props = CollectionEntry<"blog">["data"];
 
-const { title, description, date } = Astro.props;
+const { title, description, date, draft } = Astro.props;
 ---
 
 <header
@@ -79,6 +79,13 @@ const { title, description, date } = Astro.props;
                 >
                     {description}
                 </p>
+                {
+                    draft ? (
+                        <p class="mt-2 text-sm text-yellow-400">
+                            This post is a draft and may not be complete.
+                        </p>
+                    ) : null
+                }
             </div>
         </div>
     </div>
