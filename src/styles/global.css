@@ -210,6 +210,35 @@ table {
   overflow-x: auto;
 }
 
+/* Custom scrollbar styles for Python editor */
+.python-output-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #4B5563 #1F2937;
+}
+
+.python-output-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.python-output-scrollbar::-webkit-scrollbar-track {
+  background: #1F2937;
+  border-radius: 4px;
+}
+
+.python-output-scrollbar::-webkit-scrollbar-thumb {
+  background: #4B5563;
+  border-radius: 4px;
+}
+
+.python-output-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
+}
+
+/* Force scrollbar to always be visible */
+.python-output-scrollbar::-webkit-scrollbar-thumb {
+  min-height: 20px;
+}
+
 @media (max-width: 640px) {
   .container {
     width: 100% !important;

@@ -1,15 +1,15 @@
 ---
 title: See before you sync
-description: I have spedup my application without changing the stack.
+description: How I sped up my calendar without optimizing my database
 date: "2025-06-15"
 draft: true
 tags: ["development", "database", "caching"]
 ---
 
-I have been working on 
+I have been working on [a calendar application](https://github.com/nandan-varma/friday).
 
 You all know why we use a database, to store data.
-I did the same by using hosted postgresql database in the us-west, while I am working on my new calendar application. I have asked bunch of my friends try it and give suggestions and feedback.
+I did the same by using hosted postgresql database in the us-west, while I am working on my new calendar application. I have asked bunch of my friends try it and give feedback.
 
 As you might have guessed by now, I care a lot about performance. To find out what was slow, I checked which API calls and server actions were taking the most time.
 
@@ -24,7 +24,7 @@ Unexpected :
 I then immediately implemented simple cache layer to my database queries using redis for my most repeated sql queries using [orm](https://orm.drizzle.team/docs/cache).
 but the issue still persists.
 
-So I did some digging for the reason and saw that deploying a application and database in us-west is not a great idea when most of my friends who tried this are from India.
+So I did some digging for the reason and saw that deploying an application and database in us-west is not a great idea when most of my friends who tried this are from India.
 
 So I went back to the drawing board and brainstormed some solutions. Let's first go through them and then I will explain the solution that actually works.
 
@@ -37,9 +37,9 @@ Yes, syncing is the issue but not near my application, not my database, not my c
 
 So, I started on searching for sync layers for my application. Many caught my eye but I am going with Tanstack Query's [Caching](https://tanstack.com/query/v4/docs/framework/react/guides/caching) feature.
 
-I have considered other options like manually implementing a cache layer using localStorage, but less code is better code, so I went with the Tanstack Query's caching feature.
+I have considered other options like manually implementing a cache layer using localStorage, but most of the time you dont have to reinvent the wheel, so I went with it.
 
 This have added benifit of faster loading of data in the browser, and also reduced the number of calls to my server.
 I am in the process of implementing this and maybe update this post with some results.
 
-Now the application is going to get some fun animations,
+This helps in implementing more features like offline support, optimistic updates and better mutations which I am planning to do in the future.
