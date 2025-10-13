@@ -65,7 +65,8 @@ const { title, description, image = "/og.png" } = Astro.props;
 <!-- analytics -->
 <script
 	is:inline
-	defer
+	async
+	fetchpriority="low"
 	data-domain="nandanvarma.com"
 	src="https://plausible.nandanvarma.com/js/script.outbound-links.tagged-events.js"
 ></script>
