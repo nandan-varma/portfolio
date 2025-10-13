@@ -3,9 +3,7 @@ import { expect, test } from 'vitest';
 import Index from '../../src/pages/index.astro';
 
 test('Index page renders correctly', async () => {
-  const container = await AstroContainer.create({
-    site: 'https://www.nandanvarma.com',
-  });
+  const container = await AstroContainer.create({});
   const result = await container.renderToString(Index, {
     request: new Request('https://www.nandanvarma.com/'),
   });
