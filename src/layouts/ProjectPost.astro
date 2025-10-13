@@ -4,8 +4,7 @@ import "@/styles/global.css";
 
 type Props = CollectionEntry<"project">["data"];
 
-const { title, description, date, emoji, repository, url, published } =
-    Astro.props;
+const { title, description, repository, url } = Astro.props;
 ---
 
 <header
