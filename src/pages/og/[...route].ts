@@ -30,11 +30,11 @@ const pages = {
     },
     // Add blog posts with blog/ prefix
     ...Object.fromEntries(
-        blogEntries.map(({ id, data }) => [`blog/${id}`, { ...data, type: 'blog' }])
+        blogEntries.map(({ id, data }: any) => [`blog/${id}`, { ...data, type: 'blog' }])
     ),
     // Add projects with project/ prefix
     ...Object.fromEntries(
-        projectEntries.map(({ id, data }) => [`project/${id}`, { ...data, type: 'project' }])
+        projectEntries.map(({ id, data }: any) => [`project/${id}`, { ...data, type: 'project' }])
     ),
 };
 

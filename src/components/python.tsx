@@ -4,11 +4,9 @@ import { python } from '@codemirror/lang-python';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorState } from '@codemirror/state';
 import { loadPyodide, type PyodideInterface } from 'pyodide';
+import styles from './python.module.css';
 
-interface PythonEditorProps {
-  initialCode?: string;
-  className?: string;
-}
+
 
 const defaultCode = `# Write your Python code here and click "Run" to execute
 print("Hello, World!")
@@ -43,7 +41,7 @@ export const PythonEditor = ({
       try {
         setOutput('Loading Python environment...');
         const pyodideInstance = await loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/"
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/"
         });
         
         // Redirect stdout to capture print statements
@@ -77,7 +75,6 @@ sys.stderr = _output_capture
         setIsLoading(false);
         setOutput('Python environment loaded successfully! Ready to run code.');
       } catch (error) {
-        console.error('Failed to load Pyodide:', error);
         setOutput(`Failed to load Python environment: ${error}`);
         setIsLoading(false);
       }
@@ -242,31 +239,8 @@ sys.stderr = _output_capture
         <div className="p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Output:</h3>
         </div>
-        <div 
-          className="p-4 bg-gray-900 text-green-400 font-mono text-sm h-80 overflow-y-scroll"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#4B5563 #1F2937'
-          }}>
-          <style dangerouslySetInnerHTML={{
-            __html: `
-              .bg-gray-900::-webkit-scrollbar {
-                width: 12px;
-              }
-              .bg-gray-900::-webkit-scrollbar-track {
-                background: #1F2937;
-                border-radius: 6px;
-              }
-              .bg-gray-900::-webkit-scrollbar-thumb {
-                background: #4B5563;
-                border-radius: 6px;
-                border: 2px solid #1F2937;
-              }
-              .bg-gray-900::-webkit-scrollbar-thumb:hover {
-                background: #6B7280;
-              }
-            `
-          }} />
+        <div
+          className={`p-4 bg-gray-900 text-green-400 font-mono text-sm h-80 overflow-y-scroll ${styles.outputPanel}`}>
           <pre className="whitespace-pre-wrap">
             {output || 'Click "Run" to execute your Python code and see the output here...'}
           </pre>

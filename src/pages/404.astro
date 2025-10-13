@@ -597,9 +597,7 @@ import BaseHead from "../components/BaseHead.astro";
         menu = document.querySelector(".menu"),
         ul = menu.querySelector("ul"),
         idx = 0,
-        count = ul.childElementCount - 1,
-        toggle = true,
-        frame;
+        count = ul.childElementCount - 1;
 
     // Set canvas size
     canvas.width = ww / 3;
@@ -622,16 +620,16 @@ import BaseHead from "../components/BaseHead.astro";
 
     function animate() {
         snow(ctx);
-        frame = requestAnimationFrame(animate);
+        requestAnimationFrame(animate);
     }
 
     // Glitch
-    for (i = 0; i < 4; i++) {
+    for (let i = 0; i < 4; i++) {
         var span = text.firstElementChild.cloneNode(true);
         text.appendChild(span);
     }
 
-    window.addEventListener("DOMContentLoaded", function (e) {
+    window.addEventListener("DOMContentLoaded", function (_e) {
         setTimeout(function () {
             main.classList.add("on");
             main.classList.remove("off");
@@ -641,11 +639,11 @@ import BaseHead from "../components/BaseHead.astro";
 
     window.addEventListener(
         "keydown",
-        function (e) {
-            var key = e.keyCode;
+        function (_e) {
+            var key = _e.keyCode;
             var prev = idx;
-            if (key == 38 || key == 40) {
-                e.preventDefault();
+            if (key == 38 || key == 40 || key == 13) {
+                _e.preventDefault();
 
                 switch (key) {
                     case 38:
@@ -658,7 +656,11 @@ import BaseHead from "../components/BaseHead.astro";
                             idx++;
                         }
                         break;
-                    // TODO: Add more cases for other keys
+                    case 13: {
+                        const link = ul.children[idx].querySelector('a');
+                        if (link) link.click();
+                        break;
+                    }
                 }
 
                 ul.children[prev].classList.remove("active");

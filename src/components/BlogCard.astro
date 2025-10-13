@@ -8,8 +8,9 @@
     let mouseY = 0;
 
     // Function to handle mouse move event
-    function onMouseMove(event: MouseEvent) {
-        const { currentTarget, clientX, clientY } = event;
+    function onMouseMove(event: Event) {
+        const mouseEvent = event as MouseEvent;
+        const { currentTarget, clientX, clientY } = mouseEvent;
         if (!currentTarget) return;
         const { left, top } = (
             currentTarget as HTMLElement
@@ -31,7 +32,7 @@
     // Add event listener to the card element
     const cardElement = document.querySelector("[data-card]");
     if (cardElement !== null) {
-        cardElement.addEventListener("mousemove", onMouseMove as EventListener);
+        cardElement.addEventListener("mousemove", onMouseMove);
     }
 </script>
 
