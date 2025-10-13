@@ -9,7 +9,24 @@ export default getViteConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'tests/'],
+      include: [
+        'src/**/*.{js,ts,tsx,astro}',
+      ],
+      exclude: [
+        'node_modules/',
+        'tests/',
+        'src/**/*.d.ts',
+        'src/**/*.config.*',
+        'public/',
+        'dist/',
+        '.astro/',
+        'static/',
+        '**/*.config.*',
+        '**/types.d.ts',
+        '**/content.d.ts',
+        '**/_astro/**',
+        '**/astro:scripts/**',
+      ],
     },
     // Vitest configuration options
   },
