@@ -1,0 +1,19 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+import CarGame from "@/components/CarGame.astro";
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <BaseHead
+            title="Car Game - 3D Infinite Runner"
+            description="Play a third-person infinite car racing game built with Three.js"
+            image="/og/index.png"
+        />
+    </head>
+    <body style="margin: 0; padding: 0; overflow: hidden;">
+        <CarGame />
+    </body>
+</html>

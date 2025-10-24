@@ -1,0 +1,585 @@
+
+<div id="car-game-container" style="width: 100%; height: 100vh; position: relative;">
+  <canvas id="car-game-canvas"></canvas>
+  
+  <!-- Collision impact overlay -->
+  <div id="collision-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; opacity: 0; transition: opacity 0.1s;">
+    <div style="width: 100%; height: 100%; background: radial-gradient(circle, transparent 30%, rgba(255, 0, 0, 0.5) 100%);"></div>
+  </div>
+  
+  <div id="game-ui" style="position: absolute; top: 20px; left: 20px; color: white; font-family: monospace; font-size: 18px; z-index: 10; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+    <div>Speed: <span id="speed-display">0</span> km/h</div>
+    <div>Distance: <span id="distance-display">0</span> m</div>
+    <div id="collision-warning" style="color: #ff0000; font-weight: bold; margin-top: 10px; opacity: 0; transition: opacity 0.2s;">⚠ COLLISION!</div>
+  </div>
+  <div id="controls-hint" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: white; font-family: monospace; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+    <div>Arrow Keys or WASD to Control</div>
+    <div style="font-size: 14px; margin-top: 5px; opacity: 0.8;">W/↑ Accelerate | S/↓ Brake | A/← D/→ Steer</div>
+  </div>
+</div>
+
+<script>
+  // @ts-ignore - three.js types are installed but may not be recognized in script tag
+  import * as THREE from 'three';
+  // @ts-ignore
+  import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+  // Game state
+  let scene: THREE.Scene;
+  let camera: THREE.PerspectiveCamera;
+  let renderer: THREE.WebGLRenderer;
+  let car: THREE.Group;
+  let carPosition = { x: 0, z: 0 };
+  let carVelocity = { x: 0, z: 0 };
+  let carRotation = 0;
+  let speed = 0;
+  let distance = 0;
+  let carModelLoaded = false;
+  
+  const roadWidth = 10;
+  const roadSegmentLength = 50;
+  const maxSpeed = 100;
+  const acceleration = 0.5;
+  const friction = 0.95;
+  const turnSpeed = 0.03;
+  
+  // Collision impact state
+  let collisionImpact = 0;
+  let collisionShakeX = 0;
+  let collisionShakeY = 0;
+  
+  let keys: { [key: string]: boolean } = {};
+  let roadSegments: THREE.Mesh[] = [];
+  let roadDividers: THREE.Group[] = [];
+  let trees: THREE.Mesh[] = [];
+  let leftBarrier: THREE.Mesh[] = [];
+  let rightBarrier: THREE.Mesh[] = [];
+
+  // Initialize the game
+  function init() {
+    const container = document.getElementById('car-game-container');
+    const canvas = document.getElementById('car-game-canvas') as HTMLCanvasElement;
+    
+    if (!container || !canvas) return;
+
+    // Scene setup
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB); // Sky blue
+    scene.fog = new THREE.Fog(0x87CEEB, 50, 200);
+
+    // Camera setup (third-person view)
+    camera = new THREE.PerspectiveCamera(
+      75,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      1000
+    );
+
+    // Renderer setup
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(50, 50, 50);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.camera.left = -50;
+    directionalLight.shadow.camera.right = 50;
+    directionalLight.shadow.camera.top = 50;
+    directionalLight.shadow.camera.bottom = -50;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    scene.add(directionalLight);
+
+    // Create initial road segments
+    createRoadSegments();
+    
+    // Create trees along the road
+    createTrees();
+
+    // Load car model or create placeholder
+    loadCar();
+
+    // Event listeners
+    window.addEventListener('keydown', (e) => keys[e.key] = true);
+    window.addEventListener('keyup', (e) => keys[e.key] = false);
+    window.addEventListener('resize', onWindowResize);
+
+    // Start animation loop
+    animate();
+  }
+
+  function createRoadSegments() {
+    const roadGeometry = new THREE.PlaneGeometry(roadWidth, roadSegmentLength);
+    const roadMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x333333,
+      roughness: 0.8,
+      metalness: 0.2
+    });
+
+    // Create road segments extending forward
+    for (let i = -2; i < 10; i++) {
+      const road = new THREE.Mesh(roadGeometry, roadMaterial);
+      road.rotation.x = -Math.PI / 2;
+      road.position.z = i * roadSegmentLength;
+      road.receiveShadow = true;
+      scene.add(road);
+      roadSegments.push(road);
+
+      // Add road dividers - more visible dashed lines
+      const dividerGroup = new THREE.Group();
+      const dashLength = 3;
+      const gapLength = 2;
+      const numDashes = Math.floor(roadSegmentLength / (dashLength + gapLength));
+      
+      for (let j = 0; j < numDashes; j++) {
+        const dashGeometry = new THREE.BoxGeometry(0.15, 0.15, dashLength);
+        const dashMaterial = new THREE.MeshStandardMaterial({ 
+          color: 0xFFFFFF,
+          emissive: 0xFFFFFF,
+          emissiveIntensity: 0.3
+        });
+        const dash = new THREE.Mesh(dashGeometry, dashMaterial);
+        dash.position.set(
+          0,
+          0.05,
+          -roadSegmentLength / 2 + j * (dashLength + gapLength) + dashLength / 2
+        );
+        dash.castShadow = true;
+        dividerGroup.add(dash);
+      }
+      
+      dividerGroup.position.set(0, 0, i * roadSegmentLength);
+      scene.add(dividerGroup);
+      roadDividers.push(dividerGroup);
+
+      // Side barriers (grass)
+      const grassGeometry = new THREE.PlaneGeometry(20, roadSegmentLength);
+      const grassMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+      
+      const leftGrass = new THREE.Mesh(grassGeometry, grassMaterial);
+      leftGrass.rotation.x = -Math.PI / 2;
+      leftGrass.position.set(-roadWidth / 2 - 10, -0.1, i * roadSegmentLength);
+      leftGrass.receiveShadow = true;
+      scene.add(leftGrass);
+      roadSegments.push(leftGrass);
+
+      const rightGrass = new THREE.Mesh(grassGeometry, grassMaterial);
+      rightGrass.rotation.x = -Math.PI / 2;
+      rightGrass.position.set(roadWidth / 2 + 10, -0.1, i * roadSegmentLength);
+      rightGrass.receiveShadow = true;
+      scene.add(rightGrass);
+      roadSegments.push(rightGrass);
+
+      // Add visible barriers at road edges
+      const barrierGeometry = new THREE.BoxGeometry(0.3, 0.5, roadSegmentLength);
+      const barrierMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0xFF0000,
+        emissive: 0xFF0000,
+        emissiveIntensity: 0.2
+      });
+      
+      const leftBarrierMesh = new THREE.Mesh(barrierGeometry, barrierMaterial);
+      leftBarrierMesh.position.set(-roadWidth / 2, 0.25, i * roadSegmentLength);
+      leftBarrierMesh.castShadow = true;
+      scene.add(leftBarrierMesh);
+      leftBarrier.push(leftBarrierMesh);
+
+      const rightBarrierMesh = new THREE.Mesh(barrierGeometry, barrierMaterial);
+      rightBarrierMesh.position.set(roadWidth / 2, 0.25, i * roadSegmentLength);
+      rightBarrierMesh.castShadow = true;
+      scene.add(rightBarrierMesh);
+      rightBarrier.push(rightBarrierMesh);
+    }
+  }
+
+  function createTrees() {
+    const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.4, 3, 8);
+    const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+    const foliageGeometry = new THREE.SphereGeometry(2, 8, 8);
+    const foliageMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+
+    for (let i = -2; i < 20; i++) {
+      // Left side trees
+      if (Math.random() > 0.3) {
+        const tree = new THREE.Group();
+        const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+        trunk.position.y = 1.5;
+        const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+        foliage.position.y = 3.5;
+        tree.add(trunk);
+        tree.add(foliage);
+        tree.position.set(-roadWidth / 2 - 5 - Math.random() * 10, 0, i * 10 + Math.random() * 10);
+        tree.castShadow = true;
+        scene.add(tree);
+        trees.push(trunk);
+        trees.push(foliage);
+      }
+
+      // Right side trees
+      if (Math.random() > 0.3) {
+        const tree = new THREE.Group();
+        const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+        trunk.position.y = 1.5;
+        const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+        foliage.position.y = 3.5;
+        tree.add(trunk);
+        tree.add(foliage);
+        tree.position.set(roadWidth / 2 + 5 + Math.random() * 10, 0, i * 10 + Math.random() * 10);
+        tree.castShadow = true;
+        scene.add(tree);
+        trees.push(trunk);
+        trees.push(foliage);
+      }
+    }
+  }
+
+  function loadCar() {
+    const loader = new GLTFLoader();
+    const carUrl = "https://qujr12qsco.ufs.sh/f/fthLDAMTNUTl1VSBWNJR0yqvBhEi9KmkTUuXM6PsedW2anYZ";
+
+    
+    console.log('Loading car model from:', carUrl);
+    
+    loader.load(
+      carUrl,
+      (gltf: any) => {
+        console.log('Car model loaded successfully!', gltf);
+        
+        // Remove placeholder if it exists
+        if (car && !carModelLoaded) {
+          scene.remove(car);
+        }
+        
+        car = gltf.scene;
+        carModelLoaded = true;
+        
+        // Scale down the GLB model to match placeholder car size
+        car.scale.set(0.8, 0.8, 0.8);
+        car.position.set(carPosition.x, 0, carPosition.z);
+        car.rotation.y = carRotation;
+        
+        // Enable shadows for all meshes in the model
+        car.traverse((child: any) => {
+          if ((child as THREE.Mesh).isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        
+        scene.add(car);
+        console.log('Car added to scene');
+      },
+      (progress: any) => {
+        console.log('Loading progress:', (progress.loaded / progress.total * 100).toFixed(2) + '%');
+      },
+      (error: any) => {
+        console.error('Error loading car model:', error);
+        console.log('Using placeholder car instead');
+        if (!car) {
+          createPlaceholderCar();
+        }
+      }
+    );
+    
+    // Create placeholder while loading
+    createPlaceholderCar();
+  }
+
+  function createPlaceholderCar() {
+    if (car) scene.remove(car);
+    
+    car = new THREE.Group();
+    
+    // Car body
+    const bodyGeometry = new THREE.BoxGeometry(1.5, 0.8, 3);
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.position.y = 0.6;
+    body.castShadow = true;
+    car.add(body);
+
+    // Car top
+    const topGeometry = new THREE.BoxGeometry(1.3, 0.6, 1.8);
+    const topMaterial = new THREE.MeshStandardMaterial({ color: 0xcc0000 });
+    const top = new THREE.Mesh(topGeometry, topMaterial);
+    top.position.set(0, 1.2, -0.2);
+    top.castShadow = true;
+    car.add(top);
+
+    // Wheels
+    const wheelGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.3, 16);
+    const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    
+    const wheelPositions = [
+      [-0.8, 0.3, 1],
+      [0.8, 0.3, 1],
+      [-0.8, 0.3, -1],
+      [0.8, 0.3, -1]
+    ];
+
+    wheelPositions.forEach(([x, y, z]) => {
+      const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+      wheel.rotation.z = Math.PI / 2;
+      wheel.position.set(x, y, z);
+      wheel.castShadow = true;
+      car.add(wheel);
+    });
+
+    car.position.set(0, 0, 0);
+    scene.add(car);
+  }
+
+  function updateCarPhysics() {
+    // Handle input - Arrow keys and WASD
+    if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+      speed = Math.min(speed + acceleration, maxSpeed);
+    }
+    if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+      speed = Math.max(speed - acceleration * 1.5, -maxSpeed * 0.5);
+    }
+    
+    // Apply friction
+    speed *= friction;
+
+    // Steering - Arrow keys and WASD
+    if ((keys['ArrowLeft'] || keys['a'] || keys['A']) && Math.abs(speed) > 0.5) {
+      carRotation += turnSpeed * (speed / maxSpeed);
+    }
+    if ((keys['ArrowRight'] || keys['d'] || keys['D']) && Math.abs(speed) > 0.5) {
+      carRotation -= turnSpeed * (speed / maxSpeed);
+    }
+
+    // Update velocity based on rotation
+    carVelocity.x = Math.sin(carRotation) * speed * 0.1;
+    carVelocity.z = Math.cos(carRotation) * speed * 0.1;
+
+    // Store old position for collision response
+    const oldX = carPosition.x;
+    const oldSpeed = speed;
+
+    // Update position
+    carPosition.x += carVelocity.x;
+    carPosition.z += carVelocity.z;
+
+    // Enhanced collision detection with road boundaries
+    const roadBoundary = roadWidth / 2 - 0.8;
+    let collided = false;
+    
+    if (carPosition.x < -roadBoundary) {
+      carPosition.x = -roadBoundary;
+      
+      // Calculate collision impact based on speed and angle
+      const impactForce = Math.abs(carVelocity.x) * 2;
+      collisionImpact = Math.min(impactForce, 1.0);
+      
+      // Push car back towards center of road without rotating
+      carVelocity.x = Math.abs(carVelocity.x) * 0.5; // Push towards center
+      
+      // Slow down based on impact, but not as drastically
+      speed *= 0.7;
+      collided = true;
+      
+      // Flash barrier red
+      flashBarrier(leftBarrier);
+    }
+    
+    if (carPosition.x > roadBoundary) {
+      carPosition.x = roadBoundary;
+      
+      const impactForce = Math.abs(carVelocity.x) * 2;
+      collisionImpact = Math.min(impactForce, 1.0);
+      
+      // Push car back towards center of road without rotating
+      carVelocity.x = -Math.abs(carVelocity.x) * 0.5; // Push towards center
+      
+      // Slow down based on impact, but not as drastically
+      speed *= 0.7;
+      collided = true;
+      
+      flashBarrier(rightBarrier);
+    }
+
+    // Update distance
+    if (speed > 0) {
+      distance += speed * 0.01;
+    }
+
+    // Decay collision impact
+    collisionImpact *= 0.9;
+    
+    // Generate shake effect based on impact
+    if (collisionImpact > 0.01) {
+      collisionShakeX = (Math.random() - 0.5) * collisionImpact * 0.5;
+      collisionShakeY = (Math.random() - 0.5) * collisionImpact * 0.3;
+    } else {
+      collisionShakeX *= 0.8;
+      collisionShakeY *= 0.8;
+    }
+
+    // Update car transform with impact effects
+    if (car) {
+      car.position.set(carPosition.x, 0, carPosition.z);
+      car.rotation.y = carRotation;
+      
+      // Add tilt on collision
+      if (collisionImpact > 0.01) {
+        car.rotation.z = Math.sin(Date.now() * 0.05) * collisionImpact * 0.3;
+      } else {
+        car.rotation.z *= 0.9; // Smooth return to normal
+      }
+    }
+
+    // Update UI
+    const speedDisplay = document.getElementById('speed-display');
+    const distanceDisplay = document.getElementById('distance-display');
+    if (speedDisplay) {
+      speedDisplay.textContent = Math.abs(speed).toFixed(0);
+      // Flash red on collision
+      if (collided) {
+        speedDisplay.style.color = '#ff0000';
+        setTimeout(() => {
+          if (speedDisplay) speedDisplay.style.color = 'white';
+        }, 200);
+      }
+    }
+    if (distanceDisplay) distanceDisplay.textContent = distance.toFixed(0);
+  }
+
+  function flashBarrier(barriers: THREE.Mesh[]) {
+    barriers.forEach(barrier => {
+      const material = barrier.material as THREE.MeshStandardMaterial;
+      material.emissiveIntensity = 1.0;
+      material.emissive.setHex(0xFFFFFF);
+      
+      setTimeout(() => {
+        material.emissiveIntensity = 0.2;
+        material.emissive.setHex(0xFF0000);
+      }, 100);
+    });
+    
+    // Trigger screen collision effect
+    const overlay = document.getElementById('collision-overlay');
+    const warning = document.getElementById('collision-warning');
+    
+    if (overlay) {
+      overlay.style.opacity = '1';
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+      }, 150);
+    }
+    
+    if (warning) {
+      warning.style.opacity = '1';
+      setTimeout(() => {
+        warning.style.opacity = '0';
+      }, 500);
+    }
+  }
+
+  function updateRoadSegments() {
+    // Move road segments backward relative to car
+    roadSegments.forEach((segment) => {
+      // Check if segment is behind the car
+      if (segment.position.z < carPosition.z - roadSegmentLength * 2) {
+        segment.position.z += roadSegmentLength * 12;
+      }
+    });
+
+    // Move road dividers
+    roadDividers.forEach((divider) => {
+      if (divider.position.z < carPosition.z - roadSegmentLength * 2) {
+        divider.position.z += roadSegmentLength * 12;
+      }
+    });
+
+    // Move barriers
+    leftBarrier.forEach((barrier) => {
+      if (barrier.position.z < carPosition.z - roadSegmentLength * 2) {
+        barrier.position.z += roadSegmentLength * 12;
+      }
+    });
+    
+    rightBarrier.forEach((barrier) => {
+      if (barrier.position.z < carPosition.z - roadSegmentLength * 2) {
+        barrier.position.z += roadSegmentLength * 12;
+      }
+    });
+
+    // Move trees backward
+    trees.forEach((tree) => {
+      if (tree.parent && tree.parent.position.z < carPosition.z - 50) {
+        tree.parent.position.z += 200;
+      }
+    });
+  }
+
+  function updateCamera() {
+    if (!car) return;
+
+    // Third-person camera position with collision shake
+    const cameraDistance = 8;
+    const cameraHeight = 4;
+    const cameraOffset = new THREE.Vector3(
+      Math.sin(carRotation) * cameraDistance,
+      cameraHeight,
+      Math.cos(carRotation) * cameraDistance
+    );
+
+    camera.position.set(
+      carPosition.x - cameraOffset.x + collisionShakeX,
+      cameraHeight + collisionShakeY,
+      carPosition.z - cameraOffset.z
+    );
+
+    // Look at car with slight shake on collision
+    camera.lookAt(
+      carPosition.x + collisionShakeX * 0.5, 
+      1 + collisionShakeY * 0.5, 
+      carPosition.z
+    );
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    updateCarPhysics();
+    updateRoadSegments();
+    updateCamera();
+
+    renderer.render(scene, camera);
+  }
+
+  function onWindowResize() {
+    const container = document.getElementById('car-game-container');
+    if (!container) return;
+
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>
+
+<style>
+  #car-game-container {
+    overflow: hidden;
+  }
+  
+  #car-game-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>
