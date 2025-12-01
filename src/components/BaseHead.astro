@@ -63,17 +63,4 @@ const { title, description, image = "/og.png" } = Astro.props;
 <ClientRouter />
 
 <!-- analytics -->
-<script
-	is:inline
-	async
-	fetchpriority="low"
-	data-domain="nandanvarma.com"
-	src="https://plausible.nandanvarma.com/js/script.outbound-links.tagged-events.js"
-></script>
-<script is:inline>
-	window.plausible =
-		window.plausible ||
-		function () {
-			(window.plausible.q = window.plausible.q || []).push(arguments);
-		};
-</script>
+<script defer src="https://analytics.nandan.fyi/script.js" data-website-id="c8c3074c-cce2-4ac2-8755-a86a369cc4d2"></script>
