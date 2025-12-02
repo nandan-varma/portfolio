@@ -22,6 +22,9 @@ const { title, description, date, emoji, repository, url, published } =
                     target="_blank"
                     href="https://github.com/nandan-varma"
                     class="white-back duration-200 text-zinc-400 hover:text-zinc-100"
+                    data-rybbit-event="link.github"
+                    data-rybbit-prop-content_type="project"
+                    data-rybbit-prop-link_type="profile"
                 >
                     <svg
                         class="w-8 h-8 duration-200 hover:font-medium text-zinc-400 hover:text-zinc-100"
@@ -92,6 +95,10 @@ const { title, description, date, emoji, repository, url, published } =
                                 target="_blank"
                                 href={`https://github.com/${repository}`}
                                 class="white-back"
+                                data-rybbit-event="link.github"
+                                data-rybbit-prop-content_type="project"
+                                data-rybbit-prop-content_title={title}
+                                data-rybbit-prop-repository={repository}
                             >
                                 GitHub <span aria-hidden="true">&rarr;</span>
                             </a>
@@ -99,7 +106,15 @@ const { title, description, date, emoji, repository, url, published } =
                     }
                     {
                         url && (
-                            <a target="_blank" href={url} class="white-back">
+                            <a
+                                target="_blank"
+                                href={url}
+                                class="white-back"
+                                data-rybbit-event="link.demo"
+                                data-rybbit-prop-content_type="project"
+                                data-rybbit-prop-content_title={title}
+                                data-rybbit-prop-url={url}
+                            >
                                 Website <span aria-hidden="true">&rarr;</span>
                             </a>
                         )
