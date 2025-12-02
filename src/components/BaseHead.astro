@@ -62,9 +62,36 @@ const { title, description, image = "/og.png" } = Astro.props;
 <!-- view transitions -->
 <ClientRouter />
 
-<!-- analytics -->
-<script
-    src="https://analytics.nandanvarma.com/api/script.js"
-    data-site-id="1"
-    defer
-></script>
+<!-- Rybbit Analytics -->
+<script>
+	import rybbit from "@rybbit/js";
+
+	// Initialize Rybbit analytics
+	if (typeof window !== "undefined") {
+		// Make rybbit globally available for the analytics utility
+		(window as any).rybbit = rybbit;
+
+		// Initialize with configuration
+		rybbit.init({
+			analyticsHost: "https://analytics.nandanvarma.com/api",
+			siteId: "1",
+			debug: false,
+			debounce: 500,
+			// Privacy-focused configuration
+			replayPrivacyConfig: {
+				maskAllInputs: true,
+				maskTextSelectors: [".sensitive-data", "[data-sensitive]"],
+			},
+			// Path patterns for privacy
+			maskPatterns: [
+				"/users/*/profile",
+				"/projects/*/edit",
+			],
+			skipPatterns: [
+				"/admin/**",
+			],
+		}).catch((error) => {
+			console.error("[Rybbit] Initialization failed:", error);
+		});
+	}
+</script>
