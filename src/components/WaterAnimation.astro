@@ -1,0 +1,25 @@
+<script>
+    import { WaterAnimationController } from "@/lib/water/waterAnimationController";
+
+    function animateWater() {
+        document.addEventListener("astro:page-load", () => {
+            const canvas = document.getElementById(
+                "waterCanvas",
+            ) as HTMLCanvasElement | null;
+            
+            if (!canvas) {
+                return;
+            }
+
+            const controller = new WaterAnimationController(canvas, "Nandan Varma");
+            controller.start();
+
+            // Cleanup on page unload
+            document.addEventListener("astro:before-preparation", () => {
+                controller.cleanup();
+            }, { once: true });
+        });
+    }
+    
+    animateWater();
+</script>
