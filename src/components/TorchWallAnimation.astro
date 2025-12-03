@@ -1,0 +1,25 @@
+<script>
+    import { TorchWallAnimationController } from "@/lib/water/torchWallAnimationController";
+
+    function animateTorchWall() {
+        document.addEventListener("astro:page-load", () => {
+            const canvas = document.getElementById(
+                "torchWallCanvas",
+            ) as HTMLCanvasElement | null;
+            
+            if (!canvas) {
+                return;
+            }
+
+            const controller = new TorchWallAnimationController(canvas);
+            controller.start();
+
+            // Cleanup on page unload
+            document.addEventListener("astro:before-preparation", () => {
+                controller.cleanup();
+            }, { once: true });
+        });
+    }
+    
+    animateTorchWall();
+</script>

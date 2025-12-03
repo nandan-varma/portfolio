@@ -1,5 +1,6 @@
 ---
 import Water from "@/components/Water.astro";
+import TorchWall from "@/components/TorchWall.astro";
 import BaseHead from "../components/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
@@ -15,6 +16,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 	</head>
 	<body class="m-0 p-0 flex flex-col min-h-screen relative">
 		<div id="background" class="fixed inset-0 w-full h-full -z-10">
+			<TorchWall />
 			<Water />
 		</div>
 		<div
