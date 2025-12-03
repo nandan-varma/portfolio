@@ -1,17 +1,17 @@
 <script>
-    import { TorchWallAnimationController } from "@/lib/water/torchWallAnimationController";
+    import { WaterAnimationController } from "@/lib/animations/waterAnimationController";
 
-    function animateTorchWall() {
+    function animateWater() {
         document.addEventListener("astro:page-load", () => {
             const canvas = document.getElementById(
-                "torchWallCanvas",
+                "waterCanvas",
             ) as HTMLCanvasElement | null;
             
             if (!canvas) {
                 return;
             }
 
-            const controller = new TorchWallAnimationController(canvas);
+            const controller = new WaterAnimationController(canvas, "Nandan Varma");
             controller.start();
 
             // Cleanup on page unload
@@ -21,5 +21,5 @@
         });
     }
     
-    animateTorchWall();
+    animateWater();
 </script>

@@ -5,7 +5,7 @@ import "@/styles/global.css";
 import "@/styles/mdx.css";
 
 import { render } from "astro:content";
-import BaseHead from "@/components/BaseHead.astro";
+import BaseHead from "@/components/layout/BaseHead.astro";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("project");
