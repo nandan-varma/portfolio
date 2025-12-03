@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import Navigation from "@/components/Navigation.astro";
 import "../../styles/global.css";
-import BlogCard from "@/components/BlogCard.astro";
+import GlassCard from "@/components/GlassCard.astro";
 import Blog from "@/components/Blog.astro";
 import BaseHead from "@/components/BaseHead.astro";
 import TorchWall from "@/components/TorchWall.astro";
@@ -56,13 +56,13 @@ const sorted = blogs.sort((a, b) => {
 								sorted
 									.filter((_, i) => i % 3 === 0)
 									.map((blog) => (
-										<BlogCard key={blog.id}>
+										<GlassCard>
 											<Blog
 												id={blog.id}
 												blog={blog.data}
 												views={0}
 											/>
-										</BlogCard>
+										</GlassCard>
 									))
 							}
 						</div>
@@ -71,13 +71,13 @@ const sorted = blogs.sort((a, b) => {
 								sorted
 									.filter((_, i) => i % 3 === 1)
 									.map((blog) => (
-										<BlogCard key={blog.id}>
+										<GlassCard>
 											<Blog
 												id={blog.id}
 												blog={blog.data}
 												views={0}
 											/>
-										</BlogCard>
+										</GlassCard>
 									))
 							}
 						</div>
@@ -86,13 +86,13 @@ const sorted = blogs.sort((a, b) => {
 								sorted
 									.filter((_, i) => i % 3 === 2)
 									.map((blog) => (
-										<BlogCard key={blog.id}>
+										<GlassCard>
 											<Blog
 												id={blog.id}
 												blog={blog.data}
 												views={0}
 											/>
-										</BlogCard>
+										</GlassCard>
 									))
 							}
 						</div>
