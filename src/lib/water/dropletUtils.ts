@@ -3,7 +3,7 @@ import type { Droplet } from './types';
 export class DropletManager {
     private droplets: Droplet[] = [];
     private readonly maxDroplets: number;
-    private readonly dropletSpawnRate = 0.01;
+    private readonly dropletSpawnRate: number;
     private readonly gravity = 0.3;
     private readonly dropletRadius = 10;
 
@@ -15,7 +15,10 @@ export class DropletManager {
         private onSplash: (x: number, y: number) => void,
         private onRipple: (x: number, radius: number, opacity: number) => void
     ) {
-        this.maxDroplets = canvas.width / 5;
+        // Scale based on width: baseline at 1200px
+        const widthScale = Math.min(canvas.width / 1200, 1);
+        this.maxDroplets = Math.max(8, Math.floor(canvas.width / 8 * widthScale));
+        this.dropletSpawnRate = 0.006 * widthScale;
     }
 
     createDroplet(deltaTime: number) {
