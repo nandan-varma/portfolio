@@ -1,0 +1,68 @@
+---
+interface Props {
+    class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<script>
+    // Initialize mouse coordinates
+    let mouseX = 0;
+    let mouseY = 0;
+
+    // Function to handle mouse move event
+    function onMouseMove(event: MouseEvent) {
+        const { currentTarget, clientX, clientY } = event;
+        if (!currentTarget) return;
+        const { left, top } = (
+            currentTarget as HTMLElement
+        ).getBoundingClientRect();
+        mouseX = clientX - left;
+        mouseY = clientY - top;
+        updateStyles(currentTarget as HTMLElement);
+    }
+
+    // Function to update styles based on mouse coordinates
+    function updateStyles(cardElement: HTMLElement) {
+        const maskImage = `radial-gradient(240px at ${mouseX}px ${mouseY}px, white, transparent)`;
+        cardElement.querySelectorAll("[data-gradient]").forEach((element) => {
+            (element as HTMLElement).style.maskImage = maskImage;
+            (element as HTMLElement).style.webkitMaskImage = maskImage;
+        });
+    }
+
+    // Add event listener to the card element
+    const cardElement = document.querySelector("[data-card]");
+    if (cardElement !== null) {
+        cardElement.addEventListener("mousemove", onMouseMove as EventListener);
+    }
+</script>
+
+<div
+    data-card
+    tabindex={0}
+    class:list={[
+        "overflow-hidden relative duration-700 border rounded-xl hover:bg-zinc-800/10 group md:gap-8 hover:border-zinc-400/50 border-zinc-600 focus:outline-none focus:border-blue-500 focus:shadow-outline-blue bg-black/50 backdrop-blur-md hover:backdrop-blur-3xl",
+        className
+    ]}
+>
+    <div class="pointer-events-none">
+        <div
+            class="absolute inset-0 z-0 transition duration-1000 [mask-image:linear-gradient(black,transparent)]"
+        >
+        </div>
+        <div
+            class="absolute inset-0 z-10 bg-gradient-to-br opacity-100 via-zinc-600/10 transition duration-1000 group-hover:opacity-50"
+            data-gradient
+        >
+        </div>
+        <div
+            class="absolute inset-0 z-10 opacity-0 mix-blend-overlay transition duration-1000 group-hover:opacity-100"
+            data-gradient
+        >
+        </div>
+    </div>
+
+    <slot />
+</div>

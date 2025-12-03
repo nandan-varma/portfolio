@@ -1,11 +1,11 @@
 ---
 import { getCollection } from "astro:content";
-import Navigation from "../../components/Navigation.astro";
+import Navigation from "@/components/layout/Navigation.astro";
 import "../../styles/global.css";
-import GlassCard from "@/components/GlassCard.astro";
-import Article from "@/components/Article.astro";
-import BaseHead from "@/components/BaseHead.astro";
-import TorchWall from "@/components/TorchWall.astro";
+import GlassCard from "@/components/cards/GlassCard.astro";
+import Article from "@/components/content/Article.astro";
+import BaseHead from "@/components/layout/BaseHead.astro";
+import TorchWall from "@/components/animations/TorchWall.astro";
 
 const projects = (await getCollection("project"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
