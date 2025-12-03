@@ -2,44 +2,9 @@
 import Navigation from "@/components/Navigation.astro";
 import BaseHead from "../components/BaseHead.astro";
 import TorchWall from "@/components/TorchWall.astro";
+import GlassCard from "@/components/GlassCard.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
-
-<script>
-	// Initialize mouse coordinates for each card
-	function setupCard(cardElement: HTMLElement) {
-		let mouseX = 0;
-		let mouseY = 0;
-
-		function onMouseMove(event: MouseEvent) {
-			const { currentTarget, clientX, clientY } = event;
-			if (!currentTarget) return;
-			const { left, top } = (
-				currentTarget as HTMLElement
-			).getBoundingClientRect();
-			mouseX = clientX - left;
-			mouseY = clientY - top;
-			updateStyles(currentTarget as HTMLElement);
-		}
-
-		function updateStyles(element: HTMLElement) {
-			const maskImage = `radial-gradient(240px at ${mouseX}px ${mouseY}px, white, transparent)`;
-			element.querySelectorAll("[data-gradient]").forEach((gradientElement) => {
-				(gradientElement as HTMLElement).style.maskImage = maskImage;
-				(gradientElement as HTMLElement).style.webkitMaskImage = maskImage;
-			});
-		}
-
-		cardElement.addEventListener("mousemove", onMouseMove as EventListener);
-	}
-
-	// Setup all cards
-	document.addEventListener("DOMContentLoaded", () => {
-		document.querySelectorAll("[data-contact-card]").forEach((card) => {
-			setupCard(card as HTMLElement);
-		});
-	});
-</script>
 
 <!doctype html>
 <html lang="en">
@@ -74,26 +39,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 						<div
 							class="grid w-full grid-cols-1 gap-6 mx-auto sm:mt-0 sm:grid-cols-3 lg:gap-16 lg:grid-rows-1"
 						>
-							<div
-								data-contact-card
-								class="overflow-hidden relative duration-700 border rounded-xl hover:bg-zinc-800/10 group md:gap-8 hover:border-zinc-400/50 border-zinc-600 bg-black/50 backdrop-blur-md hover:backdrop-blur-3xl h-full flex flex-col"
-							>
-								<div class="pointer-events-none">
-									<div
-										class="absolute inset-0 z-0 transition duration-1000 [mask-image:linear-gradient(black,transparent)]"
-									>
-									</div>
-									<div
-										class="absolute inset-0 z-10 bg-gradient-to-br opacity-100 via-zinc-600/10 transition duration-1000 group-hover:opacity-50"
-										data-gradient
-									>
-									</div>
-									<div
-										class="absolute inset-0 z-10 opacity-0 mix-blend-overlay transition duration-1000 group-hover:opacity-100"
-										data-gradient
-									>
-									</div>
-								</div>
+							<GlassCard class="h-full flex flex-col">
 								<a
 									href="mailto:contact@nandan.fyi"
 									target="_blank"
@@ -144,27 +90,8 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 										</span>
 									</div>
 								</a>
-							</div>
-							<div
-								data-contact-card
-								class="overflow-hidden relative duration-700 border rounded-xl hover:bg-zinc-800/10 group md:gap-8 hover:border-zinc-400/50 border-zinc-600 bg-black/50 backdrop-blur-md hover:backdrop-blur-3xl h-full flex flex-col"
-							>
-								<div class="pointer-events-none">
-									<div
-										class="absolute inset-0 z-0 transition duration-1000 [mask-image:linear-gradient(black,transparent)]"
-									>
-									</div>
-									<div
-										class="absolute inset-0 z-10 bg-gradient-to-br opacity-100 via-zinc-600/10 transition duration-1000 group-hover:opacity-50"
-										data-gradient
-									>
-									</div>
-									<div
-										class="absolute inset-0 z-10 opacity-0 mix-blend-overlay transition duration-1000 group-hover:opacity-100"
-										data-gradient
-									>
-									</div>
-								</div>
+							</GlassCard>
+							<GlassCard class="h-full flex flex-col">
 								<a
 									href="https://github.com/nandan-varma"
 									target="_blank"
@@ -213,27 +140,8 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 										</span>
 									</div>
 								</a>
-							</div>
-							<div
-								data-contact-card
-								class="overflow-hidden relative duration-700 border rounded-xl hover:bg-zinc-800/10 group md:gap-8 hover:border-zinc-400/50 border-zinc-600 bg-black/50 backdrop-blur-md hover:backdrop-blur-3xl h-full flex flex-col"
-							>
-								<div class="pointer-events-none">
-									<div
-										class="absolute inset-0 z-0 transition duration-1000 [mask-image:linear-gradient(black,transparent)]"
-									>
-									</div>
-									<div
-										class="absolute inset-0 z-10 bg-gradient-to-br opacity-100 via-zinc-600/10 transition duration-1000 group-hover:opacity-50"
-										data-gradient
-									>
-									</div>
-									<div
-										class="absolute inset-0 z-10 opacity-0 mix-blend-overlay transition duration-1000 group-hover:opacity-100"
-										data-gradient
-									>
-									</div>
-								</div>
+							</GlassCard>
+							<GlassCard class="h-full flex flex-col">
 								<a
 									href="https://www.linkedin.com/in/nandanvarma/"
 									target="_blank"
@@ -287,7 +195,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 										</span>
 									</div>
 								</a>
-							</div>
+							</GlassCard>
 						</div>
 					</div>
 				</div>
