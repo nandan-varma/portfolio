@@ -5,6 +5,7 @@ import "../../styles/global.css";
 import BlogCard from "@/components/BlogCard.astro";
 import Blog from "@/components/Blog.astro";
 import BaseHead from "@/components/BaseHead.astro";
+import TorchWall from "@/components/TorchWall.astro";
 
 const blogs = (await getCollection("blog"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
@@ -29,6 +30,7 @@ const sorted = blogs.sort((a, b) => {
 	<body
 		class="bg-gradient-to-tl from-black via-neutral-900 to-black h-screen"
 	>
+		<TorchWall />
 		<Navigation />
 		<div class="relative pb-16">
 			<div
@@ -46,8 +48,6 @@ const sorted = blogs.sort((a, b) => {
 				<div
 					class="flex flex-col w-full gap-8 mx-auto border-t border-gray-900/10 lg:mx-0 lg:border-t-0"
 				>
-					<div class="hidden w-full h-px md:block bg-zinc-800"></div>
-
 					<div
 						class="grid grid-cols-1 gap-4 mx-auto lg:mx-0 md:grid-cols-3"
 					>

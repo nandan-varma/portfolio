@@ -5,6 +5,7 @@ import "../../styles/global.css";
 import ProjectCard from "@/components/ProjectCard.astro";
 import Article from "@/components/Article.astro";
 import BaseHead from "@/components/BaseHead.astro";
+import TorchWall from "@/components/TorchWall.astro";
 
 const projects = (await getCollection("project"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
@@ -39,6 +40,7 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 		/>
 	</head>
 	<body class="bg-gradient-to-tl from-black via-neutral-900 to-black">
+		<TorchWall />
 		<Navigation />
 		<div class="relative pb-16">
 			<div
@@ -52,7 +54,6 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 						Projects
 					</h2>
 				</div>
-				<div class="w-full h-px bg-zinc-800"></div>
 
 				<div class="grid grid-cols-1 gap-8 mx-auto lg:grid-cols-2">
 					<ProjectCard>
@@ -136,7 +137,6 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 						}
 					</div>
 				</div>
-				<div class="hidden w-full h-px md:block bg-zinc-800"></div>
 
 				<div
 					class="grid grid-cols-1 gap-4 mx-auto lg:mx-0 md:grid-cols-3"
