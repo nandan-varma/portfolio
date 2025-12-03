@@ -11,8 +11,11 @@ export class TextManager {
     ) {}
 
     generateTextPixels() {
-        // Set text style
-        const fontSize = Math.min(this.canvas.width / 10, 72);
+        // Set text style - larger on desktop, smaller on mobile
+        const isMobile = this.canvas.width < 768;
+        const fontSize = isMobile 
+            ? Math.min(this.canvas.width / 10, 72)
+            : Math.min(this.canvas.width / 6, 120);
         this.ctx.font = `bold ${fontSize}px Arial`;
         this.ctx.textAlign = "center";
         this.ctx.textBaseline = "middle";
@@ -90,11 +93,46 @@ export class TextManager {
         return false;
     }
 
-    drawText() {
-        const fontSize = Math.min(this.canvas.width / 10, 72);
+    drawText(torchX?: number, torchY?: number) {
+        // Set text style - larger on desktop, smaller on mobile
+        const isMobile = this.canvas.width < 768;
+        const fontSize = isMobile 
+            ? Math.min(this.canvas.width / 10, 72)
+            : Math.min(this.canvas.width / 6, 120);
         this.ctx.font = `bold ${fontSize}px Arial`;
         this.ctx.textAlign = "center";
         this.ctx.textBaseline = "middle";
+
+        const textX = this.canvas.width / 2;
+        const textY = this.canvas.height / 2;
+
+        // Draw shadow if torch position is provided
+        if (torchX !== undefined && torchY !== undefined) {
+            // Calculate shadow offset based on torch position
+            const dx = textX - torchX;
+            const dy = textY - torchY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Normalize and scale shadow offset
+            const shadowScale = 80; // How far the shadow extends
+            const shadowOffsetX = (dx / distance) * shadowScale;
+            const shadowOffsetY = (dy / distance) * shadowScale;
+            
+            // Draw shadow with blur
+            this.ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+            this.ctx.shadowBlur = 20;
+            this.ctx.shadowOffsetX = shadowOffsetX;
+            this.ctx.shadowOffsetY = shadowOffsetY;
+            
+            this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+            this.ctx.fillText(this.text, textX, textY);
+        }
+
+        // Reset shadow for main text
+        this.ctx.shadowColor = "transparent";
+        this.ctx.shadowBlur = 0;
+        this.ctx.shadowOffsetX = 0;
+        this.ctx.shadowOffsetY = 0;
 
         // Create gradient for text
         const gradient = this.ctx.createLinearGradient(
@@ -106,14 +144,8 @@ export class TextManager {
         gradient.addColorStop(0, "rgba(255, 255, 255, 0.9)");
         gradient.addColorStop(1, "rgba(200, 200, 200, 0.8)");
 
-        // Draw text with shadow for depth
-        this.ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-        this.ctx.shadowBlur = 5;
-        this.ctx.shadowOffsetX = 3;
-        this.ctx.shadowOffsetY = 3;
-
         this.ctx.fillStyle = gradient;
-        this.ctx.fillText(this.text, this.canvas.width / 2, this.canvas.height / 2);
+        this.ctx.fillText(this.text, textX, textY);
 
         // Reset shadow
         this.ctx.shadowBlur = 0;

@@ -3,6 +3,7 @@ import { DropletManager } from './dropletUtils';
 import { SplashManager } from './splashUtils';
 import { RippleManager } from './rippleUtils';
 import { WaterSurface } from './waterSurfaceUtils';
+import { TorchEffect } from './torchUtils';
 
 export class WaterAnimationController {
     private ctx: CanvasRenderingContext2D;
@@ -16,6 +17,7 @@ export class WaterAnimationController {
     private splashManager: SplashManager;
     private rippleManager: RippleManager;
     private waterSurface: WaterSurface;
+    private torchEffect: TorchEffect;
 
     constructor(
         private canvas: HTMLCanvasElement,
@@ -51,6 +53,7 @@ export class WaterAnimationController {
             (x, r, o) => this.rippleManager.createRipple(x, r, o)
         );
         this.waterSurface = new WaterSurface(this.ctx, this.canvas, () => this.waterLevel);
+        this.torchEffect = new TorchEffect(this.ctx, this.canvas);
     }
 
     setCanvasDimensions() {
@@ -81,6 +84,9 @@ export class WaterAnimationController {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+        // Draw torch effect (brick wall with lighting)
+        this.torchEffect.draw();
+
         // Draw water surface with perspective
         this.waterSurface.draw(this.rippleManager.getRipples());
 
@@ -96,8 +102,9 @@ export class WaterAnimationController {
         // Update and draw ripples
         this.rippleManager.update(normalizedDelta);
 
-        // Draw the text
-        this.textManager.drawText();
+        // Draw the text with shadow from torch
+        const torchPos = this.torchEffect.getTorchPosition();
+        this.textManager.drawText(torchPos.x, torchPos.y);
 
         requestAnimationFrame(this.animate);
     }
@@ -110,5 +117,6 @@ export class WaterAnimationController {
 
     cleanup() {
         window.removeEventListener("resize", this.handleResize);
+        this.torchEffect.cleanup();
     }
 }
