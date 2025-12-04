@@ -1,6 +1,5 @@
 ---
-import Water from "@/components/animations/Water.astro";
-import TorchWall from "@/components/animations/TorchWall.astro";
+import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 import BaseHead from "@/components/layout/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
@@ -15,10 +14,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 		/>
 	</head>
 	<body class="m-0 p-0 flex flex-col min-h-screen relative">
-		<div id="background" class="fixed inset-0 w-full h-full -z-10">
-			<TorchWall />
-			<Water />
-		</div>
+		<BackgroundAnimation text="Nandan Varma" />
 		<div
 			id="content"
 			class="flex-1 flex justify-center items-end pb-40 gap-4 md:gap-12 text-2xl md:text-3xl font-bold z-20"

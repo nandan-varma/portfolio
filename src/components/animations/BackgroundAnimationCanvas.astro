@@ -1,0 +1,13 @@
+---
+export interface Props {
+	text?: string;
+}
+
+const { text } = Astro.props;
+---
+
+<canvas
+	id="background-canvas"
+	class="fixed top-0 left-0 w-full h-full -z-10"
+	data-text={text}
+></canvas>

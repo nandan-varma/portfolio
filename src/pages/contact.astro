@@ -1,7 +1,7 @@
 ---
 import Navigation from "@/components/layout/Navigation.astro";
 import BaseHead from "@/components/layout/BaseHead.astro";
-import TorchWall from "@/components/animations/TorchWall.astro";
+import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 import GlassCard from "@/components/cards/GlassCard.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
@@ -15,10 +15,8 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 			image="/og/contact.png"
 		/>
 	</head>
-	<body
-		class="bg-gradient-to-tl from-black via-neutral-900 to-black bg-fixed min-h-screen"
-	>
-		<TorchWall />
+	<body class="bg-black min-h-screen">
+		<BackgroundAnimation />
 		<Navigation />
 		<div class="relative pb-16">
 			<div

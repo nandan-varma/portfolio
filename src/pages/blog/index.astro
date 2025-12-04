@@ -5,7 +5,7 @@ import "../../styles/global.css";
 import GlassCard from "@/components/cards/GlassCard.astro";
 import Blog from "@/components/content/Blog.astro";
 import BaseHead from "@/components/layout/BaseHead.astro";
-import TorchWall from "@/components/animations/TorchWall.astro";
+import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 
 const blogs = (await getCollection("blog"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
@@ -27,10 +27,8 @@ const sorted = blogs.sort((a, b) => {
 	<head>
 		<BaseHead title={"Blog"} description={"Blog"} image="/og/blog.png" />
 	</head>
-	<body
-		class="bg-gradient-to-tl from-black via-neutral-900 to-black h-screen"
-	>
-		<TorchWall />
+	<body class="bg-black">
+		<BackgroundAnimation />
 		<Navigation />
 		<div class="relative pb-16">
 			<div

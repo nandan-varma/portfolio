@@ -1,0 +1,13 @@
+---
+import BackgroundAnimationCanvas from "./BackgroundAnimationCanvas.astro";
+import BackgroundAnimationScript from "./BackgroundAnimationScript.astro";
+
+export interface Props {
+	text?: string;
+}
+
+const { text } = Astro.props;
+---
+
+<BackgroundAnimationCanvas text={text} />
+<BackgroundAnimationScript />
