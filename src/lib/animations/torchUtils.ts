@@ -93,7 +93,8 @@ export class TorchEffect {
 
     constructor(
         private readonly ctx: CanvasRenderingContext2D,
-        private readonly canvas: HTMLCanvasElement
+        private readonly canvas: HTMLCanvasElement,
+        initialPosition?: { x: number; y: number }
     ) {
         this.autoAnimate = this.detectTouchDevice();
         
@@ -101,10 +102,18 @@ export class TorchEffect {
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         
-        this.mouseX = centerX;
-        this.mouseY = centerY;
-        this.targetMouseX = centerX;
-        this.targetMouseY = centerY;
+        // Use stored position if available, otherwise use center
+        if (initialPosition) {
+            this.mouseX = initialPosition.x;
+            this.mouseY = initialPosition.y;
+            this.targetMouseX = initialPosition.x;
+            this.targetMouseY = initialPosition.y;
+        } else {
+            this.mouseX = centerX;
+            this.mouseY = centerY;
+            this.targetMouseX = centerX;
+            this.targetMouseY = centerY;
+        }
         
         if (this.autoAnimate) {
             this.torchX = centerX;
@@ -388,27 +397,59 @@ export class TorchEffect {
     
     private drawBrick(x: number, y: number, width: number, height: number, mortarSize: number, opacity: number): void {
         const borderRadius = 3;
+        const brickX = x + mortarSize;
+        const brickY = y + mortarSize;
+        const brickWidth = width - mortarSize * 2;
+        const brickHeight = height - mortarSize * 2;
         
-        // Main brick
+        // Main brick base
         this.ctx.fillStyle = `rgba(180, 180, 180, ${opacity})`;
         this.ctx.beginPath();
+        this.ctx.roundRect(brickX, brickY, brickWidth, brickHeight, borderRadius);
+        this.ctx.fill();
+
+        // Subtle horizontal lines for texture
+        this.ctx.fillStyle = `rgba(140, 140, 140, ${opacity * 0.25})`;
+        this.ctx.beginPath();
         this.ctx.roundRect(
-            x + mortarSize,
-            y + mortarSize,
-            width - mortarSize * 2,
-            height - mortarSize * 2,
-            borderRadius
+            brickX + 5,
+            brickY + brickHeight * 0.3,
+            brickWidth - 10,
+            1.5,
+            0.5
+        );
+        this.ctx.fill();
+        
+        this.ctx.beginPath();
+        this.ctx.roundRect(
+            brickX + 8,
+            brickY + brickHeight * 0.65,
+            brickWidth - 16,
+            1,
+            0.5
         );
         this.ctx.fill();
 
-        // Texture detail
-        this.ctx.fillStyle = `rgba(120, 120, 120, ${opacity * 0.3})`;
+        // Light highlight on top edge
+        this.ctx.fillStyle = `rgba(200, 200, 200, ${opacity * 0.4})`;
         this.ctx.beginPath();
         this.ctx.roundRect(
-            x + mortarSize + 5,
-            y + mortarSize + 5,
-            width - mortarSize * 2 - 10,
-            height / 3,
+            brickX + 3,
+            brickY + 2,
+            brickWidth - 6,
+            brickHeight * 0.2,
+            borderRadius - 1
+        );
+        this.ctx.fill();
+        
+        // Darker bottom edge for depth
+        this.ctx.fillStyle = `rgba(100, 100, 100, ${opacity * 0.3})`;
+        this.ctx.beginPath();
+        this.ctx.roundRect(
+            brickX + 3,
+            brickY + brickHeight * 0.8,
+            brickWidth - 6,
+            brickHeight * 0.18,
             borderRadius - 1
         );
         this.ctx.fill();
@@ -473,6 +514,10 @@ export class TorchEffect {
 
     getTorchPosition(): { x: number; y: number } {
         return { x: this.torchX, y: this.torchY };
+    }
+
+    getMousePosition(): { x: number; y: number } {
+        return { x: this.mouseX, y: this.mouseY };
     }
 
     cleanup(): void {

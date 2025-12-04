@@ -3,14 +3,15 @@ import { TorchEffect } from './torchUtils';
 export class TorchWallAnimationController {
     private ctx: CanvasRenderingContext2D;
     private torchEffect: TorchEffect;
+    private animationFrameId: number | null = null;
 
-    constructor(private canvas: HTMLCanvasElement) {
+    constructor(private canvas: HTMLCanvasElement, initialPosition?: { x: number; y: number }) {
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
         if (!ctx) {
             throw new Error("Could not get canvas context");
         }
         this.ctx = ctx;
-        this.torchEffect = new TorchEffect(this.ctx, this.canvas);
+        this.torchEffect = new TorchEffect(this.ctx, this.canvas, initialPosition);
     }
 
     setCanvasDimensions() {
@@ -34,7 +35,7 @@ export class TorchWallAnimationController {
         // Draw torch effect (brick wall with lighting)
         this.torchEffect.draw();
 
-        requestAnimationFrame(this.animate);
+        this.animationFrameId = requestAnimationFrame(this.animate);
     }
 
     start() {
@@ -43,7 +44,17 @@ export class TorchWallAnimationController {
         this.animate();
     }
 
+    getMousePosition() {
+        return this.torchEffect.getMousePosition();
+    }
+
     cleanup() {
+        // Cancel animation frame
+        if (this.animationFrameId !== null) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+        
         window.removeEventListener("resize", this.handleResize);
         this.torchEffect.cleanup();
     }
