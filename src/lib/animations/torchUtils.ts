@@ -387,23 +387,31 @@ export class TorchEffect {
     }
     
     private drawBrick(x: number, y: number, width: number, height: number, mortarSize: number, opacity: number): void {
+        const borderRadius = 3;
+        
         // Main brick
         this.ctx.fillStyle = `rgba(180, 180, 180, ${opacity})`;
-        this.ctx.fillRect(
+        this.ctx.beginPath();
+        this.ctx.roundRect(
             x + mortarSize,
             y + mortarSize,
             width - mortarSize * 2,
-            height - mortarSize * 2
+            height - mortarSize * 2,
+            borderRadius
         );
+        this.ctx.fill();
 
         // Texture detail
         this.ctx.fillStyle = `rgba(120, 120, 120, ${opacity * 0.3})`;
-        this.ctx.fillRect(
+        this.ctx.beginPath();
+        this.ctx.roundRect(
             x + mortarSize + 5,
             y + mortarSize + 5,
             width - mortarSize * 2 - 10,
-            height / 3
+            height / 3,
+            borderRadius - 1
         );
+        this.ctx.fill();
     }
     
     private getDistance(x1: number, y1: number, x2: number, y2: number): number {
