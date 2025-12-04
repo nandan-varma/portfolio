@@ -1,0 +1,78 @@
+---
+export interface Props {
+	text?: string;
+}
+
+const { text } = Astro.props;
+const textValue = text;
+---
+
+<script>
+	import { BackgroundAnimationController } from "@/lib/animations/backgroundAnimationController";
+
+	// Global singleton to prevent multiple instances
+	declare global {
+		interface Window {
+			__backgroundController?: BackgroundAnimationController;
+		}
+	}
+
+	function animateBackground() {
+		document.addEventListener("astro:page-load", () => {
+			const canvas = document.getElementById(
+				"background-canvas",
+			) as HTMLCanvasElement | null;
+
+			if (!canvas) {
+				return;
+			}
+
+			// Save current mouse position before cleanup
+			let savedPosition: { x: number; y: number } | null = null;
+			if (window.__backgroundController) {
+				savedPosition = window.__backgroundController.getMousePosition();
+				window.__backgroundController.cleanup();
+				window.__backgroundController = undefined;
+			} else {
+				// Try to restore from sessionStorage
+				try {
+					const stored = sessionStorage.getItem('torchPosition');
+					if (stored) {
+						savedPosition = JSON.parse(stored);
+					}
+				} catch (e) {
+					// Silently fail if sessionStorage is unavailable
+				}
+			}
+
+			// Get text from data attribute
+			const text = canvas.dataset.text;
+
+			// Create new controller with optional text
+			const controller = new BackgroundAnimationController(
+				canvas,
+				text || undefined,
+			);
+			
+			// Restore mouse position if available
+			if (savedPosition) {
+				controller.setMousePosition(savedPosition.x, savedPosition.y);
+			}
+			
+			controller.start();
+
+			// Store reference globally
+			window.__backgroundController = controller;
+		});
+		
+		// Save position before page swap for view transitions
+		document.addEventListener("astro:before-swap", () => {
+			if (window.__backgroundController) {
+				window.__backgroundController.saveMousePosition();
+			}
+		});
+	}
+
+	// Start animation setup
+	animateBackground();
+</script>

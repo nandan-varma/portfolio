@@ -5,7 +5,7 @@ import "../../styles/global.css";
 import GlassCard from "@/components/cards/GlassCard.astro";
 import Article from "@/components/content/Article.astro";
 import BaseHead from "@/components/layout/BaseHead.astro";
-import TorchWall from "@/components/animations/TorchWall.astro";
+import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 
 const projects = (await getCollection("project"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
@@ -39,8 +39,8 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 			image="/og/projects.png"
 		/>
 	</head>
-	<body class="bg-gradient-to-tl from-black via-neutral-900 to-black">
-		<TorchWall />
+	<body class="bg-black">
+		<BackgroundAnimation />
 		<Navigation />
 		<div class="relative pb-16">
 			<div
@@ -57,9 +57,9 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 
 				<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 					<GlassCard>
-						<a class="block h-full" href={`/projects/${featured?.id}`}>
+						<a href={`/projects/${featured?.id}`} class="block">
 							<article
-								class="relative h-full w-full p-4 md:p-8 flex flex-col"
+								class="relative w-full p-4 md:p-8 flex flex-col min-h-full"
 								tabindex={-1}
 							>
 								<div

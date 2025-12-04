@@ -48,7 +48,7 @@ const LIGHTING_CONFIG = {
 
 const BRICK_CONFIG = {
     width: 80,
-    height: 40,
+    height: 50,
     mortarSize: 3,
     noiseScale: 0.1,
     noiseAmount: 0.02,
@@ -518,6 +518,13 @@ export class TorchEffect {
 
     getMousePosition(): { x: number; y: number } {
         return { x: this.mouseX, y: this.mouseY };
+    }
+    
+    setMousePosition(x: number, y: number): void {
+        this.mouseX = x;
+        this.mouseY = y;
+        this.targetMouseX = x;
+        this.targetMouseY = y;
     }
 
     cleanup(): void {

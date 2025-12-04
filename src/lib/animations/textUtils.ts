@@ -114,13 +114,13 @@ export class TextManager {
             const distance = Math.sqrt(dx * dx + dy * dy);
             
             // Normalize and scale shadow offset
-            const shadowScale = 40; // How far the shadow extends
+            const shadowScale = 30; // How far the shadow extends
             const shadowOffsetX = (dx / distance) * shadowScale;
             const shadowOffsetY = (dy / distance) * shadowScale;
             
             // Draw shadow with blur
             this.ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-            this.ctx.shadowBlur = 10;
+            this.ctx.shadowBlur = 12;
             this.ctx.shadowOffsetX = shadowOffsetX;
             this.ctx.shadowOffsetY = shadowOffsetY;
             
