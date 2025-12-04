@@ -1,6 +1,13 @@
 <script>
     import { WaterAnimationController } from "@/lib/animations/waterAnimationController";
 
+    // Global singleton to prevent multiple instances
+    declare global {
+        interface Window {
+            __waterController?: WaterAnimationController;
+        }
+    }
+
     function animateWater() {
         document.addEventListener("astro:page-load", () => {
             const canvas = document.getElementById(
@@ -11,12 +18,22 @@
                 return;
             }
 
+            // Cleanup existing instance if it exists
+            if (window.__waterController) {
+                window.__waterController.cleanup();
+                window.__waterController = undefined;
+            }
+
             const controller = new WaterAnimationController(canvas, "Nandan Varma");
+            window.__waterController = controller;
             controller.start();
 
             // Cleanup on page unload
             document.addEventListener("astro:before-preparation", () => {
-                controller.cleanup();
+                if (window.__waterController) {
+                    window.__waterController.cleanup();
+                    window.__waterController = undefined;
+                }
             }, { once: true });
         });
     }

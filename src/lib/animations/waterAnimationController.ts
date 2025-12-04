@@ -10,6 +10,7 @@ export class WaterAnimationController {
     private lastFrameTime: number = performance.now();
     private readonly targetFPS = 60;
     private readonly frameTime: number;
+    private animationFrameId: number | null = null;
     
     private textManager: TextManager;
     private dropletManager: DropletManager;
@@ -98,7 +99,7 @@ export class WaterAnimationController {
         // Draw the text
         this.textManager.drawText();
 
-        requestAnimationFrame(this.animate);
+        this.animationFrameId = requestAnimationFrame(this.animate);
     }
 
     start() {
@@ -108,6 +109,12 @@ export class WaterAnimationController {
     }
 
     cleanup() {
+        // Cancel animation frame
+        if (this.animationFrameId !== null) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+        
         window.removeEventListener("resize", this.handleResize);
     }
 }
