@@ -3,7 +3,7 @@ import { EditorView, basicSetup } from 'codemirror';
 import { python } from '@codemirror/lang-python';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorState } from '@codemirror/state';
-import { loadPyodide, type PyodideInterface } from 'pyodide';
+import type { PyodideInterface } from 'pyodide';
 
 interface PythonEditorProps {
   initialCode?: string;
@@ -42,8 +42,9 @@ export const PythonEditor = ({
     const initPyodide = async () => {
       try {
         setOutput('Loading Python environment...');
+        const { loadPyodide } = await import('pyodide');
         const pyodideInstance = await loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/"
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/"
         });
         
         // Redirect stdout to capture print statements
@@ -97,21 +98,41 @@ sys.stderr = _output_capture
         oneDark,
         EditorView.theme({
           '&': {
+            height: '100%',
             fontSize: '14px',
-            fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+            fontFamily: "'Fira Code', 'Consolas', 'Monaco', 'Menlo', monospace",
+            backgroundColor: '#1e1e1e',
           },
           '.cm-content': {
-            padding: '16px',
-            minHeight: '300px',
+            padding: '16px 12px',
+            caretColor: '#2cbb5d',
+          },
+          '.cm-activeLine': {
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          },
+          '.cm-activeLineGutter': {
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          },
+          '.cm-gutters': {
+            backgroundColor: '#1e1e1e',
+            color: '#6e7681',
+            border: 'none',
+            paddingRight: '8px',
+          },
+          '.cm-lineNumbers .cm-gutterElement': {
+            padding: '0 8px 0 12px',
+            minWidth: '40px',
           },
           '.cm-focused': {
             outline: 'none',
           },
-          '.cm-editor': {
-            borderRadius: '8px',
-          },
           '.cm-scroller': {
-            borderRadius: '8px',
+            overflow: 'auto',
+            fontFamily: "'Fira Code', 'Consolas', 'Monaco', 'Menlo', monospace",
+            lineHeight: '1.6',
+          },
+          '.cm-line': {
+            padding: '0 4px',
           }
         }),
         EditorView.lineWrapping,
@@ -180,96 +201,139 @@ sys.stderr = _output_capture
   };
 
   return (
-    <div className={`python-editor bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+    <div className={`flex h-screen bg-[#1a1a1a] ${className}`}>
+      {/* Left Panel - Editor */}
+      <div className="flex-1 flex flex-col border-r border-[#2d2d2d]">
+        {/* Editor Header */}
+        <div className="flex items-center justify-between px-4 py-3 bg-[#1e1e1e] border-b border-[#2d2d2d]">
+          <div className="flex items-center space-x-3">
+            <span className="text-sm font-semibold text-white">Code</span>
+            <div className="flex items-center space-x-1 text-xs text-gray-400">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              <span>Python 3.11</span>
+            </div>
           </div>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-2">
-            Python Code Runner
-          </span>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={resetCode}
+              className="px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-[#2d2d2d] rounded transition-all"
+              title="Reset to default code"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
         </div>
-        
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={resetCode}
-            className="px-3 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-          >
-            Reset
-          </button>
-          <button
-            onClick={clearOutput}
-            className="px-3 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-          >
-            Clear
-          </button>
+
+        {/* Editor Content */}
+        <div className="flex-1 overflow-hidden">
+          <div ref={editorRef} className="h-full" />
+        </div>
+
+        {/* Editor Footer */}
+        <div className="flex items-center justify-between px-4 py-2 bg-[#1e1e1e] border-t border-[#2d2d2d]">
+          <div className="flex items-center space-x-4 text-xs text-gray-400">
+          </div>
           <button
             onClick={runCode}
             disabled={isRunning || isLoading || !pyodide}
-            className="px-4 py-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white text-sm rounded transition-colors flex items-center space-x-2"
+            className="px-6 py-2 bg-[#2cbb5d] hover:bg-[#26a04f] disabled:bg-[#1a4d2e] disabled:text-gray-500 text-white text-sm font-medium rounded-lg transition-all flex items-center space-x-2 shadow-lg"
           >
             {isLoading ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Loading...</span>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Loading Python...</span>
               </>
             ) : isRunning ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 <span>Running...</span>
               </>
             ) : (
               <>
-                <span>▶️</span>
-                <span>Run</span>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                </svg>
+                <span>Run Code</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="relative">
-        <div ref={editorRef} className="min-h-[300px]" />
-      </div>
-
-      {/* Output Panel */}
-      <div className="border-t border-gray-200 dark:border-gray-700">
-        <div className="p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Output:</h3>
+      {/* Right Panel - Output */}
+      <div className="w-[45%] flex flex-col bg-[#1e1e1e]">
+        {/* Output Header */}
+        <div className="flex items-center justify-between px-4 py-3 bg-[#1e1e1e] border-b border-[#2d2d2d]">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-semibold text-white">Console</span>
+            {output && output !== 'Click "Run" to execute your Python code and see the output here...' && (
+              <span className="px-2 py-0.5 text-xs bg-[#2d2d2d] text-gray-400 rounded">
+                {output.split('\n').length} lines
+              </span>
+            )}
+          </div>
+          
+          <button
+            onClick={clearOutput}
+            className="px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-[#2d2d2d] rounded transition-all"
+            title="Clear console"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
         </div>
+
+        {/* Output Content */}
         <div 
-          className="p-4 bg-gray-900 text-green-400 font-mono text-sm h-80 overflow-y-scroll"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#4B5563 #1F2937'
-          }}>
+          className="flex-1 p-4 bg-[#0d0d0d] text-[#d4d4d4] font-mono text-sm overflow-y-auto custom-scrollbar"
+        >
           <style dangerouslySetInnerHTML={{
             __html: `
-              .bg-gray-900::-webkit-scrollbar {
-                width: 12px;
+              .custom-scrollbar::-webkit-scrollbar {
+                width: 10px;
               }
-              .bg-gray-900::-webkit-scrollbar-track {
-                background: #1F2937;
-                border-radius: 6px;
+              .custom-scrollbar::-webkit-scrollbar-track {
+                background: #0d0d0d;
               }
-              .bg-gray-900::-webkit-scrollbar-thumb {
-                background: #4B5563;
-                border-radius: 6px;
-                border: 2px solid #1F2937;
+              .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #3d3d3d;
+                border-radius: 5px;
               }
-              .bg-gray-900::-webkit-scrollbar-thumb:hover {
-                background: #6B7280;
+              .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #4d4d4d;
+              }
+              .custom-scrollbar {
+                scrollbar-width: thin;
+                scrollbar-color: #3d3d3d #0d0d0d;
               }
             `
           }} />
-          <pre className="whitespace-pre-wrap">
-            {output || 'Click "Run" to execute your Python code and see the output here...'}
-          </pre>
+          {output ? (
+            <pre className="whitespace-pre-wrap leading-relaxed">
+              {output.split('\n').map((line, i) => (
+                <div key={i} className="flex hover:bg-[#1a1a1a] px-2 -mx-2 rounded">
+                  <span className="text-gray-600 select-none mr-4 text-right" style={{ minWidth: '2rem' }}>
+                    {i + 1}
+                  </span>
+                  <span className={line.toLowerCase().includes('error') ? 'text-red-400' : ''}>{line}</span>
+                </div>
+              ))}
+            </pre>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-gray-600">
+              <svg className="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-sm">Run your code to see the output</p>
+              <p className="text-xs mt-2 text-gray-700">Press the "Run Code" button or use Ctrl+Enter</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

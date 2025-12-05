@@ -1,6 +1,8 @@
 ---
-import Navigation from "@/components/Navigation.astro";
-import BaseHead from "../components/BaseHead.astro";
+import Navigation from "@/components/layout/Navigation.astro";
+import BaseHead from "@/components/layout/BaseHead.astro";
+import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
+import GlassCard from "@/components/cards/GlassCard.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
 
@@ -13,9 +15,8 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 			image="/og/contact.png"
 		/>
 	</head>
-	<body
-		class="bg-gradient-to-tl from-black via-neutral-900 to-black bg-fixed min-h-screen"
-	>
+	<body class="bg-black min-h-screen">
+		<BackgroundAnimation />
 		<Navigation />
 		<div class="relative pb-16">
 			<div
@@ -29,20 +30,18 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 						Contact
 					</h2>
 				</div>
-				<div class="w-full h-px bg-zinc-800">
+				<div>
 					<div
-						class="container flex items-start justify-center min-h-screen mx-auto"
+						class="container flex items-start justify-center mx-auto"
 					>
 						<div
-							class="grid w-full grid-cols-1 gap-6 mx-auto sm:mt-0 sm:grid-cols-3 lg:gap-16"
+							class="grid w-full grid-cols-1 gap-6 mx-auto sm:mt-0 sm:grid-cols-3 lg:gap-16 lg:grid-rows-1"
 						>
-							<div
-								class="relative flex items-center justify-center"
-							>
+							<GlassCard class="h-full flex flex-col">
 								<a
 									href="mailto:contact@nandan.fyi"
 									target="_blank"
-									class="p-4 relative flex flex-col items-center gap-4 duration-700 group md:gap-8 md:py-24 lg:pb-48 md:p-16"
+									class="p-4 relative flex flex-col items-center justify-center gap-4 duration-700 md:gap-8 md:py-24 md:p-16 flex-1"
 									data-rybbit-event="link.email"
 									data-rybbit-prop-link_type="email"
 									data-rybbit-prop-page="contact"
@@ -89,14 +88,12 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 										</span>
 									</div>
 								</a>
-							</div>
-							<div
-								class="relative flex items-center justify-center"
-							>
+							</GlassCard>
+							<GlassCard class="h-full flex flex-col">
 								<a
 									href="https://github.com/nandan-varma"
 									target="_blank"
-									class="p-4 relative flex flex-col items-center gap-4 duration-700 group md:gap-8 md:py-24 lg:pb-48 md:p-16"
+									class="p-4 relative flex flex-col items-center justify-center gap-4 duration-700 md:gap-8 md:py-24 md:p-16 flex-1"
 									data-rybbit-event="link.social"
 									data-rybbit-prop-platform="github"
 									data-rybbit-prop-link_type="profile"
@@ -141,14 +138,12 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 										</span>
 									</div>
 								</a>
-							</div>
-							<div
-								class="relative flex items-center justify-center"
-							>
+							</GlassCard>
+							<GlassCard class="h-full flex flex-col">
 								<a
 									href="https://www.linkedin.com/in/nandanvarma/"
 									target="_blank"
-									class="p-4 relative flex flex-col items-center gap-4 duration-700 group md:gap-8 md:py-24 lg:pb-48 md:p-16"
+									class="p-4 relative flex flex-col items-center justify-center gap-4 duration-700 md:gap-8 md:py-24 md:p-16 flex-1"
 									data-rybbit-event="link.social"
 									data-rybbit-prop-platform="linkedin"
 									data-rybbit-prop-link_type="profile"
@@ -198,15 +193,11 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 										</span>
 									</div>
 								</a>
-							</div>
+							</GlassCard>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-
-		<style>
-			/* Add any additional styles here */
-		</style>
 	</body>
 </html>
