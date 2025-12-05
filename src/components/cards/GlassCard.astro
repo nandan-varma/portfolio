@@ -1,0 +1,78 @@
+---
+interface Props {
+    class?: string;
+    enableHoverEffect?: boolean;
+}
+
+const { class: className = "", enableHoverEffect = true } = Astro.props;
+---
+
+<script>
+    function setupCard(cardElement: HTMLElement) {
+        let mouseX = 0;
+        let mouseY = 0;
+
+        function onMouseMove(event: MouseEvent) {
+            const { currentTarget, clientX, clientY } = event;
+            if (!currentTarget) return;
+            const { left, top } = (
+                currentTarget as HTMLElement
+            ).getBoundingClientRect();
+            mouseX = clientX - left;
+            mouseY = clientY - top;
+            updateStyles(currentTarget as HTMLElement);
+        }
+
+        function updateStyles(element: HTMLElement) {
+            const maskImage = `radial-gradient(240px at ${mouseX}px ${mouseY}px, white, transparent)`;
+            element
+                .querySelectorAll("[data-gradient]")
+                .forEach((gradientElement) => {
+                    (gradientElement as HTMLElement).style.maskImage =
+                        maskImage;
+                    (gradientElement as HTMLElement).style.webkitMaskImage =
+                        maskImage;
+                });
+        }
+
+        cardElement.addEventListener("mousemove", onMouseMove as EventListener);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("[data-glass-card]").forEach((card) => {
+            setupCard(card as HTMLElement);
+        });
+    });
+</script>
+
+<div
+    data-glass-card
+    class:list={[
+        "overflow-hidden relative duration-700 border rounded-xl group md:gap-8",
+        "border-zinc-600/30 bg-black/10 backdrop-blur-sm",
+        enableHoverEffect &&
+            "hover:bg-zinc-800/15 hover:border-zinc-400/50 hover:backdrop-blur-md",
+        "shadow-lg shadow-black/30",
+        className,
+    ]}
+>
+    <div class="pointer-events-none">
+        <div
+            class="absolute inset-0 z-0 transition duration-1000 [mask-image:linear-gradient(black,transparent)]"
+        >
+        </div>
+        <div
+            class="absolute inset-0 z-10 bg-gradient-to-br from-zinc-400/3 via-zinc-600/3 to-transparent opacity-100 transition duration-1000 group-hover:opacity-30"
+            data-gradient
+        >
+        </div>
+        <div
+            class="absolute inset-0 z-10 opacity-0 mix-blend-overlay transition duration-1000 group-hover:opacity-100 bg-gradient-to-br from-white/5 via-zinc-400/5 to-transparent"
+            data-gradient
+        >
+        </div>
+    </div>
+    <div class="relative z-20">
+        <slot />
+    </div>
+</div>

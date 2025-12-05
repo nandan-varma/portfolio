@@ -23,7 +23,6 @@
     "@fontsource/roboto": "^5.2.8",
     "@resvg/resvg-js": "^2.6.2",
     "@rybbit/js": "^0.4.0",
-    "@sentry/astro": "^10.19.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",

@@ -1,10 +1,11 @@
 ---
 import { getCollection } from "astro:content";
-import Navigation from "@/components/Navigation.astro";
+import Navigation from "@/components/layout/Navigation.astro";
 import "../../styles/global.css";
-import BlogCard from "@/components/BlogCard.astro";
-import Blog from "@/components/Blog.astro";
-import BaseHead from "@/components/BaseHead.astro";
+import GlassCard from "@/components/cards/GlassCard.astro";
+import Blog from "@/components/content/Blog.astro";
+import BaseHead from "@/components/layout/BaseHead.astro";
+import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 
 const blogs = (await getCollection("blog"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
@@ -26,15 +27,14 @@ const sorted = blogs.sort((a, b) => {
 	<head>
 		<BaseHead title={"Blog"} description={"Blog"} image="/og/blog.png" />
 	</head>
-	<body
-		class="bg-gradient-to-tl from-black via-neutral-900 to-black h-screen"
-	>
+	<body class="bg-black">
+		<BackgroundAnimation />
 		<Navigation />
 		<div class="relative pb-16">
 			<div
 				class="px-6 pt-16 mx-auto space-y-8 max-w-7xl lg:px-8 md:space-y-16 md:pt-24 lg:pt-32"
 			>
-				<div class="max-w-2xl mx-auto lg:mx-0">
+				<div class="max-w-2xl lg:mx-0">
 					<h2
 						class="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl"
 						transition:name={"Blog"}
@@ -44,25 +44,23 @@ const sorted = blogs.sort((a, b) => {
 				</div>
 
 				<div
-					class="flex flex-col w-full gap-8 mx-auto border-t border-gray-900/10 lg:mx-0 lg:border-t-0"
+					class="flex flex-col w-full gap-8 border-t border-gray-900/10 lg:border-t-0"
 				>
-					<div class="hidden w-full h-px md:block bg-zinc-800"></div>
-
 					<div
-						class="grid grid-cols-1 gap-4 mx-auto lg:mx-0 md:grid-cols-3"
+						class="grid grid-cols-1 gap-4 lg:mx-0 md:grid-cols-3"
 					>
 						<div class="grid grid-cols-1 gap-4">
 							{
 								sorted
 									.filter((_, i) => i % 3 === 0)
 									.map((blog) => (
-										<BlogCard key={blog.id}>
+										<GlassCard>
 											<Blog
 												id={blog.id}
 												blog={blog.data}
 												views={0}
 											/>
-										</BlogCard>
+										</GlassCard>
 									))
 							}
 						</div>
@@ -71,13 +69,13 @@ const sorted = blogs.sort((a, b) => {
 								sorted
 									.filter((_, i) => i % 3 === 1)
 									.map((blog) => (
-										<BlogCard key={blog.id}>
+										<GlassCard>
 											<Blog
 												id={blog.id}
 												blog={blog.data}
 												views={0}
 											/>
-										</BlogCard>
+										</GlassCard>
 									))
 							}
 						</div>
@@ -86,13 +84,13 @@ const sorted = blogs.sort((a, b) => {
 								sorted
 									.filter((_, i) => i % 3 === 2)
 									.map((blog) => (
-										<BlogCard key={blog.id}>
+										<GlassCard>
 											<Blog
 												id={blog.id}
 												blog={blog.data}
 												views={0}
 											/>
-										</BlogCard>
+										</GlassCard>
 									))
 							}
 						</div>

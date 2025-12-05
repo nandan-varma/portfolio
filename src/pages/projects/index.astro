@@ -1,10 +1,11 @@
 ---
 import { getCollection } from "astro:content";
-import Navigation from "../../components/Navigation.astro";
+import Navigation from "@/components/layout/Navigation.astro";
 import "../../styles/global.css";
-import ProjectCard from "@/components/ProjectCard.astro";
-import Article from "@/components/Article.astro";
-import BaseHead from "@/components/BaseHead.astro";
+import GlassCard from "@/components/cards/GlassCard.astro";
+import Article from "@/components/content/Article.astro";
+import BaseHead from "@/components/layout/BaseHead.astro";
+import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 
 const projects = (await getCollection("project"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
@@ -38,13 +39,14 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 			image="/og/projects.png"
 		/>
 	</head>
-	<body class="bg-gradient-to-tl from-black via-neutral-900 to-black">
+	<body class="bg-black">
+		<BackgroundAnimation />
 		<Navigation />
 		<div class="relative pb-16">
 			<div
 				class="px-6 pt-16 mx-auto space-y-8 max-w-7xl lg:px-8 md:space-y-16 md:pt-24 lg:pt-32"
 			>
-				<div class="max-w-2xl mx-auto lg:mx-0">
+				<div class="max-w-2xl lg:mx-0">
 					<h2
 						class="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl"
 						transition:name={"Projects"}
@@ -52,13 +54,12 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 						Projects
 					</h2>
 				</div>
-				<div class="w-full h-px bg-zinc-800"></div>
 
-				<div class="grid grid-cols-1 gap-8 mx-auto lg:grid-cols-2">
-					<ProjectCard>
-						<a class="" href={`/projects/${featured?.id}`}>
+				<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+					<GlassCard>
+						<a href={`/projects/${featured?.id}`} class="block">
 							<article
-								class="relative h-full w-full p-4 md:p-8"
+								class="relative w-full p-4 md:p-8 flex flex-col min-h-full"
 								tabindex={-1}
 							>
 								<div
@@ -99,13 +100,13 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 									{featured?.data.title}
 								</h2>
 								<p
-									class="mt-4 leading-8 duration-150 text-zinc-400 group-hover:text-zinc-300"
+									class="mt-4 leading-8 duration-150 text-zinc-400 group-hover:text-zinc-300 flex-1"
 									transition:name={"project-desc-" +
 										featured?.data.title}
 								>
 									{featured?.data.description}
 								</p>
-								<div class="absolute bottom-4 md:bottom-8">
+								<div class="pt-4">
 									<p
 										class="text-zinc-200 hover:text-zinc-50 hidden lg:block"
 									>
@@ -116,43 +117,42 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 								</div>
 							</article>
 						</a>
-					</ProjectCard>
+					</GlassCard>
 
 					<div
-						class="flex flex-col w-full gap-8 mx-auto border-t border-gray-900/10 lg:mx-0 lg:border-t-0"
+						class="flex flex-col w-full gap-8 border-t border-gray-900/10 lg:border-t-0"
 					>
 						{
 							[top2, top3]
 								.filter((project) => project !== undefined)
 								.map((project) => (
-									<ProjectCard>
+									<GlassCard>
 										<Article
 											id={project.id}
 											project={project.data}
 											views={0}
 										/>
-									</ProjectCard>
+									</GlassCard>
 								))
 						}
 					</div>
 				</div>
-				<div class="hidden w-full h-px md:block bg-zinc-800"></div>
 
 				<div
-					class="grid grid-cols-1 gap-4 mx-auto lg:mx-0 md:grid-cols-3"
+					class="grid grid-cols-1 gap-4 lg:mx-0 md:grid-cols-3"
 				>
 					<div class="grid grid-cols-1 gap-4">
 						{
 							sorted
 								.filter((_, i) => i % 3 === 0)
 								.map((project) => (
-									<ProjectCard key={project.id}>
+									<GlassCard>
 										<Article
 											id={project.id}
 											project={project.data}
 											views={0}
 										/>
-									</ProjectCard>
+									</GlassCard>
 								))
 						}
 					</div>
@@ -161,13 +161,13 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 							sorted
 								.filter((_, i) => i % 3 === 1)
 								.map((project) => (
-									<ProjectCard key={project.id}>
+									<GlassCard>
 										<Article
 											id={project.id}
 											project={project.data}
 											views={0}
 										/>
-									</ProjectCard>
+									</GlassCard>
 								))
 						}
 					</div>
@@ -176,13 +176,13 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 							sorted
 								.filter((_, i) => i % 3 === 2)
 								.map((project) => (
-									<ProjectCard key={project.id}>
+									<GlassCard>
 										<Article
 											id={project.id}
 											project={project.data}
 											views={0}
 										/>
-									</ProjectCard>
+									</GlassCard>
 								))
 						}
 					</div>

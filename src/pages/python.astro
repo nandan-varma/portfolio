@@ -1,6 +1,6 @@
 ---
 import { PythonEditor } from "@/components/python";
-import BaseHead from "../components/BaseHead.astro";
+import BaseHead from "@/components/layout/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
 
@@ -13,8 +13,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
             image="/og/index.png"
         />
     </head>
-    <body>
-        {/* simple python runner */}
-        <PythonEditor className="w-full" client:load />
+    <body class="m-0 p-0 overflow-hidden">
+        <PythonEditor client:load />
     </body>
 </html>
