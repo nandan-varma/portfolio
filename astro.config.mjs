@@ -2,14 +2,9 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-
 import tailwindcss from '@tailwindcss/vite';
-
 import vercel from '@astrojs/vercel';
-
 import react from '@astrojs/react';
-
-// import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
 export default defineConfig({
@@ -23,6 +18,10 @@ export default defineConfig({
         external: ['pyodide'],
       },
     }
+  },
+
+  redirects: {
+    '/cv': 'https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlvG2WP5NtSWA6D1E3dn59jRJIHL24zrchovMw',
   },
 
   adapter: vercel(),
