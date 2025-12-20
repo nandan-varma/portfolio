@@ -8,25 +8,32 @@ published: true
   
 ---
 
-## Bingo implements the following features
+## Description
 
-- Hashable board (so you can choose your favorite board every time).
-- Multiplayer using peer to peer connection with WebRTC.
+Bingo Game is a web-based multiplayer bingo application that allows users to host or join real-time games with friends. Players can create a game room, share the unique game ID, and compete in turn-based bingo matches where marking numbers leads to scoring bingo lines. The app leverages Firebase for seamless real-time synchronization, ensuring all players see live updates without page refreshes, making it ideal for social gaming sessions.
 
-## TODO
+## Features
 
-- Use Firebase for matching players
+- Real-time multiplayer gameplay: Host or join games instantly with Firebase-powered synchronization for live board updates and turn management.
+- Interactive bingo board: 5x5 grid with clickable numbers, visual marking, and automatic scoring based on completed lines.
+- Game state management: Tracks player turns, marked numbers, and detects winners when a player achieves 5 bingo lines.
+- Simple room system: Unique game IDs for private rooms, allowing players to enter names and join specific sessions.
+- Responsive UI: Built with Next.js and React for a clean, user-friendly interface across devices.
+- Persistent game data: Uses Firebase Realtime Database to store and update game states reliably.
 
-## What I learnt
+## What I Learnt
 
-- Hashing
-- Caching
-- Peer-to-peer connections
+- Implementing real-time data synchronization using Firebase Realtime Database for multiplayer interactions.
+- Managing complex game state with custom React hooks and TypeScript for type safety.
+- Building turn-based games with event-driven updates and conflict resolution.
+- Generating deterministic bingo boards using seedrandom for fair gameplay.
+- Integrating Firebase into a Next.js app for scalable web applications.
 
-P.S. I was not that good at web development when I did this.
-+
-## Built with
+## Built With
 
-- [Next.js](https://nextjs.org)
-- [tailwindcss](https://tailwindcss.com)
-- Deployed on [Vercel](https://vercel.com)
+- [Next.js](https://nextjs.org/) - React framework for server-side rendering and routing.
+- [React](https://reactjs.org/) - UI library for building interactive components.
+- [TypeScript](https://www.typescriptlang.org/) - Typed JavaScript for better development experience.
+- [Firebase](https://firebase.google.com/) - Realtime database for live game synchronization.
+- [Supabase](https://supabase.com/) - Backend-as-a-service (included in dependencies).
+- [seedrandom](https://www.npmjs.com/package/seedrandom) - Deterministic random number generation for bingo boards.

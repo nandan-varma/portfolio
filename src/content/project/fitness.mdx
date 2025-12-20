@@ -7,45 +7,35 @@ published: true
   
 ---
 
-# Replog
-Replog is a fitness app to track your workouts and exercises.
-With privacy and open source in mind, Replog is built to be lightweight and fast.
+## Description
 
-# Demo
+RepLog is a minimalistic workout logging app designed for fitness enthusiasts to track their exercises and progress efficiently. It integrates the Free Exercise DB to provide a comprehensive library of exercises, allowing users to log sets, reps, weight, and duration for each workout. The app features an intuitive onboarding process, bookmarking for favorite exercises, and a clean UI built for mobile devices, making it easy to maintain a consistent fitness routine without unnecessary clutter.
 
-Here is a quick demo of the app I have built so far.
-<br/>
+## Features
 
-<video width="320" height="240" controls>
-  <source src="https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlJUhuiIdzxiZ8RUlHQfDceV5yaEgCuWMr0Y2P" type="video/mp4"/>
-</video>
+- Workout Logging: Log detailed workout sessions including sets, reps, weight, and duration for each exercise.
+- Exercise Library: Access a vast database of exercises from the Free Exercise DB, categorized by type, equipment, and difficulty level.
+- Bookmarking System: Bookmark favorite exercises for quick access and personalized workout planning.
+- Onboarding Flow: Guided setup process to collect user details like age, height, weight, and fitness goals.
+- Calendar Integration: View workout history and stats on a calendar interface for tracking progress over time.
+- Filtering and Search: Filter exercises by category, equipment, or search queries to find specific workouts.
+- Dark Mode Support: Automatic theme switching based on device settings for comfortable viewing.
+- Offline Support: Local SQLite database ensures workouts can be logged without internet connectivity.
 
-*UI is subject to change as I am still working on it.
+## What I Learnt
 
-# Features
+- Implementing a robust local database with Drizzle ORM and Expo SQLite for data persistence in mobile apps.
+- Managing complex state and navigation in React Native using Expo Router and context providers.
+- Designing user-friendly onboarding flows with animated transitions and form validation.
+- Integrating external APIs and handling data migration in a mobile environment.
+- Optimizing performance for large lists using infinite scrolling and efficient rendering techniques.
+- Building responsive UIs with Tailwind CSS and custom components in a cross-platform app.
 
-**Non-functional requirements:**
-- Simple and intuitive UI
-- Privacy focused
-- Open source
-- Cross platform
-- Offline support
-- Lightweight
+## Built With
 
-**Functional requirements:**
-- Display all exercises with important information with images and descriptions
-- Track workouts and exercises
-- Track progress over time
-- Set goals and reminders
-- Create custom workout plans
-- Calendar view to see past workouts
-- AI assistance for workout suggestions
-
-## Built with
-
-- [Expo](https://expo.dev)
-- [React Native](https://reactnative.dev)
+- [React Native](https://reactnative.dev/)
+- [Expo](https://expo.dev/)
 - [Drizzle ORM](https://orm.drizzle.team/)
-- [EAS](https://expo.dev/eas)
-- [SQLite](https://www.sqlite.org/index.html)
-- [NativeWind](https://www.nativewind.dev)
+- [SQLite](https://www.sqlite.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [React Navigation](https://reactnavigation.org/)

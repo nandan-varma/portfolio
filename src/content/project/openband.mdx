@@ -7,28 +7,38 @@ repository: nandan-varma/OpenBand
 published: true
 ---
 
+## Description
+
+OpenBand is a professional virtual piano studio built as a web application, offering musicians a high-fidelity digital piano experience with advanced recording capabilities. It combines real-time playback, velocity-sensitive input, and studio-quality sound to create an accessible platform for music creation and practice, suitable for beginners to advanced players.
 
 ## Features
 
-- GUI to use piano on keyboard
-- Record and replay tunes made from piano
+- High-Quality Sound: Utilizes SoundFont technology with acoustic grand piano samples for realistic dynamics and tone
+- Advanced Recording: Captures precise timing, note velocity, and duration with MIDI-like accuracy
+- Instant Playback: Enables real-time playback of recorded sessions with perfect synchronization
+- Responsive Design: Adapts to mobile and desktop devices with optimized keyboard layouts and touch support
+- Keyboard Shortcuts: Supports computer keyboard input mapped to piano keys for enhanced usability
+- Recording Management: Features play, stop, clear, and export functionality for managing musical sessions
+- Velocity Sensitivity: Records and reproduces note velocity for expressive musical performance
+- Audio Context Integration: Handles web audio API initialization and user interaction requirements
 
-## TODO
+## What I Learnt
 
-- Other instruments
-- Ability to export and save tunes
+- AudioContext and Web Audio API integration for browser-based music applications
+- MIDI number mapping and soundfont implementation for realistic instrument simulation
+- Complex React state management for real-time recording and playback synchronization
+- Responsive design principles for musical interfaces across different screen sizes
+- Event scheduling and timing precision for accurate musical playback
+- Browser audio permission handling and user interaction patterns
+- Integration of third-party libraries like react-piano and soundfont-player
 
-## What I learnt
+## Built With
 
-- Handling audio in multiple platforms
-- Multiple input handling (keyboard)
-
-## Built with
-
-- [Next.js](https://nextjs.org)
-- [tailwindcss](https://tailwindcss.com)
-- Deployed on [Vercel](https://vercel.com)
-
-## Docs
-
-Docs in the README are temporary and will be moved to the website soon.
+- [Next.js](https://nextjs.org) - React framework for server-side rendering and routing
+- [React](https://reactjs.org) - UI library for component-based development
+- [TypeScript](https://www.typescriptlang.org) - Typed JavaScript for enhanced development experience
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework for styling
+- [react-piano](https://github.com/iqnivek/react-piano) - React piano component with MIDI support
+- [soundfont-player](https://github.com/danigb/soundfont-player) - Web Audio API soundfont player
+- [Lodash](https://lodash.com) - Utility library for functional programming helpers
+- [ESLint](https://eslint.org) - JavaScript linting tool

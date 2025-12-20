@@ -8,29 +8,40 @@ published: true
   
 ---
 
-Chess Online is developed to play chess online with the flexibility to upload and upgrade my own chess engine, which is in active development.
+## Description
+
+Chess Online is a web-based chess platform built with Next.js, offering multiple game modes including local play, AI challenges, and friend matches. Players can enjoy a fully interactive chess experience with drag-and-drop moves, move validation, and game state management. The app provides a responsive interface with real-time feedback for checkmates, draws, and invalid moves, making it accessible for both casual and competitive players.
 
 ## Features
 
-- Play with friends
-- Play with AI
-- Play on board
+- Interactive chessboard with drag-and-drop piece movement and visual move highlights
+- Multiple game modes: local play against yourself, versus AI opponent, and online friend matches
+- Undo, redo, and reset functionality for flexible gameplay
+- Pawn promotion support with user prompts for piece selection
+- Game status notifications via toasts for checkmates, draws, and invalid moves
+- Responsive design with dark theme support for better user experience
+- Integration with chess engines for AI opponent logic
 
-## TODO
+## What I Learnt
 
-- User-specific metrics (under development)
-- Login system for future use.
+- Implementing real-time chess game logic using the chess.js library for move validation and FEN notation
+- Managing complex state in React with hooks for game history, AI responses, and UI interactions
+- Integrating third-party chessboard UI components (chessboardjsx) with custom styling and event handling
+- Handling asynchronous operations like AI move delays to simulate realistic gameplay
+- Building modular React components with TypeScript for type safety in game mechanics
+- Utilizing Firebase for potential authentication and data persistence in multiplayer scenarios
 
-## What I learnt
+## Built With
 
-- Integrating AI to web applications
-- Real-time updates with the database
-
-
-## Built with
-
-- [Next.js](https://nextjs.org)
-- [tailwindcss](https://tailwindcss.com)
-- Deployed on [Vercel](https://vercel.com)
-
-To learn more about my Chess Engine [Meadows](/projects/meadows).
+- [Next.js](https://nextjs.org) - React framework for server-side rendering and routing
+- [React](https://reactjs.org) - JavaScript library for building user interfaces
+- [TypeScript](https://www.typescriptlang.org) - Typed superset of JavaScript
+- [chess.js](https://github.com/jhlywa/chess.js) - JavaScript chess library for game logic
+- [chessboardjsx](https://github.com/willb335/chessboardjsx) - React chessboard component
+- [js-chess-engine](https://github.com/damirka/js-chess-engine) - JavaScript chess engine for AI
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Material-UI](https://mui.com) - React components for faster web development
+- [Firebase](https://firebase.google.com) - Backend services for authentication and data
+- [Radix UI](https://www.radix-ui.com) - Low-level UI primitives for accessible components
+- [Zod](https://zod.dev) - TypeScript-first schema validation
+- [Sonner](https://sonner.emilkowal.ski) - Toast notifications for React

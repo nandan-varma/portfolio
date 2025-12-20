@@ -8,30 +8,44 @@ published: true
   
 ---
 
-A real time chat application and challenge for me to learn encryption
+## Description
+
+This is a real-time chat application developed as a personal challenge to explore encryption technologies and modern web development practices. The app enables users to create and join password-protected chat rooms for secure, instantaneous messaging with friends and colleagues. Featuring end-to-end encryption powered by the Web Crypto API, it ensures message privacy while providing a smooth, responsive user experience across devices.
 
 ## Features
 
-- Realtime Update
-- Nice UI
-- Chat rooms
+- Real-time messaging: Instant message delivery and updates using Firebase Realtime Database
+- Chat rooms: Create and join multiple conversation rooms with unique IDs
+- End-to-end encryption: AES-GCM encryption for message security using browser's Web Crypto API
+- Password-protected rooms: Optional password protection with hashed verification
+- User authentication: Secure sign-in and sign-out with Firebase Authentication
+- Responsive UI: Clean, modern interface built with shadcn/ui and Tailwind CSS
+- Auto-scrolling chat: Automatic scrolling to latest messages for seamless conversation flow
 
 ## TODO
 - Implement encryption
 - Transfer from Firebase to SQL
 
-## What I learnt
+## What I Learnt
 
-- Realtime DB updates
-- Encryption
-- DB migrations
-- SQL ORMs
+- Real-time database updates using Firebase for instant message synchronization
+- Implementing end-to-end encryption with AES-GCM and Web Crypto API
+- Database migrations from Firebase to PostgreSQL using Drizzle ORM
+- Working with SQL ORMs and relational databases
+- Building responsive, accessible UI components with shadcn/ui
+- Integrating authentication systems and managing user sessions
 
+## Built With
 
-## Built with
-
-- [Next.js](https://nextjs.org)
-- [shadcn-ui](https://ui.shadcn.com/)
-- Deployed on [Vercel](https://vercel.com)
-- [Drizzle ORM](https://orm.drizzle.team/)
-- PostgreSQL deployed on [Turso](https://turso.tech/)
+- [Next.js](https://nextjs.org/) - React framework for the web
+- [shadcn/ui](https://ui.shadcn.com/) - Modern UI components
+- [Firebase](https://firebase.google.com/) - Authentication and Realtime Database
+- [Drizzle ORM](https://orm.drizzle.team/) - TypeScript-first SQL ORM
+- [PostgreSQL](https://www.postgresql.org/) - Relational database (hosted on Turso)
+- [Vercel](https://vercel.com/) - Deployment platform
+- [React](https://reactjs.org/) - UI library
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Redux Toolkit](https://redux-toolkit.js.org/) - State management
+- [React Hook Form](https://react-hook-form.com/) - Form handling
+- [Zod](https://zod.dev/) - Schema validation

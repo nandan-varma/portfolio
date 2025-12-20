@@ -8,25 +8,35 @@ published: true
   
 ---
 
-Podcasts is developed with my friends for hackathon but later updated to be full stack application.
+## Description
+
+Pod is a modern web-based podcast application built with Next.js and Supabase, enabling users to upload, discover, and stream podcasts seamlessly. The app features user authentication, a search functionality for finding podcasts by name, and an integrated audio player for uninterrupted listening. It provides a clean, responsive interface for podcast enthusiasts to manage and enjoy their favorite content, with support for direct file uploads or URL-based additions to the library.
 
 ## Features
 
-- Store audio in database
-- Play and download audio files
-- Player controls for online playing
-- Login system for favorites
+- User Authentication: Secure login and logout using Supabase Auth, protecting access to podcast management features.
+- Podcast Upload: Upload audio files (.m4a, .mp4) directly to Supabase Storage or add via external URLs, automatically calculating duration.
+- Search Functionality: Real-time search through podcast titles using Supabase's text search capabilities, displaying results in a responsive table.
+- Audio Playback: Integrated HTML5 audio player with controls for play, pause, and navigation, managed via React Context for state.
+- Responsive UI: Built with Tailwind CSS and Radix UI components for a modern, accessible interface across devices.
+- Data Management: Server-side rendering with Next.js for optimal performance, storing podcast metadata in Supabase PostgreSQL.
 
-## What I learned
+## What I Learnt
 
-- React Contexts
-- MongoDB
-- Communication and Work allotment
+- Integrating Supabase for authentication, database operations, and file storage in a Next.js application.
+- Implementing server actions in Next.js for secure data fetching and mutations.
+- Managing global state with React Context for audio playback across components.
+- Handling audio file metadata extraction and duration calculation on the client side.
+- Building responsive UIs with Tailwind CSS and component libraries like Radix UI.
+- Utilizing Supabase's text search for efficient querying of user-generated content.
 
-## Built with
+## Built With
 
-- [Next.js](https://nextjs.org)
-- [chakra-ui](https://chakra-ui.com)
-- Deployed on [Vercel](https://vercel.com)
-- Database on [mongodb](https://www.mongodb.com)
-- Authentication using [Firebase](https://firebase.google.com)
+- [Next.js](https://nextjs.org) - React framework for server-side rendering and static site generation.
+- [React](https://reactjs.org) - JavaScript library for building user interfaces.
+- [Supabase](https://supabase.com) - Open-source Firebase alternative for database and authentication.
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework for styling.
+- [TypeScript](https://www.typescriptlang.org) - Typed superset of JavaScript.
+- [Radix UI](https://www.radix-ui.com) - Low-level UI primitives for accessible components.
+- [Lucide React](https://lucide.dev) - Icon library for React.
+- [React H5 Audio Player](https://www.npmjs.com/package/react-h5-audio-player) - Customizable HTML5 audio player component.

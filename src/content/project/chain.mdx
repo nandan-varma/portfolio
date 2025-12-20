@@ -7,21 +7,46 @@ url: https://chain.nandanvarma.com
 published: true
   
 ---
-# Chain Reaction
+## Description
 
-A game with tactics and numbers.
-I used to play this, but it became outdated and less responsive due to poor maintenance from its Android developer.
-So, I recreated it on the web for cross-platform compatibility.
+Chain Reaction 3D is an immersive web-based implementation of the classic Chain Reaction board game, featuring stunning 3D graphics and smooth animations. Players take turns placing colored orbs on a grid-based board, where cells explode when reaching their critical mass, spreading orbs to adjacent cells in a chain reaction. The game continues until one player eliminates all opponent orbs, creating dynamic and strategic gameplay with visual flair.
 
-- Minimal UI with dark mode too
-- 3 players too
+## Features
+
+- 3D Interactive Board: Fully interactive 3D game board built with Three.js and React Three Fiber, allowing players to click cells to place orbs
+- Animated Explosions: Spectacular explosion effects when cells reach critical mass, with orbs cascading to adjacent cells in smooth animations
+- Turn-Based Gameplay: Clean turn indicator showing current player and game status, with automatic player switching
+- Hover Effects: Visual feedback on valid moves with cell highlighting and color changes
+- Real-Time Animations: Fluid orb movements, floating animations, and color transitions throughout gameplay
+- Victory Detection: Automatic win condition checking and clear victory announcements
+- Responsive UI: Modern interface with dark theme, using Tailwind CSS and Radix UI components
 
 ## TODO
-- Online multiplayer
-- Configurable with margin, font size, spacings
 
-## Built with
+- Integrate Firebase Realtime Database for multiplayer functionality
+- Implement game room creation and joining via URL routing
+- Add player disconnection handling and game persistence
 
-- [Next.js](https://nextjs.org)
-- [tailwindcss](https://tailwindcss.com)
-- Deployed on [Vercel](https://vercel.com)
+## What I Learnt
+
+- Mastering React Three Fiber for building complex 3D web applications
+- Implementing sophisticated game state management with race condition prevention
+- Creating smooth 3D animations and physics-like behaviors using Three.js
+- Handling complex user interactions in 3D space with raycasting
+- Using TypeScript for type-safe game logic and state structures
+- Integrating Firebase for potential real-time multiplayer features
+
+## Built With
+
+- [Next.js](https://nextjs.org) - React framework for production
+- [React](https://reactjs.org) - UI library
+- [TypeScript](https://www.typescriptlang.org) - Type-safe JavaScript
+- [Three.js](https://threejs.org) - 3D graphics library
+- [@react-three/fiber](https://docs.pmnd.rs/react-three-fiber) - React renderer for Three.js
+- [@react-three/drei](https://github.com/pmndrs/drei) - Useful helpers for React Three Fiber
+- [@react-spring/three](https://www.react-spring.dev) - Animation library for React Three Fiber
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Radix UI](https://www.radix-ui.com) - Unstyled UI components
+- [Lucide React](https://lucide.dev) - Icon library
+- [Firebase](https://firebase.google.com) - Backend services
+- [Next Themes](https://github.com/pacocoursey/next-themes) - Dark mode support

@@ -8,28 +8,37 @@ published: true
   
 ---
 
-An application to play and download music.
+## Description
+
+This modern music streaming app is a progressive web application (PWA) that enables users to search and stream a vast library of songs, albums, artists, and playlists. It offers offline listening capabilities, persistent audio playback with queue management, and seamless device integration. Leveraging the JioSaavn API for music data, the app provides a responsive, mobile-first design optimized for both desktop and mobile experiences.
 
 ## Features
 
-- Scrapes music from JioSaavn (thanks to it not using DRM)
-- Can search songs and albums
-- Ability to add to playlist
-- Download songs in 150kbps (High Quality)
+- Global search across songs, albums, artists, and playlists with real-time results
+- Persistent audio player featuring queue management, playback controls, and media session integration
+- Offline mode with downloads to IndexedDB for uninterrupted listening without connectivity
+- Installable PWA including service worker caching for static assets and background sync
+- Responsive design with mobile-first approach and desktop optimizations
+- Robust audio playback using HTML5 Audio API with error handling and volume controls
+- Detailed music metadata fetching and pagination via external API integration
 
-## TODO
+## What I Learnt
 
-- Export and save playlist
-- Recommendation system
+- Implementing advanced React patterns such as splitting contexts to minimize re-renders for better performance
+- Developing PWA features including service workers, offline storage with IndexedDB, and web app manifest
+- Managing complex audio playback with HTML5 Audio API, Media Session API, and comprehensive error handling
+- Integrating with external REST APIs for data fetching, pagination, and state management
+- Utilizing TanStack Query for efficient caching and synchronization of API responses
+- Building responsive, accessible UI components using Radix UI primitives and Tailwind CSS
 
-## What I learnt
+## Built With
 
-- Application -> Middleware -> Server ( Architecture )
-- Scraping
-
-## Built with
-
-- [Next.js](https://nextjs.org)
-- [tailwindcss](https://tailwindcss.com)
-- Deployed on [Vercel](https://vercel.com)
-- Some JioSaavn APIs that shall not be discussed 🤫
+- [Next.js](https://nextjs.org) - React framework for server-side rendering and routing
+- [React](https://reactjs.org) - UI library for component-based development
+- [TypeScript](https://www.typescriptlang.org/) - Typed programming language for JavaScript
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- Radix UI components - Accessible UI primitives library
+- [TanStack Query](https://tanstack.com/query) - Data fetching and caching solution
+- IndexedDB - Client-side database for offline storage
+- HTML5 Audio API - Native web audio playback
+- Service Worker - Background caching and offline support

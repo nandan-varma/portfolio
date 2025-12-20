@@ -7,18 +7,37 @@ url: https://writing.nandanvarma.com
 published: true
   
 ---
-# Handwriting Generation
+## Description
 
-Generates uniquely styled PDFs with a minimal UI
+This web application transforms plain text into PDF documents that mimic authentic handwriting, perfect for creating personalized assignments and notes. Users can input text, customize various styling options like font size, color, and line spacing, and instantly preview or download the generated PDF with a natural handwritten appearance achieved through randomized font variations and subtle line irregularities.
 
-- PDFs generated the right way (you can even mark/copy text after generation)
-- Minimal UI
-- Configurable with margin, font size, and spacing
+## Features
 
-A better version is made with TensorFlow V2 and Flask using RNN, but I can't deploy Docker/Flask with models for free and I am broke right now.
+- Text Input Interface: A resizable textarea for entering and editing text content.
+- Customizable Controls: Advanced settings including font size, line height, margins, letter spacing, and text color via an intuitive popover interface.
+- Preset Configurations: Quick-select presets (small, medium, large) for common formatting needs.
+- Real-Time Preview: Embedded PDF viewer for instant preview of the handwritten output.
+- Download Functionality: One-click PDF download with customizable filename.
+- Responsive Layout: Horizontal resizable panels for optimal workspace management.
+- Handwriting Simulation: Randomized font selection per character and slight line variance for authentic handwritten look.
 
-## Built with
+## What I Learnt
 
-- [Next.js](https://nextjs.org)
-- [tailwindcss](https://tailwindcss.com)
-- Deployed on [Vercel](https://vercel.com)
+- Client-side PDF generation using pdf-lib with font embedding and custom rendering.
+- Implementing randomization techniques for natural text appearance in digital documents.
+- Managing complex state across multiple React contexts for UI controls and PDF processing.
+- Integrating third-party libraries like react-pdf for PDF preview functionality.
+- Handling asynchronous font loading and embedding in browser environments.
+- Building responsive, interactive UIs with Tailwind CSS and Radix UI components.
+
+## Built With
+
+- [Next.js](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [pdf-lib](https://pdf-lib.js.org/)
+- [react-pdf](https://react-pdf.org/)
+- [Radix UI](https://www.radix-ui.com/)
+- [Supabase](https://supabase.com/)
+- [UploadThing](https://uploadthing.com/)
