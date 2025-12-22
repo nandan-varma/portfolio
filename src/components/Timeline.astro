@@ -1,0 +1,142 @@
+---
+// Timeline.astro
+// Props: projects (array)
+import type { Project } from "@/content.config";
+import TimelineItem from "./TimelineItem.astro";
+const { projects } = Astro.props;
+
+
+---
+
+<section class="super-timeline" aria-label="Project Timeline">
+  <div class="timeline-center-line" id="timeline-center-line" aria-hidden="true"></div>
+  <div class="timeline-items">
+    {(projects as Project[]).map((project, i) => (
+      <TimelineItem
+        project={project}
+        side={i % 2 === 0 ? "left" : "right"}
+        isLast={i === projects.length - 1}
+        client:load
+      />
+    ))}
+  </div>
+</section>
+
+<script type="module">
+// Timeline scroll/animation logic
+// - Animates center line height based on scroll
+// - Reveals timeline items as they enter viewport
+// - Handles reduced motion
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const timelineLine = document.getElementById('timeline-center-line');
+const timelineSection = document.querySelector('.super-timeline');
+const items = Array.from(document.querySelectorAll('.timeline-item'));
+
+function animateLine() {
+  if (!timelineLine || !timelineSection || items.length === 0) return;
+  const sectionRect = timelineSection.getBoundingClientRect();
+  const scrollY = window.scrollY || window.pageYOffset;
+  const sectionTop = sectionRect.top + scrollY;
+  const sectionBottom = sectionRect.bottom + scrollY;
+  const first = items[0];
+  const last = items[items.length - 1];
+  const firstRect = first.getBoundingClientRect();
+  const lastRect = last.getBoundingClientRect();
+  const firstTop = firstRect.top + scrollY;
+  const lastBottom = lastRect.bottom + scrollY;
+  // Clamp line to section and viewport
+  const viewportTop = scrollY;
+  const viewportBottom = scrollY + window.innerHeight;
+  const lineStart = Math.max(firstTop, sectionTop, viewportTop + window.innerHeight * 0.15);
+  const lineEnd = Math.min(lastBottom, sectionBottom, viewportBottom - window.innerHeight * 0.1);
+  const height = Math.max(0, lineEnd - lineStart);
+  timelineLine.style.top = `${lineStart - sectionTop}px`;
+  timelineLine.style.height = `${height}px`;
+}
+
+function revealItems() {
+  if (prefersReducedMotion) {
+    items.forEach(item => item.classList.add('visible'));
+    return;
+  }
+  const reveal = (entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  };
+  const observer = new IntersectionObserver(reveal, {
+    threshold: 0.2
+  });
+  items.forEach(item => observer.observe(item));
+}
+
+window.addEventListener('scroll', animateLine, { passive: true });
+window.addEventListener('resize', animateLine);
+window.addEventListener('DOMContentLoaded', () => {
+  animateLine();
+  revealItems();
+});
+</script>
+
+<style>
+.super-timeline {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6rem 0 6rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scroll-snap-type: y mandatory;
+}
+.timeline-center-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 4px;
+  background: transparent;
+  border-radius: 2px;
+  box-shadow: 0 0 24px 4px rgba(255,255,255,0.18), 0 0 8px 2px rgba(255,255,255,0.10);
+  z-index: 1;
+  transition: height 0.5s cubic-bezier(.4,0,.2,1), top 0.5s cubic-bezier(.4,0,.2,1);
+  will-change: height, top;
+}
+.timeline-items {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 900px) {
+  .super-timeline {
+    padding: 3rem 0 3rem 0;
+  }
+}
+@media (max-width: 700px) {
+  .timeline-center-line {
+    left: 2.5rem;
+  }
+}
+@media (max-width: 500px) {
+  .timeline-center-line {
+    left: 1.5rem;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .timeline-center-line {
+    background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.10) 100%);
+    box-shadow: 0 0 32px 8px rgba(255,255,255,0.22), 0 0 8px 2px rgba(255,255,255,0.10);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .timeline-center-line {
+    transition: none !important;
+  }
+}
+</style>

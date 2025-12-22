@@ -8,7 +8,7 @@ const projectSchema = z.object({
 	date: z.string(),
 	updatedDate: z.coerce.date().optional(),
 	emoji: z.string().optional(),
-	heroImage: z.string().optional(),
+	heroImage: z.string(),
 	repository: z.string(),
 	url: z.string().optional(),
 	published: z.boolean(),
