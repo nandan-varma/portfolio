@@ -21,7 +21,7 @@ export default defineConfig({
   },
 
   redirects: {
-    '/cv': 'https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlvG2WP5NtSWA6D1E3dn59jRJIHL24zrchovMw',
+    '/cv': 'https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlwdChqLZue7hJ43mSDHQtXwVdx90vZ8kIKgM5',
   },
 
   adapter: vercel(),
