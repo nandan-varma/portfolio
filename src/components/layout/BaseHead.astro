@@ -4,6 +4,7 @@
 import "@/styles/global.css";
 import { SITE_TITLE } from "@/consts";
 import { ClientRouter } from "astro:transitions";
+import PostHog from "@/components/posthog.astro";
 
 interface Props {
 	title: string;
@@ -62,36 +63,5 @@ const { title, description, image = "/og.png" } = Astro.props;
 <!-- view transitions -->
 <ClientRouter />
 
-<!-- Rybbit Analytics -->
-<script>
-	import rybbit from "@rybbit/js";
-
-	// Initialize Rybbit analytics
-	if (typeof window !== "undefined") {
-		// Make rybbit globally available for the analytics utility
-		(window as any).rybbit = rybbit;
-
-		// Initialize with configuration
-		rybbit.init({
-			analyticsHost: "https://analytics.nandanvarma.com/api",
-			siteId: "1",
-			debug: false,
-			debounce: 500,
-			// Privacy-focused configuration
-			replayPrivacyConfig: {
-				maskAllInputs: true,
-				maskTextSelectors: [".sensitive-data", "[data-sensitive]"],
-			},
-			// Path patterns for privacy
-			maskPatterns: [
-				"/users/*/profile",
-				"/projects/*/edit",
-			],
-			skipPatterns: [
-				"/admin/**",
-			],
-		}).catch((error) => {
-			console.error("[Rybbit] Initialization failed:", error);
-		});
-	}
-</script>
+<!-- PostHog Analytics -->
+<PostHog />

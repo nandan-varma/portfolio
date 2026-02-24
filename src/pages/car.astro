@@ -17,3 +17,12 @@ import CarGame from "@/components/CarGame.astro";
         <CarGame />
     </body>
 </html>
+
+<script is:inline>
+  function trackCarGameStarted() {
+    window.posthog?.capture('car_game_started');
+  }
+
+  document.addEventListener('DOMContentLoaded', trackCarGameStarted);
+  document.addEventListener('astro:page-load', trackCarGameStarted);
+</script>
