@@ -56,3 +56,26 @@
         </div>
     </div>
 </header>
+
+<script is:inline>
+  function setupNavTracking() {
+    var navLinks = document.querySelectorAll('header nav a, header > div > div a[href="/"], header > div > div > div a');
+    navLinks.forEach(function(link) {
+      link.removeEventListener('click', handleNavClick);
+      link.addEventListener('click', handleNavClick);
+    });
+  }
+
+  function handleNavClick(event) {
+    var link = event.currentTarget;
+    var href = link.getAttribute('href') || '';
+    var label = link.textContent?.trim() || href;
+    window.posthog?.capture('navigation_link_clicked', {
+      nav_destination: href,
+      nav_label: label
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupNavTracking);
+  document.addEventListener('astro:page-load', setupNavTracking);
+</script>

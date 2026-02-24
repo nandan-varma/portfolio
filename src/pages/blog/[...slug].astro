@@ -38,3 +38,15 @@ const { Content } = await render(post);
 		</BlogPost>
 	</body>
 </html>
+
+<script is:inline define:vars={{ postId: post.id, postTitle: post.data.title }}>
+  function trackBlogPostOpened() {
+    window.posthog?.capture('blog_post_opened', {
+      post_id: postId,
+      post_title: postTitle
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', trackBlogPostOpened);
+  document.addEventListener('astro:page-load', trackBlogPostOpened);
+</script>

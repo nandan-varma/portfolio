@@ -22,9 +22,6 @@ const { title, description, date, emoji, repository, url, published } =
                     target="_blank"
                     href="https://github.com/nandan-varma"
                     class="white-back duration-200 text-zinc-400 hover:text-zinc-100"
-                    data-rybbit-event="link.github"
-                    data-rybbit-prop-content_type="project"
-                    data-rybbit-prop-link_type="profile"
                 >
                     <svg
                         class="w-8 h-8 duration-200 hover:font-medium text-zinc-400 hover:text-zinc-100"
@@ -95,10 +92,6 @@ const { title, description, date, emoji, repository, url, published } =
                                 target="_blank"
                                 href={`https://github.com/${repository}`}
                                 class="white-back"
-                                data-rybbit-event="link.github"
-                                data-rybbit-prop-content_type="project"
-                                data-rybbit-prop-content_title={title}
-                                data-rybbit-prop-repository={repository}
                             >
                                 GitHub <span aria-hidden="true">&rarr;</span>
                             </a>
@@ -110,10 +103,6 @@ const { title, description, date, emoji, repository, url, published } =
                                 target="_blank"
                                 href={url}
                                 class="white-back"
-                                data-rybbit-event="link.demo"
-                                data-rybbit-prop-content_type="project"
-                                data-rybbit-prop-content_title={title}
-                                data-rybbit-prop-url={url}
                             >
                                 Website <span aria-hidden="true">&rarr;</span>
                             </a>
@@ -128,6 +117,42 @@ const { title, description, date, emoji, repository, url, published } =
 <div class="container mx-auto px-2 sm:px-4 lg:px-6 max-w-full w-full">
     <slot />
 </div>
+
+<script is:inline define:vars={{ projectTitle: title }}>
+  function setupExternalLinkTracking() {
+    var externalLinks = document.querySelectorAll('header a[target="_blank"][href*="github.com"], header a[target="_blank"]:not([href*="github.com/nandan-varma"])');
+    externalLinks.forEach(function(link) {
+      var href = link.getAttribute('href') || '';
+      // Only track project-specific GitHub and website links (not the profile link)
+      if (href.includes('github.com/nandan-varma') && !href.includes('/projects/') && href !== 'https://github.com/nandan-varma') return;
+      link.removeEventListener('click', handleExternalLinkClick);
+      link.addEventListener('click', handleExternalLinkClick);
+    });
+
+    // Track the featured project repo/url links specifically
+    var projectLinks = document.querySelectorAll('.mx-auto.mt-10 a[target="_blank"]');
+    projectLinks.forEach(function(link) {
+      link.removeEventListener('click', handleExternalLinkClick);
+      link.addEventListener('click', handleExternalLinkClick);
+    });
+  }
+
+  function handleExternalLinkClick(event) {
+    var link = event.currentTarget;
+    var href = link.getAttribute('href') || '';
+    var linkText = link.textContent?.trim() || '';
+    var linkType = href.includes('github.com') ? 'github' : 'website';
+    window.posthog?.capture('external_project_link_clicked', {
+      project_title: projectTitle,
+      link_type: linkType,
+      link_url: href,
+      link_text: linkText
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupExternalLinkTracking);
+  document.addEventListener('astro:page-load', setupExternalLinkTracking);
+</script>
 
 <style>
     .font-display {

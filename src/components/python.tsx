@@ -5,6 +5,16 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorState } from '@codemirror/state';
 import type { PyodideInterface } from 'pyodide';
 
+// PostHog type declaration for window global
+declare global {
+  interface Window {
+    posthog?: {
+      capture: (event: string, properties?: Record<string, unknown>) => void;
+      captureException: (error: Error) => void;
+    };
+  }
+}
+
 interface PythonEditorProps {
   initialCode?: string;
   className?: string;
@@ -153,31 +163,45 @@ sys.stderr = _output_capture
 
   const runCode = async () => {
     if (!viewRef.current || !pyodide) return;
-    
+
     setIsRunning(true);
     setOutput('Running...');
-    
+
     const code = viewRef.current.state.doc.toString();
-    
+    const lineCount = code.split('\n').length;
+
     try {
       // Clear previous output
       pyodide.runPython('_output_capture.clear()');
-      
+
       // Execute the user's code
       pyodide.runPython(code);
-      
+
       // Get the captured output
       const result = pyodide.runPython('_output_capture.get_output()');
-      
+
       if (result.trim()) {
         setOutput(result);
       } else {
         setOutput('Code executed successfully (no output)');
       }
+
+      // Track successful code execution
+      window.posthog?.capture('python_code_executed', {
+        code_lines: lineCount,
+        had_output: result.trim().length > 0
+      });
     } catch (error) {
       // Get error output from stderr
       const errorOutput = pyodide.runPython('_output_capture.get_output()');
       setOutput(`Error: ${error}\n${errorOutput}`);
+
+      // Track execution errors
+      window.posthog?.capture('python_execution_error', {
+        error_message: String(error),
+        code_lines: lineCount
+      });
+      window.posthog?.captureException(error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsRunning(false);
     }
