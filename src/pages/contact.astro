@@ -42,9 +42,8 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 									href="mailto:contact@nandan.fyi"
 									target="_blank"
 									class="p-4 relative flex flex-col items-center justify-center gap-4 duration-700 md:gap-8 md:py-24 md:p-16 flex-1"
-									data-rybbit-event="link.email"
-									data-rybbit-prop-link_type="email"
-									data-rybbit-prop-page="contact"
+									data-contact-type="email"
+									data-contact-value="contact@nandan.fyi"
 								>
 									<span
 										class="absolute w-px h-2/3"
@@ -94,10 +93,8 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 									href="https://github.com/nandan-varma"
 									target="_blank"
 									class="p-4 relative flex flex-col items-center justify-center gap-4 duration-700 md:gap-8 md:py-24 md:p-16 flex-1"
-									data-rybbit-event="link.social"
-									data-rybbit-prop-platform="github"
-									data-rybbit-prop-link_type="profile"
-									data-rybbit-prop-page="contact"
+									data-contact-type="github"
+									data-contact-value="nandan-varma"
 								>
 									<span
 										class="absolute w-px h-2/3"
@@ -144,10 +141,8 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 									href="https://www.linkedin.com/in/nandanvarma/"
 									target="_blank"
 									class="p-4 relative flex flex-col items-center justify-center gap-4 duration-700 md:gap-8 md:py-24 md:p-16 flex-1"
-									data-rybbit-event="link.social"
-									data-rybbit-prop-platform="linkedin"
-									data-rybbit-prop-link_type="profile"
-									data-rybbit-prop-page="contact"
+									data-contact-type="linkedin"
+									data-contact-value="nandanvarma"
 								>
 									<span
 										class="absolute w-px h-2/3"
@@ -201,3 +196,27 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 		</div>
 	</body>
 </html>
+
+<script is:inline>
+  function setupContactTracking() {
+    // Track contact link clicks
+    const contactLinks = document.querySelectorAll('[data-contact-type]');
+    contactLinks.forEach(function(link) {
+      link.removeEventListener('click', handleContactClick);
+      link.addEventListener('click', handleContactClick);
+    });
+  }
+
+  function handleContactClick(event) {
+    var link = event.currentTarget;
+    var contactType = link.getAttribute('data-contact-type');
+    var contactValue = link.getAttribute('data-contact-value');
+    window.posthog?.capture('contact_link_clicked', {
+      contact_type: contactType,
+      contact_value: contactValue
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupContactTracking);
+  document.addEventListener('astro:page-load', setupContactTracking);
+</script>

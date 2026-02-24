@@ -191,3 +191,29 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 		</div>
 	</body>
 </html>
+
+<script is:inline>
+  function setupProjectsTracking() {
+    // Track project card clicks from the listing page
+    var projectLinks = document.querySelectorAll('a[href^="/projects/"]');
+    projectLinks.forEach(function(link) {
+      link.removeEventListener('click', handleProjectCardClick);
+      link.addEventListener('click', handleProjectCardClick);
+    });
+  }
+
+  function handleProjectCardClick(event) {
+    var link = event.currentTarget;
+    var href = link.getAttribute('href');
+    var projectId = href ? href.replace('/projects/', '') : '';
+    var titleEl = link.querySelector('h2');
+    var title = titleEl ? titleEl.textContent?.trim() : projectId;
+    window.posthog?.capture('project_card_clicked', {
+      project_id: projectId,
+      project_title: title
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupProjectsTracking);
+  document.addEventListener('astro:page-load', setupProjectsTracking);
+</script>

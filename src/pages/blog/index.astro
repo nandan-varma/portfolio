@@ -100,3 +100,29 @@ const sorted = blogs.sort((a, b) => {
 		</div>
 	</body>
 </html>
+
+<script is:inline>
+  function setupBlogTracking() {
+    // Track blog post card clicks from the listing page
+    var blogLinks = document.querySelectorAll('a[href^="/blog/"]');
+    blogLinks.forEach(function(link) {
+      link.removeEventListener('click', handleBlogCardClick);
+      link.addEventListener('click', handleBlogCardClick);
+    });
+  }
+
+  function handleBlogCardClick(event) {
+    var link = event.currentTarget;
+    var href = link.getAttribute('href');
+    var postId = href ? href.replace('/blog/', '') : '';
+    var titleEl = link.querySelector('h2');
+    var title = titleEl ? titleEl.textContent?.trim() : postId;
+    window.posthog?.capture('blog_post_card_clicked', {
+      post_id: postId,
+      post_title: title
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupBlogTracking);
+  document.addEventListener('astro:page-load', setupBlogTracking);
+</script>

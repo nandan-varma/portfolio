@@ -38,3 +38,15 @@ const { Content } = await render(post);
 		</ProjectPost>
 	</body>
 </html>
+
+<script is:inline define:vars={{ postId: post.id, postTitle: post.data.title }}>
+  function trackProjectOpened() {
+    window.posthog?.capture('project_opened', {
+      project_id: postId,
+      project_title: postTitle
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', trackProjectOpened);
+  document.addEventListener('astro:page-load', trackProjectOpened);
+</script>
