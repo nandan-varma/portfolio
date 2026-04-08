@@ -9,12 +9,21 @@
     "astro": "astro"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@astrojs/cloudflare": "^13.1.2",
     "@astrojs/mdx": "^5.0.2",
     "@astrojs/react": "^5.0.1",
     "@astrojs/rss": "^4.0.17",
     "@astrojs/sitemap": "^3.7.1",
     "@astrojs/vercel": "^10.0.1",
+=======
+    "@astrojs/cloudflare": "^13.1.8",
+    "@astrojs/mdx": "^5.0.3",
+    "@astrojs/react": "^5.0.3",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/vercel": "^10.0.4",
+>>>>>>> 4c1a19a (deployment fixes)
     "@codemirror/commands": "^6.10.3",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/search": "^6.6.0",
@@ -25,6 +34,7 @@
     "@tailwindcss/vite": "^4.2.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+<<<<<<< HEAD
     "astro": "^6.0.6",
     "astro-og-canvas": "^0.10.1",
     "astro-opengraph-images": "^1.14.3",
@@ -36,6 +46,19 @@
     "pyodide": "^0.29.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+=======
+    "astro": "^6.1.5",
+    "astro-og-canvas": "^0.11.0",
+    "astro-opengraph-images": "^1.14.3",
+    "canvaskit-wasm": "^0.41.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "codemirror": "^6.0.2",
+    "posthog-js": "^1.365.4",
+    "pyodide": "^0.29.3",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+>>>>>>> 4c1a19a (deployment fixes)
     "rrweb": "2.0.0-alpha.4",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0",
