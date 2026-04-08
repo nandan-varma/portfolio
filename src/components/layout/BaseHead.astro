@@ -38,6 +38,9 @@ const { title, description, image = "/og.png" } = Astro.props;
 
 <!-- Font preloads -->
 
+<!-- Preconnect to external origins for performance -->
+<link rel="preconnect" href="https://us.i.posthog.com" crossorigin />
+
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
 
