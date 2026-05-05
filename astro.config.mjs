@@ -4,20 +4,14 @@ import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import vercel from "@astrojs/vercel";
-import react from "@astrojs/react";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://www.nandanvarma.com",
-  integrations: [mdx(), sitemap(), react()],
+  integrations: [mdx(), sitemap()],
 
   vite: {
     plugins: [tailwindcss()],
-    build: {
-      rollupOptions: {
-        external: ["pyodide"],
-      },
-    },
   },
 
   redirects: {
