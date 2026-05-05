@@ -54,7 +54,6 @@ const { class: className = "", enableHoverEffect = true, index = 0 } = Astro.pro
         enableHoverEffect &&
             "hover:bg-zinc-800/15 hover:border-zinc-400/50 hover:backdrop-blur-md",
         "shadow-lg shadow-black/30",
-        "animate-fade-in-up",
         className,
     ]}
     style={`--delay: ${index * 0.1}s`}
@@ -80,56 +79,3 @@ const { class: className = "", enableHoverEffect = true, index = 0 } = Astro.pro
     </div>
 </div>
 
-<style is:global>
-    @keyframes cardAppear {
-        0% {
-            opacity: 0;
-            transform: translateY(60px) rotate(-3deg) scale(0.96);
-        }
-        60% {
-            transform: translateY(-4px) rotate(0.5deg) scale(1.01);
-        }
-        100% {
-            opacity: 1;
-            transform: translateY(0) rotate(0deg) scale(1);
-        }
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes expandWidth {
-        from {
-            transform: scaleX(0);
-        }
-        to {
-            transform: scaleX(1);
-        }
-    }
-
-    .animate-fade-in-up {
-        opacity: 0;
-        animation: cardAppear 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        animation-delay: var(--delay);
-    }
-
-    .animate-fade-in {
-        opacity: 0;
-        animation: fadeIn 0.6s ease-out forwards;
-        animation-delay: var(--delay, 0s);
-    }
-
-    .animate-expand {
-        transform-origin: left;
-        animation: expandWidth 0.8s ease-out forwards;
-        animation-delay: calc(var(--delay, 0s) + 0.1s);
-    }
-</style>

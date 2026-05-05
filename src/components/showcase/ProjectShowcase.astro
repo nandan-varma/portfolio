@@ -30,11 +30,11 @@ const featuredProjects = projects.slice(0, 3);
           </div>
         </div>
         
-        <h3 class="project-title" transition:name={`project-title-${project.id}`}>
+        <h3 class="project-title" transition:name={`project-title-${project.data.title}`}>
           {project.data.title}
         </h3>
         
-        <p class="project-description" transition:name={`project-desc-${project.id}`}>
+        <p class="project-description" transition:name={`project-desc-${project.data.title}`}>
           {project.data.description}
         </p>
         
