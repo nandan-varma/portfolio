@@ -1,25 +1,13 @@
 ---
 import { getCollection } from "astro:content";
 import Navigation from "@/components/layout/Navigation.astro";
-import "../../styles/global.css";
-import GlassCard from "@/components/cards/GlassCard.astro";
-import Blog from "@/components/content/Blog.astro";
 import BaseHead from "@/components/layout/BaseHead.astro";
-import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
+import BlogsGrid from "@/components/BlogsGrid.astro";
 
 const blogs = (await getCollection("blog"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
 	.filter((post) => !post.data.draft)
 	.map((post) => post);
-
-const sorted = blogs.sort((a, b) => {
-	if (a.data.date && b.data.date) {
-		return (
-			new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
-		);
-	}
-	return 0;
-});
 ---
 
 <!doctype html>
@@ -27,102 +15,10 @@ const sorted = blogs.sort((a, b) => {
 	<head>
 		<BaseHead title={"Blog"} description={"Blog"} image="/og/blog.png" />
 	</head>
-	<body class="bg-black">
-		<BackgroundAnimation />
+	<body class="bg-black min-h-screen">
 		<Navigation />
-		<div class="relative pb-16">
-			<div
-				class="px-6 pt-16 mx-auto space-y-8 max-w-7xl lg:px-8 md:space-y-16 md:pt-24 lg:pt-32"
-			>
-				<div class="max-w-2xl lg:mx-0">
-					<h2
-						class="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl"
-						transition:name={"Blog"}
-					>
-						Blog
-					</h2>
-				</div>
-
-				<div
-					class="flex flex-col w-full gap-8 border-t border-gray-900/10 lg:border-t-0"
-				>
-					<div
-						class="grid grid-cols-1 gap-4 lg:mx-0 md:grid-cols-3"
-					>
-						<div class="grid grid-cols-1 gap-4">
-							{
-								sorted
-									.filter((_, i) => i % 3 === 0)
-									.map((blog) => (
-										<GlassCard>
-											<Blog
-												id={blog.id}
-												blog={blog.data}
-												views={0}
-											/>
-										</GlassCard>
-									))
-							}
-						</div>
-						<div class="grid grid-cols-1 gap-4">
-							{
-								sorted
-									.filter((_, i) => i % 3 === 1)
-									.map((blog) => (
-										<GlassCard>
-											<Blog
-												id={blog.id}
-												blog={blog.data}
-												views={0}
-											/>
-										</GlassCard>
-									))
-							}
-						</div>
-						<div class="grid grid-cols-1 gap-4">
-							{
-								sorted
-									.filter((_, i) => i % 3 === 2)
-									.map((blog) => (
-										<GlassCard>
-											<Blog
-												id={blog.id}
-												blog={blog.data}
-												views={0}
-											/>
-										</GlassCard>
-									))
-							}
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+		<main class="relative z-10 px-6 mx-auto max-w-7xl lg:px-8 py-16 md:py-24 lg:py-32">
+			<BlogsGrid blogs={blogs} showAll={true} />
+		</main>
 	</body>
 </html>
-
-<script is:inline>
-  function setupBlogTracking() {
-    // Track blog post card clicks from the listing page
-    var blogLinks = document.querySelectorAll('a[href^="/blog/"]');
-    blogLinks.forEach(function(link) {
-      link.removeEventListener('click', handleBlogCardClick);
-      link.addEventListener('click', handleBlogCardClick);
-    });
-  }
-
-  function handleBlogCardClick(event) {
-    var link = event.currentTarget;
-    var href = link.getAttribute('href');
-    var postId = href ? href.replace('/blog/', '') : '';
-    var titleEl = link.querySelector('h2');
-    var title = titleEl ? titleEl.textContent?.trim() : postId;
-    window.posthog?.capture('blog_post_card_clicked', {
-      post_id: postId,
-      post_title: title
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', setupBlogTracking);
-  document.addEventListener('astro:page-load', setupBlogTracking);
-</script>

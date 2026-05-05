@@ -1,0 +1,77 @@
+---
+export interface Props {
+	spacing?: number;
+	lineColor?: string;
+	fadeRadius?: number;
+}
+
+const { spacing = 60, lineColor = "rgba(255, 255, 255, 0.03)", fadeRadius = 0.5 } = Astro.props;
+---
+
+<canvas
+	id="grid-canvas"
+	class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"
+	data-spacing={spacing}
+	data-line-color={lineColor}
+	data-fade-radius={fadeRadius}
+></canvas>
+
+<script>
+	function initGrid() {
+		const canvas = document.getElementById(
+			"grid-canvas"
+		) as HTMLCanvasElement | null;
+		if (!canvas) return;
+
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return;
+
+		const spacing = parseFloat(canvas.dataset.spacing || "60");
+		const lineColor = canvas.dataset.lineColor || "rgba(255, 255, 255, 0.03)";
+		const fadeRadius = parseFloat(canvas.dataset.fadeRadius || "0.5");
+
+		function resize() {
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			draw();
+		}
+
+		function draw() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			const centerX = canvas.width / 2;
+			const centerY = canvas.height / 2;
+			const maxDist = Math.sqrt(centerX * centerX + centerY * centerY);
+			const fadeDist = maxDist * fadeRadius;
+
+			ctx.strokeStyle = lineColor;
+			ctx.lineWidth = 1;
+
+			for (let x = 0; x <= canvas.width; x += spacing) {
+				for (let y = 0; y <= canvas.height; y += spacing) {
+					const dist = Math.sqrt(
+						Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+					);
+					const alpha = Math.max(0, 1 - dist / fadeDist);
+					if (alpha > 0) {
+						ctx.globalAlpha = alpha * 0.5;
+						ctx.beginPath();
+						ctx.moveTo(x - 1, y);
+						ctx.lineTo(x + 1, y);
+						ctx.moveTo(x, y - 1);
+						ctx.lineTo(x, y + 1);
+						ctx.stroke();
+					}
+				}
+			}
+
+			ctx.globalAlpha = 1;
+		}
+
+		window.addEventListener("resize", resize);
+		resize();
+	}
+
+	initGrid();
+	document.addEventListener("astro:page-load", initGrid);
+</script>

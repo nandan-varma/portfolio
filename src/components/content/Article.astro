@@ -32,12 +32,10 @@ const { id, project, views } = Astro.props;
     </div>
     <h2
     class="z-20 text-xl font-medium duration-1000 lg:text-3xl text-zinc-200 group-hover:text-white font-display"
-    transition:name={`project-title-${project.title}`}
     >
       {project.title}
     </h2>
     <p class="z-20 mt-4 text-sm duration-1000 text-zinc-400 group-hover:text-zinc-200"
-    transition:name={`project-desc-${project.title}`}
     >
       {project.description}
     </p>

@@ -1,0 +1,84 @@
+---
+import GlassCard from "@/components/cards/GlassCard.astro";
+import Blog from "@/components/content/Blog.astro";
+
+interface Props {
+	blogs: any[];
+	showAll?: boolean;
+	showTitle?: boolean;
+}
+
+const { blogs, showAll = false, showTitle = true } = Astro.props;
+
+const sorted = showAll ? blogs : blogs.slice(0, 6);
+const hasMore = !showAll && blogs.length > 6;
+---
+
+{showTitle && (
+	<div class="flex items-center gap-4 mb-8 animate-fade-in" style="--delay: 0.2s;">
+		<h2 class="text-2xl md:text-3xl font-semibold text-zinc-200">
+			Blog
+		</h2>
+		<div class="h-px flex-1 bg-zinc-800 animate-expand"></div>
+	</div>
+)}
+
+	<div class="grid grid-cols-1 gap-4 lg:mx-0 md:grid-cols-3">
+		<div class="grid grid-cols-1 gap-4">
+			{
+				sorted
+					.filter((_, i) => i % 3 === 0)
+					.map((blog, i) => (
+						<GlassCard index={i}>
+							<Blog
+								id={blog.id}
+								blog={blog.data}
+								views={0}
+							/>
+						</GlassCard>
+					))
+			}
+		</div>
+		<div class="grid grid-cols-1 gap-4">
+			{
+				sorted
+					.filter((_, i) => i % 3 === 1)
+					.map((blog, i) => (
+						<GlassCard index={i}>
+							<Blog
+								id={blog.id}
+								blog={blog.data}
+								views={0}
+							/>
+						</GlassCard>
+					))
+			}
+		</div>
+		<div class="grid grid-cols-1 gap-4">
+			{
+				sorted
+					.filter((_, i) => i % 3 === 2)
+					.map((blog, i) => (
+						<GlassCard index={i}>
+							<Blog
+								id={blog.id}
+								blog={blog.data}
+								views={0}
+							/>
+						</GlassCard>
+					))
+			}
+		</div>
+	</div>
+
+	{hasMore && (
+		<div class="mt-12 flex justify-center">
+			<a
+				href="/blog"
+				class="px-8 py-3 rounded-full border border-zinc-700 text-zinc-300 hover:text-zinc-100 hover:border-zinc-500 transition-all duration-300"
+			>
+				Show more →
+			</a>
+		</div>
+	)}
+</section>
