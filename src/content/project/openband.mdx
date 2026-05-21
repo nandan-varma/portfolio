@@ -1,34 +1,36 @@
 ---
 title: OpenBand
-description: OpenBand is a simple tool to use musical instruments to record and replay keys, and it is under active development.
+description: Play instruments in the browser — a piano you can use from your keyboard, with realistic sounds and a recorder to replay what you played.
 date: "2023-01-16"
 url: https://band.nandanvarma.com
 repository: nandan-varma/OpenBand
 published: true
 ---
 
+I wanted to noodle on a piano without needing an app or a MIDI controller. OpenBand runs entirely in the browser — realistic instrument sounds via soundfonts, keyboard mapping, and a recorder so you can play something back after you've figured it out.
 
 ## Features
 
-- GUI to use piano on keyboard
-- Record and replay tunes made from piano
+- Piano playable from your keyboard
+- Realistic instrument sounds via Soundfont Player (General MIDI soundfonts)
+- Record a session and replay it
 
 ## TODO
 
-- Other instruments
-- Ability to export and save tunes
+- Other instruments — guitar, drums, synth
+- Export recorded tunes as audio files
+- Tempo and key controls
 
 ## What I learnt
 
-- Handling audio in multiple platforms
-- Multiple input handling (keyboard)
+- How the Web Audio API works under the hood
+- Managing simultaneous key inputs so chords don't drop notes
+- Loading and streaming soundfont files in the browser
 
 ## Built with
 
 - [Next.js](https://nextjs.org)
+- [React Piano](https://github.com/kevinsqi/react-piano)
+- [Soundfont Player](https://github.com/danigb/soundfont-player)
 - [tailwindcss](https://tailwindcss.com)
 - Deployed on [Vercel](https://vercel.com)
-
-## Docs
-
-Docs in the README are temporary and will be moved to the website soon.

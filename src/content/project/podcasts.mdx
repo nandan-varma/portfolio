@@ -1,32 +1,32 @@
 ---
 title: Podcasts
-description: Podcasts is an app to nuke the moon. JK, it stores and plays podcasts
+description: A podcast app built at a hackathon with friends, then evolved into a full-stack application with uploads, streaming, and user accounts.
 date: "2022-09-24"
 repository: TheBrosProj/podcasts
 url: https://pod.nandanvarma.com
 published: true
-  
 ---
 
-Podcasts is developed with my friends for hackathon but later updated to be full stack application.
+This started as a hackathon project with two of my friends. We had a weekend to build something, decided on a podcast player, and split the work across frontend, backend, and database. After the hackathon we kept going — adding proper authentication, a playback system, and the ability to upload and store audio.
 
 ## Features
 
-- Store audio in database
-- Play and download audio files
-- Player controls for online playing
-- Login system for favorites
+- Upload and store podcast audio in the database
+- Stream or download episodes directly
+- Player controls with progress tracking
+- Favourites with login system
 
-## What I learned
+## What I learnt
 
-- React Contexts
-- MongoDB
-- Communication and Work allotment
+- React Context for shared state (audio player that persists across page navigation)
+- MongoDB for storing audio metadata
+- Coordinating work across a team — who owns what, how to merge without stepping on each other
+- How to scope a project for a tight deadline and know what to cut
 
 ## Built with
 
 - [Next.js](https://nextjs.org)
-- [chakra-ui](https://chakra-ui.com)
+- [Chakra UI](https://chakra-ui.com)
+- [MongoDB](https://www.mongodb.com) — audio metadata and user data
+- [Firebase](https://firebase.google.com) — authentication
 - Deployed on [Vercel](https://vercel.com)
-- Database on [mongodb](https://www.mongodb.com)
-- Authentication using [Firebase](https://firebase.google.com)

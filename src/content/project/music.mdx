@@ -1,35 +1,42 @@
 ---
 title: Music
-description: Music application
+description: A music streaming app that scrapes JioSaavn — search songs and albums, build playlists, and download for offline listening.
 date: "2023-06-14"
 repository: nandan-varma/songs
 url: https://songs.nandanvarma.com
 published: true
-  
 ---
 
-An application to play and download music.
+I wanted a clean music app with no ads, no subscription walls, and the ability to actually download songs. JioSaavn doesn't use DRM on its audio files, which made it the right target. So I built the full stack — scraping layer, API middleware, and a proper web client on top.
 
 ## Features
 
-- Scrapes music from JioSaavn (thanks to it not using DRM)
-- Can search songs and albums
-- Ability to add to playlist
-- Download songs in 150kbps (High Quality)
+- Search songs, albums, and playlists
+- Stream directly in the browser
+- Download tracks for offline use, cached in IndexedDB
+- Playlist management with drag-and-drop reordering
+- Login to save your library across devices
+- Server-side data fetching with TanStack Query
 
 ## TODO
 
-- Export and save playlist
-- Recommendation system
+- Export and import playlists
+- Recommendation system based on listening history
 
 ## What I learnt
 
-- Application -> Middleware -> Server ( Architecture )
-- Scraping
+- The application → middleware → data source architecture pattern
+- Offline storage with IndexedDB
+- State management with Zustand across a music player
+- How to layer server state (TanStack Query) and client state (Zustand) without them fighting each other
 
 ## Built with
 
 - [Next.js](https://nextjs.org)
+- [Drizzle ORM](https://orm.drizzle.team/) + [Neon](https://neon.tech/) — PostgreSQL
+- [Better Auth](https://www.better-auth.com/) — authentication
+- [Zustand](https://zustand-demo.pmnd.rs/) — client state
+- [TanStack Query](https://tanstack.com/query) — server state
 - [tailwindcss](https://tailwindcss.com)
 - Deployed on [Vercel](https://vercel.com)
-- Some JioSaavn APIs that shall not be discussed 🤫
+- JioSaavn API that shall not be discussed 🤫

@@ -1,0 +1,38 @@
+---
+title: Peek
+description: A macOS app that pins any website as a floating widget on your desktop — rendered in mobile layout at iPhone dimensions, always on top.
+date: "2026-04-23"
+repository: nandan-varma/peek
+published: true
+---
+
+I keep a few websites open constantly — a dashboard, a chat, a quick reference. Having them buried in a browser tab means constantly switching context. I wanted them pinned to my desktop like sticky notes, always visible, without taking up a full window.
+
+Peek lets you add any URL as a floating widget. It loads the site using an iPhone user agent at iPhone dimensions (393×780 by default), so you get the mobile layout — which looks much better at that size than the desktop version would.
+
+## Features
+
+- Add any URL as a persistent desktop widget
+- Renders sites in mobile layout using an iPhone 18 user agent — clean and readable at phone proportions
+- Always-on-top mode so the widget floats above other windows
+- Pin widgets so they stay on the desktop between sessions
+- Configurable position and size per widget (320×600 min, 460×900 max)
+- Auto-refresh on a configurable interval — useful for dashboards or live data
+- Launch at login
+- All widget state persisted locally in SQLite
+- Back/forward navigation gestures on the web view
+
+## What I learnt
+
+- Building a macOS app with AppKit and WKWebView
+- Managing multiple floating `NSWindow` instances with independent state
+- Why spoofing a mobile user agent is the right call for phone-sized web views — desktop layouts at 393px wide are a mess
+- Local persistence with SQLite.swift without pulling in CoreData
+- Debouncing resize and scroll events so position writes don't hammer the database
+
+## Built with
+
+- Swift 5.9
+- AppKit + WKWebKit
+- [SQLite.swift](https://github.com/stephencelis/SQLite.swift) — local persistence
+- macOS 13 Ventura+

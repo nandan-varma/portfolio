@@ -1,37 +1,34 @@
 ---
 title: Productivity
-description: Productivity application for gathering thoughts.
+description: A workspace for focused work — Pomodoro timer, notes, and a todo list, all in one place with a clean UI.
 date: "2023-08-24"
 repository: TheBrosProj/notes
 url: https://prod.nandanvarma.com
 published: true
-  
 ---
 
-An application to gather and organize thoughts
+I kept switching between a Pomodoro timer in one tab, notes in another, and a todo list somewhere else. I wanted them all in one place with a UI that didn't get in the way — so I built it.
 
 ## Features
 
-- Pomodoro Timer
-- TODO list
-- Notes
-- Slick UI
+- Pomodoro timer with configurable work/break intervals
+- Todo list
+- Notes editor
+- Persistent across sessions via PostgreSQL
 
 ## TODO
-- Implement AI tools to common note taking scenarios like summarization and referencing
+
+- AI tools for note-taking — summarisation, cross-referencing, smart search
 
 ## What I learnt
 
-- UI design
-- Multi Platform support
-- API design
-- SQL Database with upgradability in mind
-
+- Designing a UI that surfaces multiple tools without feeling cluttered
+- Building a database schema with migrations in mind — not just for today's features
+- API design for a multi-feature app where each feature could evolve independently
 
 ## Built with
 
 - [Next.js](https://nextjs.org)
-- [chakra-ui](https://chakra-ui.com)
+- [Chakra UI](https://chakra-ui.com)
+- PostgreSQL on [Neon](https://neon.tech/)
 - Deployed on [Vercel](https://vercel.com)
-- PostgreSQL
-- Deployed on [neon.tech](https://neon.tech/)

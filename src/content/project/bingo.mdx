@@ -1,30 +1,32 @@
 ---
 title: Bingo
-description: Bingo is a webpage developed to play Bingo online with multiplayer using a shareable link
+description: Play Bingo online with friends over a shareable link — no accounts, no server, just peer-to-peer WebRTC.
 date: "2021-10-15"
 repository: nandan-varma/bingo
 url: https://bingo.nandanvarma.com
 published: true
-  
 ---
 
-## Bingo implements the following features
+I wanted to play Bingo with friends remotely. The interesting constraint I set myself: no backend server for the game state — everything should sync peer-to-peer. So I used WebRTC for the multiplayer and hashing to let players keep the same board across sessions.
 
-- Hashable board (so you can choose your favorite board every time).
-- Multiplayer using peer to peer connection with WebRTC.
+## Features
+
+- Shareable link gets everyone into the same game instantly
+- Hashable boards — the hash encodes your board layout, so you can bookmark your favourite and use it every time
+- Peer-to-peer multiplayer via WebRTC, no game server needed
 
 ## TODO
 
-- Use Firebase for matching players
+- Firebase matchmaking for finding games without manually sharing a link
 
 ## What I learnt
 
-- Hashing
-- Caching
-- Peer-to-peer connections
+- How WebRTC peer connections work — signalling, ICE candidates, data channels
+- URL hashing to encode and reconstruct state
+- Caching strategies for static game assets
 
-P.S. I was not that good at web development when I did this.
-+
+P.S. This was one of my earlier web projects and it shows, but the WebRTC plumbing works.
+
 ## Built with
 
 - [Next.js](https://nextjs.org)

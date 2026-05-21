@@ -1,24 +1,28 @@
 ---
-title: handwriting
-description: Simple GUI web app to generate handwritten PDFs (for those who forget about assignments)
+title: Handwriting
+description: A web app that generates PDFs that look handwritten — for those times you forgot to do an assignment by hand.
 date: "2023-06-16"
 repository: nandan-varma/handwriting
 url: https://writing.nandanvarma.com
 published: true
-  
 ---
-# Handwriting Generation
 
-Generates uniquely styled PDFs with a minimal UI
+Assignments at college sometimes had to be handwritten. I kept forgetting. So I built a tool that takes typed text and generates a PDF that looks handwritten — with configurable fonts, spacing, and margins. The PDFs are properly structured too, not just image screenshots, so you can still select and copy the text.
 
-- PDFs generated the right way (you can even mark/copy text after generation)
+## Features
+
+- Converts typed text to a handwritten-style PDF
+- Properly structured PDFs via pdf-lib — text is selectable and copyable
+- Configurable margin, font size, and line spacing
 - Minimal UI
-- Configurable with margin, font size, and spacing
 
-A better version is made with TensorFlow V2 and Flask using RNN, but I can't deploy Docker/Flask with models for free and I am broke right now.
+## The better version that doesn't exist yet
+
+I built a second version using TensorFlow and a recurrent neural network (Flask + Docker) that generates much more realistic handwriting by learning stroke patterns. It works locally but I can't deploy Docker/Flask with ML models for free — so the live site still runs the simpler version.
 
 ## Built with
 
 - [Next.js](https://nextjs.org)
+- [pdf-lib](https://pdf-lib.js.org/) — PDF generation
 - [tailwindcss](https://tailwindcss.com)
 - Deployed on [Vercel](https://vercel.com)

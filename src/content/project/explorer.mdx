@@ -1,29 +1,30 @@
 ---
 title: File Explorer
-description: File explorer with quality of life improvements.
+description: A Windows file explorer replacement with a tree view and an integrated terminal — built to fix the things that annoyed me about Windows Explorer.
 date: "2022-07-12"
 repository: nandan-varma/FileExplorer
 published: true
-  
 ---
 
-File Explorer is designed to overcome some of my inconveniences with Windows Explorer, with features like
+Windows Explorer always bothered me. No tree view for navigating deep folder structures, and opening a terminal in the current directory required too many steps. I built a replacement that fixed both.
+
+This was my first real C# and .NET project — I had just learned the basics and wanted something I'd actually use as the output.
 
 ## Features
 
-- show file tree instead of folder system
-- termial in current directory
-- terminal in the current directory
-
-P.S I am not good at C# or .Net when i did this.
+- Tree view that shows the full folder hierarchy at a glance
+- Integrated terminal that opens in the current directory
+- Standard file operations
 
 ## What I learnt
 
-- Filesystem calls
-- UI/UX 
+- Filesystem APIs in .NET
+- Building desktop UIs with WPF and XAML
+- How Windows handles file system events and directory traversal
 
+P.S. I was learning C# as I built this, so the code is rough — but it works.
 
 ## Built with
 
 - C# .NET
-- XAML
+- WPF / XAML

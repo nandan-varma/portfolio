@@ -1,38 +1,44 @@
 ---
 title: Friday
-description: giving your calendar to an AI (currently in alpha) 
+description: An AI that manages your calendar — add events in plain English, ask complicated scheduling questions, and let it figure out the details.
 date: "2024-07-07"
 repository: nandan-varma/friday
 emoji: 📅
 url: https://friday.nandanvarma.com
 published: true
-  
 ---
 
-An AI to handle your Calendar for you. ( In alpha )
+Calendar apps make you do all the work. You still have to figure out when you're free, type the right fields, and remember to add things. I wanted something where I could just say "block two hours Thursday afternoon for deep work" and have it done — so I built Friday.
 
 ## Features
 
-- Uses AI to add events
-- Show your calendar
-- Can use complicated queries and understand time schedules
-- Voice recognition to chat with AI
+- Add events in plain English — the AI parses intent, resolves times, and creates the event
+- Two-way Google Calendar sync — your existing events show up, new ones created by Friday sync back
+- Handles complicated queries like "find me a free slot next week that doesn't conflict with my meetings"
+- Voice input to chat with the AI hands-free
+- Dashboard with calendar analytics
+- Passkey authentication (no passwords)
 
 ## TODO
-- Edit events
-- link to existing Calendar APIs (eg. google calendar)
-- Text to Voice
+
+- Edit and delete events through the AI
+- Text-to-speech responses
+- Better multi-calendar support
 
 ## What I learnt
 
-- AI
-- Integrations for complex APIs (openai and google calendar)
-- User Experience (UX)
+- How to build an AI agent that calls external APIs (OpenAI tool use + Google Calendar)
+- OAuth flow for Google Calendar — more involved than it looks
+- Passkey / WebAuthn authentication
+- Designing for ambiguity — natural language input breaks in ways typed forms don't
 
 ## Built with
 
 - [Next.js](https://nextjs.org)
-- [shadcn-ui](https://ui.shadcn.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [OpenAI SDK](https://platform.openai.com/) — AI scheduling agent
+- [Google Calendar API](https://developers.google.com/calendar)
+- [Better Auth](https://www.better-auth.com/) — Passkey authentication
+- [Drizzle ORM](https://orm.drizzle.team/) + [Neon](https://neon.tech/) — PostgreSQL
+- [Recharts](https://recharts.org/) — analytics dashboard
 - Deployed on [Vercel](https://vercel.com)
-- [OpenAI](https://platform.openai.com/) for AI agent
-- [Google Calendar](https://calendar.google.com/) for integration (in works)

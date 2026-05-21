@@ -1,27 +1,36 @@
 ---
 title: Chain Reaction
-description: A game I played as a child
+description: A strategy game I played obsessively as a kid, rebuilt on the web with 3D rendering and multiplayer.
 date: "2023-09-24"
 repository: nandan-varma/chain
 url: https://chain.nandanvarma.com
 published: true
-  
 ---
-# Chain Reaction
 
-A game with tactics and numbers.
-I used to play this, but it became outdated and less responsive due to poor maintenance from its Android developer.
-So, I recreated it on the web for cross-platform compatibility.
+Chain Reaction is a turn-based strategy game where you place orbs in cells and trigger chain explosions across the board. I played it constantly on Android as a kid, but the app got abandoned — slow, outdated, never updated. So I rebuilt it myself, this time in 3D.
 
-- Minimal UI with dark mode too
-- 3 players too
+## Features
+
+- 3D rendered board using Three.js and React Three Fiber
+- Up to 3 players
+- Dark mode
+- Real-time state via Firebase
 
 ## TODO
-- Online multiplayer
-- Configurable with margin, font size, spacings
+
+- Online multiplayer (play with friends over the internet, not just locally)
+- Configurable board size, margin, and font size
+
+## What I learnt
+
+- 3D scene management with React Three Fiber
+- How to translate a 2D game mechanic into 3D space
+- Game state management across turns
 
 ## Built with
 
 - [Next.js](https://nextjs.org)
+- [Three.js](https://threejs.org) + [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
+- [Firebase](https://firebase.google.com)
 - [tailwindcss](https://tailwindcss.com)
 - Deployed on [Vercel](https://vercel.com)

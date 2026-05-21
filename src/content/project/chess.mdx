@@ -1,36 +1,37 @@
 ---
 title: Chess Online
-description: Chess Online is a web interface I created to test and develop my own Chess Engine.
+description: A web chess interface with real-time multiplayer, AI opponent, and drag-and-drop board — built to test and play chess in the browser.
 date: "2022-08-20"
 repository: nandan-varma/chess-online
 url: https://chess.nandanvarma.com
 published: true
-  
 ---
 
-Chess Online is developed to play chess online with the flexibility to upload and upgrade my own chess engine, which is in active development.
+I wanted a place to play chess online without ads, trackers, or accounts — and I wanted to be able to drop in my own chess AI. So I built the board and the platform myself.
 
 ## Features
 
-- Play with friends
-- Play with AI
-- Play on board
+- Play against a friend in real time — game state syncs instantly via Firebase Realtime Database
+- Play against an AI opponent (js-chess-engine under the hood)
+- Drag-and-drop piece movement
+- Board-only mode for casual play or analysis
 
 ## TODO
 
-- User-specific metrics (under development)
-- Login system for future use.
+- User-specific win/loss metrics
+- Login system for saving game history
+- Swap in a stronger engine
 
 ## What I learnt
 
-- Integrating AI to web applications
-- Real-time updates with the database
-
+- How Firebase Realtime Database handles live sync between two clients
+- Drag-and-drop event handling for a game board
+- How chess move validation works at the library level vs rolling it yourself
 
 ## Built with
 
-- [Next.js](https://nextjs.org)
+- [TanStack Start](https://tanstack.com/start)
+- [React DnD](https://react-dnd.github.io/react-dnd/)
+- [Firebase](https://firebase.google.com) — Realtime Database and Auth
 - [tailwindcss](https://tailwindcss.com)
 - Deployed on [Vercel](https://vercel.com)
-
-To learn more about my Chess Engine [Meadows](/projects/meadows).

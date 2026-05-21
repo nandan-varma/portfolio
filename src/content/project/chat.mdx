@@ -1,37 +1,35 @@
 ---
 title: Chats
-description: Realtime chat with encryption (currently in alpha) 
+description: A real-time chat app with rooms — built as a challenge to understand encryption and live database sync.
 date: "2024-02-14"
 repository: nandan-varma/chat
 url: https://chat.nandanvarma.com
 published: true
-  
 ---
 
-A real time chat application and challenge for me to learn encryption
+I built this to really understand two things: how real-time database updates propagate across clients, and how end-to-end encryption works in a chat context. The first part is done. Encryption is still in progress.
 
 ## Features
 
-- Realtime Update
-- Nice UI
+- Real-time message sync across clients
 - Chat rooms
+- Clean UI with shadcn/ui
 
 ## TODO
-- Implement encryption
-- Transfer from Firebase to SQL
+
+- End-to-end encryption (the original reason I started this)
+- Migrate remaining state from Firebase to PostgreSQL
 
 ## What I learnt
 
-- Realtime DB updates
-- Encryption
-- DB migrations
-- SQL ORMs
-
+- How to keep UI in sync with live database changes
+- Database migrations with Drizzle ORM
+- The difference between symmetric and asymmetric encryption and why E2E chat is harder than it sounds
 
 ## Built with
 
 - [Next.js](https://nextjs.org)
-- [shadcn-ui](https://ui.shadcn.com/)
-- Deployed on [Vercel](https://vercel.com)
+- [shadcn/ui](https://ui.shadcn.com/)
 - [Drizzle ORM](https://orm.drizzle.team/)
-- PostgreSQL deployed on [Turso](https://turso.tech/)
+- PostgreSQL on [Turso](https://turso.tech/)
+- Deployed on [Vercel](https://vercel.com)
