@@ -1,20 +1,18 @@
 ---
 title: Meadows Compiler
-description: A compiled programming language I built from scratch — custom syntax, recursive-descent parser, and LLVM IR codegen all the way to native executables.
+description: A compiled programming language I built from scratch - custom syntax, recursive-descent parser, and LLVM IR codegen all the way to native executables.
 date: "2025-08-22"
 repository: nandan-varma/meadows
 published: true
 ---
 
-I wanted to understand how programming languages actually work — not just "a compiler turns code into machine code" but every single step: how raw text becomes tokens, how tokens become a tree, and how that tree becomes something a CPU can run. So I built one.
+I wanted to understand how programming languages actually work - not just "a compiler turns code into machine code" but every single step: how raw text becomes tokens, how tokens become a tree, and how that tree becomes something a CPU can run. So I built one.
 
-Meadows is a compiled language with a C-style syntax. You write `.ms` files, run the compiler, and get a native binary. No interpreter, no VM — real machine code via LLVM IR.
+Meadows is a compiled language with a C-style syntax. You write `.ms` files, run the compiler, and get a native binary. No interpreter, no VM - real machine code via LLVM IR.
 
 ## The pipeline
 
-```
 Source (.ms)  →  Lexer  →  Parser  →  AST  →  CodeGen  →  LLVM IR  →  clang++  →  Binary
-```
 
 Each stage is its own module. The lexer tokenises raw source with line/column tracking for error messages. The parser is a hand-written recursive descent parser with 11 levels of operator precedence. The AST covers 11 statement types and 11 expression types. The codegen walks the AST and emits LLVM IR, which clang++ then compiles to a native executable.
 
@@ -33,7 +31,7 @@ let result = factorial(5);
 print result;
 ```
 
-Variables, functions, conditionals, loops, arrays, objects, string escapes — the full set of things you reach for without thinking when you write in any language. Implementing every one of them yourself changes how you see the languages you use every day.
+Variables, functions, conditionals, loops, arrays, objects, string escapes - the full set of things you reach for without thinking when you write in any language. Implementing every one of them yourself changes how you see the languages you use every day.
 
 ## LSP support
 
@@ -41,7 +39,7 @@ The compiler also ships an LSP server so editors can provide completions and dia
 
 ## Trying to run in the browser
 
-I spent a while attempting to compile Meadows to WebAssembly with Emscripten so it could run entirely in the browser. LLVM dependencies do not play nicely with Emscripten, so I made the native LLVM codegen conditional and built a separate WebAssembly code path. It partially works — the parser and AST run fine; the native backend is skipped when building for the web. Getting the full pipeline to run in a browser tab is still on the TODO list.
+I spent a while attempting to compile Meadows to WebAssembly with Emscripten so it could run entirely in the browser. LLVM dependencies do not play nicely with Emscripten, so I made the native LLVM codegen conditional and built a separate WebAssembly code path. It partially works - the parser and AST run fine; the native backend is skipped when building for the web. Getting the full pipeline to run in a browser tab is still on the TODO list.
 
 ## What I learnt
 
@@ -61,8 +59,8 @@ I spent a while attempting to compile Meadows to WebAssembly with Emscripten so 
 
 ## Built with
 
-- C++17 — compiler implementation
-- [LLVM](https://llvm.org) 17 — IR generation and native codegen
-- CMake — build system
-- [Catch2](https://github.com/catchorg/Catch2) — unit, integration, and security tests
-- Emscripten — WebAssembly build (partial)
+- C++17 - compiler implementation
+- [LLVM](https://llvm.org) 17 - IR generation and native codegen
+- CMake - build system
+- [Catch2](https://github.com/catchorg/Catch2) - unit, integration, and security tests
+- Emscripten - WebAssembly build (partial)

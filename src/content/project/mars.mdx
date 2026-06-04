@@ -1,12 +1,12 @@
 ---
 title: MarsOS
-description: A desktop operating system I built from scratch — UEFI boot, cooperative multitasking kernel, a real windowed GUI, and an event-driven application framework, all in freestanding C.
+description: A desktop operating system I built from scratch - UEFI boot, cooperative multitasking kernel, a real windowed GUI, and an event-driven application framework, all in freestanding C.
 date: "2026-02-20"
 repository: nandan-varma/mars
 published: true
 ---
 
-I wanted to understand what an operating system actually is below the abstraction layers. Not Linux internals, not a POSIX wrapper — actually building one. MarsOS boots from UEFI on x86_64, brings up its own kernel, renders a windowed desktop to the framebuffer, and runs a set of built-in applications. No libc. No third-party OS libraries. Just freestanding C and UEFI firmware protocols.
+I wanted to understand what an operating system actually is below the abstraction layers. Not Linux internals, not a POSIX wrapper - actually building one. MarsOS boots from UEFI on x86_64, brings up its own kernel, renders a windowed desktop to the framebuffer, and runs a set of built-in applications. No libc. No third-party OS libraries. Just freestanding C and UEFI firmware protocols.
 
 It runs in QEMU today. Real hardware is the goal.
 
@@ -18,13 +18,13 @@ After that the scheduler loop runs forever. No OS call ever returns to firmware.
 
 ## The kernel
 
-The scheduler is cooperative round-robin — tasks yield by returning from their step function. There's an optional timer-preemptive mode but the main model is cooperative, which keeps the design simple and eliminates a whole class of concurrency bugs at this stage. Each process gets a capability bitmask (input, graphics, storage, system) that controls what it can access.
+The scheduler is cooperative round-robin - tasks yield by returning from their step function. There's an optional timer-preemptive mode but the main model is cooperative, which keeps the design simple and eliminates a whole class of concurrency bugs at this stage. Each process gets a capability bitmask (input, graphics, storage, system) that controls what it can access.
 
 Memory is managed with a heap for small allocations and a page allocator for large ones. There's also a virtual memory subsystem and a simple FAT VFS for disk access.
 
 ## The GUI
 
-The window manager renders directly to the UEFI GOP framebuffer in software — no GPU. It supports overlapping windows with z-ordering, a taskbar, a start menu, focus management, keyboard and mouse routing, and a resize handle on every window. Text is rendered with an 8x16 monospace bitmap font.
+The window manager renders directly to the UEFI GOP framebuffer in software - no GPU. It supports overlapping windows with z-ordering, a taskbar, a start menu, focus management, keyboard and mouse routing, and a resize handle on every window. Text is rendered with an 8x16 monospace bitmap font.
 
 Apps don't touch the framebuffer directly. Instead each app maintains a UTF-16 text content buffer and calls `wm_set_window_content()`. The WM renders it. This keeps apps simple and the rendering logic centralised.
 
@@ -36,12 +36,12 @@ Everything in the OS communicates through an event bus. There are four broadcast
 
 Apps are kernel tasks with a manifest that declares an ID, title, initial window geometry, and capability flags. The task step function processes up to 12 events per cycle, updates the content buffer, and returns. Built-in apps:
 
-- **Shell** — command interpreter
-- **Terminal** — text terminal
-- **File Browser** — VFS navigation
-- **Settings** — system configuration
-- **Task Manager** — live scheduler view
-- **System Logs** — kernel log stream
+- **Shell** - command interpreter
+- **Terminal** - text terminal
+- **File Browser** - VFS navigation
+- **Settings** - system configuration
+- **Task Manager** - live scheduler view
+- **System Logs** - kernel log stream
 
 More are in progress: text editor, calculator, paint, audio player, system info, network tools.
 
@@ -56,10 +56,10 @@ Because you can't unit test a kernel running inside QEMU very easily, I built a 
 ## What I learnt
 
 - How UEFI boot works and how to use Boot Services protocols (GOP, SimpleInput, Pointer)
-- Software framebuffer rendering — drawing pixels, rects, and bitmap glyphs by hand
-- Cooperative multitasking — designing around the constraint that tasks must never block
+- Software framebuffer rendering - drawing pixels, rects, and bitmap glyphs by hand
+- Cooperative multitasking - designing around the constraint that tasks must never block
 - Event-driven kernel architecture and bounded queue design with backpressure
-- What freestanding C actually means: no malloc, no printf, no string.h — you implement what you need
+- What freestanding C actually means: no malloc, no printf, no string.h - you implement what you need
 - How a window manager routes input to the right consumer
 - Why memory safety is hard without an MMU and how to mitigate it with bounds checks and fixed-size structures
 - How to write a test harness for kernel code that runs on the host
@@ -75,8 +75,8 @@ Because you can't unit test a kernel running inside QEMU very easily, I built a 
 
 ## Built with
 
-- C (freestanding, `-ffreestanding -fno-stack-protector -mno-red-zone`) — everything
-- UEFI / OVMF — firmware interface and boot
-- QEMU — emulation target
-- Docker — hermetic build environment matching CI byte-for-byte
-- Make — build system with automatic toolchain detection (x86_64-elf-gcc, clang, MinGW)
+- C (freestanding, `-ffreestanding -fno-stack-protector -mno-red-zone`) - everything
+- UEFI / OVMF - firmware interface and boot
+- QEMU - emulation target
+- Docker - hermetic build environment matching CI byte-for-byte
+- Make - build system with automatic toolchain detection (x86_64-elf-gcc, clang, MinGW)

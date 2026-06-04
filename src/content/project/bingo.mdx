@@ -1,18 +1,18 @@
 ---
 title: Bingo
-description: Play Bingo online with friends over a shareable link — no accounts, no server, just peer-to-peer WebRTC.
+description: Play Bingo online with friends over a shareable link - no accounts, no server, just peer-to-peer WebRTC.
 date: "2021-10-15"
 repository: nandan-varma/bingo
 url: https://bingo.nandanvarma.com
 published: true
 ---
 
-I wanted to play Bingo with friends remotely. The interesting constraint I set myself: no backend server for the game state — everything should sync peer-to-peer. So I used WebRTC for the multiplayer and hashing to let players keep the same board across sessions.
+I wanted to play Bingo with friends remotely. The interesting constraint I set myself: no backend server for the game state - everything should sync peer-to-peer. So I used WebRTC for the multiplayer and hashing to let players keep the same board across sessions.
 
 ## Features
 
 - Shareable link gets everyone into the same game instantly
-- Hashable boards — the hash encodes your board layout, so you can bookmark your favourite and use it every time
+- Hashable boards - the hash encodes your board layout, so you can bookmark your favourite and use it every time
 - Peer-to-peer multiplayer via WebRTC, no game server needed
 
 ## TODO
@@ -21,7 +21,7 @@ I wanted to play Bingo with friends remotely. The interesting constraint I set m
 
 ## What I learnt
 
-- How WebRTC peer connections work — signalling, ICE candidates, data channels
+- How WebRTC peer connections work - signalling, ICE candidates, data channels
 - URL hashing to encode and reconstruct state
 - Caching strategies for static game assets
 

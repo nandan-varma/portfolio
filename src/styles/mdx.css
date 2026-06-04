@@ -178,6 +178,7 @@ pre {
     background-color: #1f2937;
     /* equivalent to bg-zinc-900 */
     padding: 1rem;
+    color: #ffffff;
 }
 
 code {
@@ -194,4 +195,10 @@ code {
     /* equivalent to text-sm */
     color: #4b5563;
     /* equivalent to text-zinc-600 */
+}
+
+/* Make code inside code blocks (pre) white and remove inline bg */
+pre code {
+    color: #ffffff;
+    background-color: transparent;
 }

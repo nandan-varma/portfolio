@@ -18,7 +18,7 @@ export default defineConfig({
     "/cv":
       "https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlwdChqLZue7hJ43mSDHQtXwVdx90vZ8kIKgM5",
     "/resume":
-      "https://qujr12qsco.ufs.sh/f/fthLDAMTNUTl5rrcbpwWRhT2tVkEcKydfjnYDi6NpovL79sZ",
+      "https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlHFObg98QqStVc8EiyAdw4gOmXWaCBTb59jvf",
   },
 
   adapter: vercel(),
