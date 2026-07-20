@@ -5,7 +5,7 @@ interface Props {
 
 // date is in format "2021-10-15"
 const { date } = Astro.props;
-const formattedDate = new Date(date);
+const formattedDate = new Date(date + "T12:00:00");
 
 ---
 

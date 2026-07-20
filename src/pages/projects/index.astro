@@ -115,7 +115,7 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 												<time
 													datetime={new Date(
 														featured?.data.date,
-													).toISOString()}
+													+ "T12:00:00").toISOString()}
 												>
 													{Intl.DateTimeFormat(
 														undefined,
@@ -124,7 +124,7 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 														},
 													).format(
 														new Date(
-															featured?.data.date,
+															featured?.data.date + "T12:00:00",
 														),
 													)}
 												</time>

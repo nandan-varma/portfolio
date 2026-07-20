@@ -1,7 +1,7 @@
 ---
-title: What building a git host taught me about debugging
-description: A stat about GitHub's uptime sent me down a months-long rabbit hole of edge functions, S3, and one very slow file tree
-date: "2026-07-18"
+title: I built a git host to see if I can
+description: Needed to publish a couple of npm packages in the process, but turns out I can.
+date: "2026-07-20"
 draft: true
 tags: ["development", "git", "performance", "serverless"]
 ---
@@ -48,7 +48,7 @@ A few days of fixing those one by one got me to a page that loaded end to end �
 
 I let that sit for a while, mostly because "working but slow" is an easy trap to stay in. Later, just curious where all that time was actually going, I started timing things properly — every server function, every call out to R2 — instead of guessing.
 
-The first number I found was almost funny: adding basic caching around "does this directory exist, does this ref exist" dropped a warm blob read from 2.2 seconds to 45 milliseconds. Great, I thought, that's most of it. Except a single-file commit was still taking 3.2 to 4.5 seconds, and digging into why turned up something dumber than I expected — one of my storage keys had a double slash in it that could never match anything real:
+The first number I found was almost funny: adding basic caching around "does this directory exist, does this ref exist" dropped a warm blob read from 2.2 seconds to 45 milliseconds. Great, I thought, that's most of it. Except a single-file commit was still taking 3.2 to 4.5 seconds, and digging into why turned up something dumber than I expected — one of my storage keys I had added a double slash in it that could never match anything real:
 
 ```diff
 - repos/alice/blog//git/objects/e6/9de29bb2d1d6434b8b29ae775ad8c2e48c5391
@@ -57,32 +57,32 @@ The first number I found was almost funny: adding basic caching around "does thi
 
 That extra slash meant the *root* of the git directory — the thing isomorphic-git restats before nearly every read and write — never matched a single cache key. It had been silently exempt from all the new caching since the day I added it. One character, months of misses.
 
-Fixing that, along with four other bugs in the same family, brought that commit down to 1.8–2.2 seconds and nearly halved branch listing.
+Fixing that, along with four other bugs in the same family, brought that commit down to 1.8-2.2 seconds and nearly halved branch listing.
 
 Next was the commit history walk behind the file tree. It was eating 36 of the 39 seconds a cold page load took, and once I actually looked, the reason was almost embarrassing: it was fetching one commit's data at a time, waiting for each to finish before starting the next, even though most of that work didn't depend on the step before it.
 
-Then I found the one that actually made me wince. Every push was supposed to clean up old, now-redundant pack files in R2, but the cleanup step had a safety check that, once a repo's history had any overlap between packs — which happens almost immediately — refused to ever run again. Every repo I'd been testing with had been quietly getting slower, forever, with no fix in sight until someone happened to notice.
+Then I found the one that actually made me chuckle. Every push was supposed to clean up old, now-redundant pack files in R2, but the cleanup step had a safety check that, once a repo's history had any overlap between packs — which happens almost immediately — refused to ever run again. Every repo I'd been testing with had been quietly getting slower, forever, with no fix in sight until someone happened to notice.
 
-Fixing that took an incremental push from 3.4–3.8 seconds down to 1.5–1.8. Last was something smaller: isomorphic-git firing off several concurrent lookups for the same thing on a cold cache, so four callers asking the same question at once turned into four real round trips instead of one. None of these were exotic — they were just bugs, and I only found them once I stopped guessing and started measuring. Here's the whole chase, side by side:
+Fixing that took an incremental push from 3.4-3.8 seconds down to 1.5-1.8. Last was something smaller: isomorphic-git firing off several concurrent lookups for the same thing on a cold cache, so four callers asking the same question at once turned into four real round trips instead of one. None of these were exotic — they were just bugs, and I only found them once I started measuring. Here's the whole chase, side by side:
 
 | What | Before | After |
 | --- | --- | --- |
 | Warm blob read | 2.2s | 45ms |
-| Single-file commit | 3.2–4.5s | 1.8–2.2s |
-| Incremental push | 3.4–3.8s | 1.5–1.8s |
+| Single-file commit | 3.2-4.5s | 1.8-2.2s |
+| Incremental push | 3.4-3.8s | 1.5-1.8s |
 | Cold page load | 39s | ~3s |
 
 ## Then I got curious about the compute bill
 
-Even after the R2 side got fast, I noticed the Vercel dashboard still showed more CPU time than seemed reasonable for a project nobody but me was really using. That turned into its own rabbit hole, separate from R2 entirely — poking at which work actually belonged on the server versus the client:
+Even after the R2 side got fast, I noticed the my deployment dashboard still showed more CPU time than seemed reasonable for a project nobody but me was really using. That turned into its own rabbit hole, separate from R2 entirely — poking at which work actually belonged on the server versus the client:
 
 - [x] only compute what's actually needed for a given request
 - [x] only send the client what it's actually going to render
 - [x] run independent things in parallel instead of one after another
 - [x] patch isomorphic-git itself with shortcuts our storage model allows — skip checks that can never succeed, skip probes for files that structurally can't exist
-- [x] cache aggressively, and be deliberate about *when* that cache gets busted — a stale "new commits" banner is annoying, a stale file tree is a bug
+- [x] cache aggressively, and be deliberate about *when* that cache gets busted
 
-None of it was one clean fix. It was a lot of small, individually-obvious-in-hindsight changes, each one found by poking at a real request instead of assuming I already knew where the slowness was.
+None of it was one clean fix. It was a lot of small, individually-obvious-in-hindsight changes, each one found by poking at the request.
 
 ## Where it landed
 
@@ -95,11 +95,9 @@ pushstack now just imports both instead of carrying that logic inline. They don'
 
 Which means every one of those "why is this slow" bugs I chased down for pushstack's own load times is now fixed somewhere anyone else running isomorphic-git off a real disk might eventually hit too, instead of staying a one-off fix nobody else will ever see.
 
-I still don't know if pushstack is faster or more reliable than GitHub, and honestly that was never really the point. I'm a student, not a company running git at planet scale — I was never going to out-engineer GitHub, and that was never the assignment.
+Pushstack is not faster or reliable than GitHub, and honestly that was never really the point.
 
-> What I actually wanted was to stop treating `git push` as a black box — to actually see, step by step, what happens between typing that and a commit showing up in a browser, and to have somewhere to point when something was slow instead of just shrugging and moving on.
-
-That part, at least, I got.
+The point was to see if git hosting on edge is even possible, so I guess it is.
 
 {/*
 LinkedIn "read more" post:

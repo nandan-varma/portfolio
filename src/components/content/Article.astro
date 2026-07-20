@@ -16,9 +16,9 @@ const { id, project, views } = Astro.props;
     <div class="flex justify-between gap-2 items-center">
       <span class="text-xs duration-1000 text-zinc-200 group-hover:text-white group-hover:border-zinc-200 drop-shadow-orange">
         {project.date ? (
-          <time datetime={new Date(project.date).toISOString()}>
+          <time datetime={new Date(project.date + "T12:00:00").toISOString()}>
             {Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
-              new Date(project.date)
+              new Date(project.date + "T12:00:00")
             )}
           </time>
         ) : (
