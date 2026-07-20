@@ -1,0 +1,33 @@
+---
+title: Lost & Found
+description: A multi-tenant lost-and-found SaaS for organizations - per-org roles, an invitation-based access model, and a closed auth bypass in the org-creation flow before it shipped.
+date: "2026-05-08"
+repository: nandan-varma/lost-found
+published: true
+---
+
+Every campus or office building I've been in has some version of a lost-and-found - usually a shelf and a spreadsheet nobody checks. I wanted to build the actual multi-tenant version: any organization can sign up, manage its own members and permissions, and log lost/found item reports behind proper access control - not just one shared instance for everyone.
+
+## Multi-tenancy on top of Better Auth
+
+Better Auth's organizations plugin handles the tenant boundary itself: per-org membership, a role-based permission model, and an invitation flow where an admin sends an email invite via Resend, the recipient accepts, and only then gets scoped access to that org's data. Nobody else's items, members, or settings are visible or reachable.
+
+An early draft of the org-creation endpoint let an unauthenticated request create an organization outright - a bypass I caught and closed before it ever reached production. It's the kind of bug that's easy to introduce when an endpoint feels like "just onboarding" rather than a security boundary, and exactly why the invitation flow needed a second look before shipping.
+
+## Making multi-step writes actually atomic
+
+Invite-and-accept is inherently multi-step - create the invitation record, verify the token, add the membership, all of which needs to either fully happen or not happen at all. That's what drove a migration to Neon's transaction-capable serverless driver: without real transaction support, those steps were racy under concurrent requests instead of atomic.
+
+## Key decisions
+
+- **Better Auth's organizations plugin over a hand-rolled tenant model** - multi-tenant auth has enough sharp edges (session scoping, invite tokens, role checks) that building on a maintained plugin caught issues a from-scratch implementation would have taken longer to find
+- **Closing the org-creation bypass before shipping, not patching after** - an unauthenticated org-creation path is a fundamental trust-boundary failure, not a minor bug; it got full priority over any other feature work the moment it was found
+- **Migrating to a transaction-capable driver specifically for invite flows** - multi-step writes that aren't atomic don't fail loudly, they fail as intermittent, hard-to-reproduce data inconsistencies; fixing that at the driver level was more reliable than adding manual rollback logic per endpoint
+
+## Built with
+
+- Next.js 16 + TypeScript
+- Better Auth - organizations plugin, invitation flow
+- Neon (serverless Postgres, transaction support) + Drizzle ORM
+- Resend - invitation email
+- Rate limiting - client-triggered action hardening

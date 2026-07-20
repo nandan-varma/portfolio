@@ -22,13 +22,12 @@ Peek lets you add any URL as a floating widget. It loads the site using an iPhon
 - All widget state persisted locally in SQLite
 - Back/forward navigation gestures on the web view
 
-## What I learnt
+## Key decisions
 
-- Building a macOS app with AppKit and WKWebView
-- Managing multiple floating `NSWindow` instances with independent state
-- Why spoofing a mobile user agent is the right call for phone-sized web views - desktop layouts at 393px wide are a mess
-- Local persistence with SQLite.swift without pulling in CoreData
-- Debouncing resize and scroll events so position writes don't hammer the database
+- **WKWebView over embedding a Chromium variant** — WKWebView is the system browser engine, so it shares cookies, sessions, and site data with Safari; users are already logged in to the sites they want to pin without any additional auth flow
+- **iPhone user agent by default** — desktop responsive breakpoints at 393px wide render as broken narrow layouts; mobile layouts are designed for exactly these dimensions and look right without any adjustment
+- **SQLite.swift over CoreData** — CoreData's object graph model is significant overhead for storing widget URLs, positions, and sizes; SQLite.swift gives typed queries without the abstraction layer or the Core Data stack startup cost
+- **Debounced position writes on resize and drag** — storing every intermediate position while dragging would generate hundreds of writes per second; debouncing batches them into one write at drag end and keeps the database I/O negligible
 
 ## Built with
 

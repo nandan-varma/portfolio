@@ -1,0 +1,42 @@
+---
+title: PipeForge
+description: An AI CI/CD pipeline tool - describe your stack in plain English and get a production-ready GitHub Actions, GitLab CI, or CircleCI config streamed back in real time.
+date: "2026-04-11"
+repository: nandan-varma/pipeforge
+published: true
+---
+
+Every CI config I've ever written started the same way: copy a similar pipeline from another repo, then spend twenty minutes remembering the exact YAML for caching, matrix builds, or a Docker push step. I wanted to just describe what I needed and get a correct pipeline back - so I built a tool around Claude that does exactly that, for five different CI platforms.
+
+## Four modes, one editor
+
+- **Generate** - describe your stack and requirements, pick a platform, get a complete pipeline streamed back token by token
+- **Migrate** - paste a pipeline from one platform and convert it to another (CircleCI to GitHub Actions, say), with comments flagging approximate mappings that need a human check
+- **Debug** - paste a broken pipeline plus the error output, get a diagnosis and a fixed config back
+- **Explain** - click any step in the generated YAML for a plain-English breakdown of what it does
+
+Generate pins action versions, always caches dependencies, reads secrets from environment variables instead of hardcoding them, and includes a test step by default - not because I told the model to remember those rules every time, but because they're baked into the system prompt for that mode.
+
+## Streaming and caching
+
+The generate, migrate, and debug endpoints stream via SSE, so the editor fills in as Claude writes rather than showing a spinner until the whole response lands. The explain endpoint uses Anthropic's prompt caching on its system prompt - repeated explain calls against the same pipeline reuse the cached prefix instead of re-processing the same instructions every click.
+
+There's also an "extras" system: checkboxes for things like a Docker build/push step, Slack failure notifications, matrix testing, a Trivy/Snyk security scan, or auto-semver versioning. Checking one injects a structured requirement clause into the user message at request time rather than editing the system prompt itself, which keeps the cached prefix stable while still letting requirements vary per request.
+
+## The rest of the stack
+
+A Fastify API handles `/generate`, `/migrate`, `/debug`, and `/explain`, plus a `/configs` endpoint for saved pipelines - generation history persists to libSQL via Drizzle ORM. The frontend is a React + Vite SPA with react-router-dom, consuming the SSE stream and appending YAML into a CodeMirror 6 editor as it arrives.
+
+## Key decisions
+
+- **SSE over polling** - a full pipeline generation can take several seconds; streaming tokens as they're produced makes the tool feel responsive instead of making users stare at a blank editor
+- **Extras as message-level injections, not system-prompt edits** - keeping the system prompt stable per mode means Anthropic's prompt caching actually pays off on repeat requests, even as the specific requested extras vary
+- **Four narrow modes over one general chat interface** - generate/migrate/debug/explain each get a system prompt tuned for that exact task, which produces more reliable YAML than asking one general-purpose prompt to infer what the user wants
+
+## Built with
+
+- [Anthropic Claude API](https://www.anthropic.com) (claude-sonnet-4-5) - generation, migration, debugging, and explanation, with SSE streaming and prompt caching
+- Fastify + TypeScript - API server
+- [Drizzle ORM](https://orm.drizzle.team/) + libSQL - generation history
+- React + Vite + react-router-dom - frontend SPA
+- CodeMirror 6 - pipeline editor

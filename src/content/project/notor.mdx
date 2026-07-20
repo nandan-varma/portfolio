@@ -1,0 +1,35 @@
+---
+title: Notor
+description: A minimal, native markdown note-taking app for macOS - every note is a plain .md file with YAML front matter, no database, with an optional pluggable AI panel.
+date: "2026-05-26"
+repository: nandan-varma/notor
+published: true
+---
+
+Most note apps want to own your notes - a database, a proprietary sync format, an export button as an afterthought. I wanted something where the notes are just files, forever, and the app is a fast, native way to browse and edit them. Notor is that: a Tauri shell around a plain-files vault, with a ~8MB bundle instead of an embedded browser runtime.
+
+## Files first
+
+Every note is a `.md` file with YAML front matter, sitting on disk exactly where you can see it. The Rust backend (`vault.rs`) handles parsing, indexing, and front-matter extraction, and a filesystem watcher keeps the UI synced with anything edited outside the app - in a text editor, via git, whatever. There's no database to migrate, back up, or lose.
+
+## AI as an optional panel, not a dependency
+
+The AI assistant supports Anthropic, OpenAI, Ollama, and OpenRouter - but it's a swappable side panel, not something the note-taking core depends on. The app works fully offline with no AI configured at all; the assistant is there if you want it.
+
+## A keymap-driven interface
+
+React 19 and Zustand stores are split per concern - vault, editor, search, AI, UI - backing a command palette, quick-open, full-text search, and a focus mode, instead of a traditional menu bar hierarchy. The interface is built to be driven mostly by keyboard.
+
+## Key decisions
+
+- **Plain `.md` files with YAML front matter over a database** - a database means lock-in and a migration path every time the schema changes; files on disk are portable, git-friendly, and readable by literally any other tool without an export step
+- **AI as an optional panel, never a hard dependency** - the note-taking core has to work with zero AI providers configured, since plain-files PKM tools live or die on not requiring any specific vendor to keep working
+- **Tauri over Electron** - a ~8MB native bundle instead of shipping a bundled Chromium was the whole point of choosing a files-first, minimal-overhead app in the first place
+
+## Built with
+
+- [Tauri](https://tauri.app) - Rust backend, native shell (~8MB bundle)
+- React 19 + TypeScript
+- Zustand - scoped stores (vault, editor, search, AI, UI)
+- Anthropic / OpenAI / Ollama / OpenRouter - pluggable AI panel
+- `react-i18next`

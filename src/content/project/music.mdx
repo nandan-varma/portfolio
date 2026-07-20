@@ -1,13 +1,13 @@
 ---
 title: Music
-description: A music streaming app that scrapes JioSaavn - search songs and albums, build playlists, and download for offline listening.
+description: A music streaming app - search songs and albums, build playlists, and download for offline listening.
 date: "2023-06-14"
 repository: nandan-varma/songs
 url: https://songs.nandanvarma.com
 published: true
 ---
 
-I wanted a clean music app with no ads, no subscription walls, and the ability to actually download songs. JioSaavn doesn't use DRM on its audio files, which made it the right target. So I built the full stack - scraping layer, API middleware, and a proper web client on top.
+I wanted a clean music app with no ads, no subscription walls, and the ability to actually download songs. So I built the full stack - a middleware layer, API surface, and a proper web client on top.
 
 ## Features
 
@@ -18,17 +18,16 @@ I wanted a clean music app with no ads, no subscription walls, and the ability t
 - Login to save your library across devices
 - Server-side data fetching with TanStack Query
 
-## TODO
+## Key decisions
+
+- **Three-layer architecture (client → middleware → data source)** — the middleware layer insulates the client from the upstream data shape; if the source changes, only the middleware needs updating and the client remains unchanged
+- **IndexedDB over the Cache API for downloaded tracks** — IndexedDB gives structured, queryable storage with larger quotas than localStorage; the Cache API is designed for HTTP responses, not binary audio blobs that need to be looked up by track ID
+- **Zustand for player state, TanStack Query for server state** — keeping them separate avoids the temptation to put server data in the player store; TanStack Query handles staleness and refetching, Zustand handles playback position and queue without coupling
+
+## Future directions
 
 - Export and import playlists
 - Recommendation system based on listening history
-
-## What I learnt
-
-- The application → middleware → data source architecture pattern
-- Offline storage with IndexedDB
-- State management with Zustand across a music player
-- How to layer server state (TanStack Query) and client state (Zustand) without them fighting each other
 
 ## Built with
 
@@ -39,4 +38,3 @@ I wanted a clean music app with no ads, no subscription walls, and the ability t
 - [TanStack Query](https://tanstack.com/query) - server state
 - [tailwindcss](https://tailwindcss.com)
 - Deployed on [Vercel](https://vercel.com)
-- JioSaavn API that shall not be discussed 🤫

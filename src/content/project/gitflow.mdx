@@ -1,0 +1,43 @@
+---
+title: GitFlow Studio
+description: A native cross-platform Git client built with Tauri 2 and Rust - commit-graph DAG, interactive rebase, three-pane conflict resolution, and an AI assistant with tool access to the repo.
+date: "2026-05-18"
+repository: nandan-varma/gitflow
+published: true
+---
+
+I use `git rebase -i` and three-way conflict resolution constantly, and I've never loved doing either from a terminal diff or a bloated Electron client. I wanted a Git client that felt fast and native, went past the basic "stage and commit" UI most GUIs stop at, and could talk to GitHub without reimplementing its API. So I built one on Tauri 2, with Rust doing the actual git work.
+
+## Beyond stage-and-commit
+
+The core is a commit-graph DAG view with topological and time sort and infinite scroll, hunk- and line-level staging, and blame/file-history computed directly against the git object model rather than shelled out per line. Past that baseline, it does the things that usually push people back to the terminal: interactive rebase (reorder, fixup, drop), cherry-pick with real conflict detection and a continue/abort flow, and stash push/apply/pop/drop including untracked files.
+
+Conflict resolution gets one shared three-pane editor - ours, theirs, result - reused across merge, rebase, and cherry-pick instead of three different half-built resolvers.
+
+## GitHub without reimplementing GitHub
+
+Rather than build a GitHub API client from scratch, PR and issue support goes through the `gh` CLI: list, view, create, checkout, and merge PRs, plus branch badges showing open PR status at a glance. It's less code, and it inherits `gh`'s own auth instead of needing a separate OAuth flow.
+
+## An AI assistant with actual tool access
+
+There's an in-panel assistant (OpenAI-compatible API) with full tool access to the open repository - it can inspect history, diffs, and branches to answer questions or suggest a rebase plan. Anything destructive - discard, force-delete, push, merge - requires an explicit hold-to-approve gesture before it executes, so the assistant can reason freely without being able to silently blow away work.
+
+## Shipping it for real
+
+Release builds are signed and auto-updating for macOS (Apple Silicon + Intel), Windows, and Linux (AppImage + `.deb`) via a Tauri 2 + GitHub Actions pipeline. The Rust test suite spins up real temporary git repositories rather than mocking git behavior, and runs them safely in parallel.
+
+## Key decisions
+
+- **Shelling out to `gh` for GitHub integration** - reusing an existing, well-tested CLI's auth and API surface is far less risk than maintaining a parallel GitHub API client just for PR/issue features
+- **One shared conflict-resolution UI across merge/rebase/cherry-pick** - all three produce the same three-way conflict shape; building one well-tested resolver instead of three saves real maintenance and keeps the UX consistent regardless of how the user got into a conflict
+- **Hold-to-approve on destructive AI actions** - an assistant with real tool access to a git repo needs a hard gate before force-push, discard, or merge, not just a confirmation dialog it could theoretically word its way past
+- **Real temporary repos in tests over mocked git calls** - git has enough edge cases (detached HEAD, conflicted merges, empty repos) that testing against actual repositories catches things a mocked git layer would hide
+
+## Built with
+
+- [Tauri 2](https://v2.tauri.app) - Rust backend, native shell
+- Rust - commit graph, staging, rebase, cherry-pick, blame, conflict resolution
+- React + TypeScript - frontend
+- [`gh` CLI](https://cli.github.com) - GitHub PR/issue integration
+- OpenAI-compatible API - in-panel AI assistant
+- GitHub Actions - signed release builds for macOS, Windows, Linux

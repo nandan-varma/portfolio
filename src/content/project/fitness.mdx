@@ -14,8 +14,6 @@ Most fitness apps want an account, an internet connection, and your data. I want
   <source src="https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlJUhuiIdzxiZ8RUlHQfDceV5yaEgCuWMr0Y2P" type="video/mp4"/>
 </video>
 
-*UI is still evolving.*
-
 ## Features
 
 - Browse exercises with images, descriptions, and muscle group info (powered by Free Exercise DB)
@@ -26,18 +24,18 @@ Most fitness apps want an account, an internet connection, and your data. I want
 - Fully offline - all data lives on device in SQLite
 - Cross-platform (iOS, Android, Web via Expo)
 
-## TODO
+## Key decisions
+
+- **Local-first over cloud-first** — all data lives in SQLite on device; no account required, no network dependency for logging a set during a workout, and the data belongs to the user rather than a service
+- **Expo over bare React Native** — EAS Build gives managed cloud builds without maintaining native toolchains locally; the tradeoff is some flexibility in native modules, which fitness logging doesn't need
+- **Drizzle ORM with SQLite over AsyncStorage** — AsyncStorage is a key-value store; workout history with relationships between exercises, sets, and sessions needs a real schema with queryable joins
+- **NativeWind over React Native StyleSheet** — consistent utility-first styling across the web and mobile targets; the same mental model as the web stack reduces the cost of switching contexts
+
+## Future directions
 
 - Goal setting and reminders
 - AI-powered workout suggestions
 - Charts and progress visualisations
-
-## What I learnt
-
-- Building cross-platform mobile apps with Expo and React Native
-- Local-first data architecture with SQLite and Drizzle ORM
-- NativeWind for styling React Native components like Tailwind
-- Shipping a real app with EAS Build
 
 ## Built with
 

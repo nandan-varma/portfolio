@@ -16,16 +16,16 @@ Chain Reaction is a turn-based strategy game where you place orbs in cells and t
 - Dark mode
 - Real-time state via Firebase
 
-## TODO
+## Key decisions
+
+- **React Three Fiber over raw Three.js** — keeps the scene declarative and component-driven; the board state maps naturally to React re-renders rather than imperative scene mutations, which is the right fit for a turn-based game where each move produces a new discrete state
+- **Immutable state per turn** — each step produces a new board snapshot; the explosion chain is a sequence of derived states rather than mutations, which makes the animation replay straightforward and keeps the game logic testable
+- **Firebase for real-time local multiplayer** — for a shared-screen game the latency requirements are loose enough that Realtime Database handles it without managing a custom WebSocket server
+
+## Future directions
 
 - Online multiplayer (play with friends over the internet, not just locally)
-- Configurable board size, margin, and font size
-
-## What I learnt
-
-- 3D scene management with React Three Fiber
-- How to translate a 2D game mechanic into 3D space
-- Game state management across turns
+- Configurable board size and player count
 
 ## Built with
 

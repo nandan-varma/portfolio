@@ -1,0 +1,39 @@
+---
+title: Flagbase
+description: A self-hosted feature flag and experimentation platform - targeting rules, gradual rollouts, audience segments, and audit logging, with a published Node.js SDK.
+date: "2026-06-15"
+repository: nandan-varma/flagbase
+published: true
+---
+
+I wanted to understand what actually happens behind a "toggle this feature for 10% of users" button - not just call a hosted feature-flag API, but build the targeting engine, the SDK, and the dashboard that make gradual rollouts possible. Flagbase is a self-hosted feature-flag platform: an API, a dashboard, and a Node SDK that consumers install directly into their own services.
+
+## The targeting engine
+
+Flags can be boolean, string, number, or JSON, each with independent state per environment. The interesting part is the targeting-rule engine: ordered rule sets evaluated against a user context, supporting equality, contains, prefix, list-membership, semver, and percentile conditions - so a rule can target "users on version >= 2.4.0" or "5% of users, deterministically bucketed" as naturally as "email ends in @company.com."
+
+Rollouts stack a percentage dial on top of that rule evaluation, and audience segments let a targeting condition be defined once and reused across multiple flags instead of copy-pasted.
+
+## An SDK, not just an API
+
+`sdk-node` is a published package consumers install into their own services - it polls and caches flags locally rather than hitting the API on every single flag check, which is what makes flag evaluation cheap enough to call on a hot path.
+
+## Keeping rollouts honest
+
+An audit log tracks who changed what and when, which matters the moment more than one person can touch flag state. Stale-flag detection surfaces flags that haven't been touched in 90+ days - a rollout that reached 100% six months ago and never got cleaned up is exactly the kind of thing that quietly becomes tech debt if nothing points it out.
+
+## Key decisions
+
+- **Ordered rule sets over a single boolean expression** - real targeting logic needs explicit precedence ("VIP users always get it, then 5% of everyone else") rather than one flat condition, so rules evaluate in order with the first match deciding the outcome
+- **A published SDK over "just call our REST API"** - polling and caching flags locally is the difference between a feature-flag check being free and it adding network latency to every request; a thin HTTP client wouldn't give consumers that
+- **Stale-flag detection as a first-class feature, not an afterthought** - flag platforms accumulate cruft by design (every rollout eventually reaches 100% and gets forgotten); surfacing that automatically is cheaper than a team remembering to audit flags manually
+
+## Built with
+
+- Fastify + TypeScript - API
+- Drizzle ORM + PostgreSQL
+- Zod - schema validation
+- JWT auth
+- React + Vite + TanStack Query + React Router - dashboard
+- `sdk-node` - published Node.js SDK for server-side evaluation
+- pnpm workspaces

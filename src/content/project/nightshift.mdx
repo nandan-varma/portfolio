@@ -1,0 +1,39 @@
+---
+title: NightShift
+description: A native macOS menu-bar app that warms display color temperature on a sunrise/sunset schedule - zero external dependencies, offline solar-position math, and an opt-in bedtime taper.
+date: "2026-07-16"
+repository: nandan-varma/NightShift
+published: true
+---
+
+I like f.lux and macOS's own Night Shift, but wanted something I fully understood and controlled - when exactly transitions happen, how aggressive the bedtime warming gets, all computed locally rather than through whatever heuristic a system feature uses internally. So I built a menu-bar app with zero external dependencies: no SPM packages, no CocoaPods, just AppKit, SwiftUI, CoreGraphics, and CoreLocation.
+
+## A menu-bar app, structured like a real one
+
+It's `MenuBarExtra`-based with an `.accessory` activation policy - no Dock icon, no main window, just the menu bar. Underneath, the design draws a hard line between pure value types (`ScheduleMode`, `SolarTimes`, a `ColorTemperature` type doing Kelvin-to-RGB conversion via Tanner Helland's black-body approximation) and one service per system API - `DisplayGammaController` for CGDisplay transfer functions, `SolarCalculator` for offline NOAA solar-position formulas, `GeocodingService`, `LaunchAtLoginService` - with an `@Observable` settings store as the single source of truth everything else reads from.
+
+The schedule engine's core functions - `interpolatedKelvin`, `phase`, `nextTransition`, the bedtime taper math - are kept `static` and fully parameterized, specifically so they're unit-testable without touching live CoreLocation or CGDisplay state. That's what makes a dedicated test suite for the actual branching logic possible at all.
+
+## Getting the transitions right
+
+The sunrise/sunset shift is a smoothstep-eased window centered on the solar event, not a linear ramp - eased transitions feel natural in a way linear ones don't. An opt-in bedtime taper layers on top, but only ever makes auto mode warmer, never overriding an explicit forced day/night/off mode the user picked.
+
+## The macOS quirk that took the longest to fix
+
+Display transfer functions silently reset both when an external display gets reconfigured and on wake-from-sleep - macOS just quietly drops the gamma curve. NightShift re-applies its state on both events, debounced through a cancellable `Task` so a burst of reconfiguration events doesn't cause a flicker storm. `restoreNeutral()` is guaranteed to fire on quit, on SIGINT/SIGTERM, and from both UI quit affordances, so there's no path where a display gets stuck warm after the app closes.
+
+Solar position is computed entirely offline using NOAA's low-precision formulas - the only network-adjacent call in the whole app is a one-time `CLGeocoder` lookup during manual location entry.
+
+## Key decisions
+
+- **Zero external dependencies** - a menu-bar utility that runs constantly in the background is exactly the kind of app where a supply-chain surprise from a dependency update is least acceptable; everything from Kelvin math to solar position is hand-written
+- **Static, parameterized core functions over methods on stateful services** - keeping `interpolatedKelvin`/`phase`/`nextTransition` as pure functions is what makes the schedule engine's actual logic unit-testable without mocking CoreLocation or a live display connection
+- **Re-applying gamma state on both display reconfiguration and wake** - macOS resets the transfer function silently on either event; catching just one of the two would leave the display neutral (or stuck warm) after the other
+
+## Built with
+
+- Swift + SwiftUI (`MenuBarExtra`) + AppKit
+- CoreGraphics - display gamma / transfer function control
+- CoreLocation - offline NOAA solar-position calculation
+- `SMAppService` - launch at login
+- Zero external dependencies

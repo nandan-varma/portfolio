@@ -1,0 +1,59 @@
+---
+title: Nemesis
+description: An AlphaZero-style neural chess engine trained on 3.8 million elite games — no Stockfish, no hand-crafted heuristics, just a network that learned chess from outcomes.
+date: "2026-01-15"
+repository: nandan-varma/nemesis
+published: true
+---
+
+Chess engines have been solved for decades. Stockfish is better than every human alive. So why build one?
+
+Because Stockfish is alpha-beta search with years of hand-crafted heuristics — humans encoding what good chess looks like, one evaluation term at a time. Then in 2017, DeepMind's AlphaZero started from nothing, played itself for a few hours, and beat every engine in the world. It didn't know what a passed pawn was. It just figured out that certain positions led to wins more often than others.
+
+I wanted to understand how that actually worked. Not read the paper — build it.
+
+## The network
+
+Nemesis is a 12.4M parameter ResNet with two output heads. The **policy head** outputs a probability distribution over all 4096 possible from-to moves (64 squares × 64 squares — not every one is legal, the illegal ones get masked). The **value head** outputs a single number in (−1, 1): the estimated win probability from whoever's turn it is.
+
+The board is encoded as a 19-plane 8×8 tensor: 12 planes for piece occupancy (one per piece type per colour), 4 for castling rights, 1 for en passant, 1 for side-to-move, 1 normalised move-number plane. Converting bitboards to this tensor uses `numpy.unpackbits` — it's fast enough that it never became the bottleneck.
+
+The residual tower is 10 blocks deep with spatial Dropout2d (0.1) to stop it memorising feature maps. The value head adds a separate Dropout (0.2) before the final linear layer. Training runs on PyTorch's MPS backend — Apple Silicon handles this well.
+
+## The training data
+
+Most neural chess engines train against Stockfish evaluations. You show the network a position, Stockfish evaluates it, the network learns to agree.
+
+I didn't want to do that. Stockfish's opinions are a ceiling — the network could only ever learn what Stockfish already knew.
+
+Instead I used the Lichess Elite Database: 3.8 million games where both players were 2000 ELO or above. Pure game outcomes — who won. The network has to figure out the rest from the positions that led there. It's a harder problem. It's also the point.
+
+## The search
+
+During play, Nemesis doesn't just pick the move with the highest policy probability. It runs Monte Carlo Tree Search with PUCT selection — the same formula AlphaZero used. The policy head guides which branches are worth exploring; the value head evaluates positions at the leaves. MCTS accumulates visit counts across many simulated playouts and picks the most-visited move as its final answer.
+
+Dirichlet noise is added to the root during self-play to make sure the engine explores rather than just following the policy greedily from move one. Without it, the network would quickly converge on the same lines every game and stop learning.
+
+## Key decisions
+
+- **Outcome-based training over Stockfish distillation** — training against engine evaluations creates a ceiling at what Stockfish already knows; outcome-based training from elite games forces the network to discover its own patterns and can in principle exceed what human theory has codified
+- **MCTS with PUCT over greedy policy selection** — the policy head probability is a prior that guides tree exploration, not a direct move ranking; without search the network is sensitive to local tactical errors that MCTS averages out over many simulations
+- **Dirichlet noise at the root during self-play** — without it the engine follows the same policy distribution every game and stops generating diverse training positions; the noise forces exploration of lines that look suboptimal early but may lead to better long-run outcomes
+- **Spatial Dropout2d over regular Dropout in the residual tower** — regular Dropout drops individual values; in a convolutional network with strong spatial correlation, dropping entire feature map channels is a stronger regulariser and prevents the network from relying on single-activation patterns
+- **Lichess Elite Database over generated self-play** — high-quality human games encode practical strategic knowledge from the opening; self-play from a randomly initialised network generates noisy positions that slow early convergence
+
+## Future directions
+
+- Iterative self-play training loop to improve beyond the training dataset ceiling
+- Precomputed opening book from the Elite Database to skip early search
+- Stronger search: temperature scheduling and transposition table
+- Web interface for browser-based play against the engine
+
+## Built with
+
+- Python 3.11, PyTorch (MPS / Apple Silicon)
+- [python-chess](https://python-chess.readthedocs.io) — move generation and game parsing
+- numpy — bitboard tensor conversion
+- [Textual](https://textual.textualize.io) — terminal UI for play and training monitoring
+- Matplotlib — training curve visualisation
+- Pydantic, Typer, Loguru

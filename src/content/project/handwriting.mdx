@@ -1,6 +1,6 @@
 ---
 title: Handwriting
-description: A web app that generates PDFs that look handwritten - for those times you forgot to do an assignment by hand.
+description: A web app that generates PDFs that look handwritten - typed text rendered in a handwritten style, with properly structured output you can still select and copy.
 date: "2023-06-16"
 repository: nandan-varma/handwriting
 url: https://writing.nandanvarma.com
@@ -16,9 +16,14 @@ Assignments at college sometimes had to be handwritten. I kept forgetting. So I 
 - Configurable margin, font size, and line spacing
 - Minimal UI
 
-## The better version that doesn't exist yet
+## Neural handwriting generation
 
-I built a second version using TensorFlow and a recurrent neural network (Flask + Docker) that generates much more realistic handwriting by learning stroke patterns. It works locally but I can't deploy Docker/Flask with ML models for free - so the live site still runs the simpler version.
+I also built a second version using TensorFlow and a recurrent neural network (Flask + Docker) that generates much more realistic handwriting by learning stroke patterns from a dataset. It works locally - the RNN learns to vary character spacing and slant in ways that look more natural than a static font mapping. Deployment is blocked by the Docker/ML model hosting cost, so the live site runs the font-based version.
+
+## Key decisions
+
+- **pdf-lib over canvas-to-image export** — a properly structured PDF keeps the text selectable and copyable; exporting a canvas screenshot produces an image that looks the same but throws away the semantic content
+- **Configurable spacing and margins** — different page sizes and line rulings have different requirements; making these parameters rather than constants lets the output match the actual assignment format
 
 ## Built with
 

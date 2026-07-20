@@ -1,0 +1,34 @@
+---
+title: Font Synthesis
+description: An implementation of Alex Graves' handwriting-synthesis RNN from the 2013 paper - a 3-layer LSTM with windowed soft attention that turns typed text into realistic pen-stroke SVGs.
+date: "2026-01-15"
+repository: nandan-varma/font-synthesis
+published: true
+---
+
+I already had a project ([Handwriting](/projects/handwriting)) that renders typed text as a handwritten-*looking* PDF using a fixed font. This is a different, harder problem: generate the actual pen strokes, from a neural network that learned handwriting the way Alex Graves' 2013 paper "Generating Sequences With Recurrent Neural Networks" describes. I wanted to implement the paper directly, not just use someone else's pretrained model.
+
+## The architecture, from the paper
+
+Three stacked LSTM layers process pen-stroke sequences. A window-based soft attention mechanism (10 mixture components) is the part that makes this work at all - it aligns the strokes being generated to the input character sequence as it's written, so the network knows which letter it's currently drawing without being told explicitly. A mixture-density network output head (30 components) models the (x, y) pen position at each timestep, alongside a separate Bernoulli head predicting pen-up events - when the pen lifts between strokes.
+
+At inference, a `bias` parameter scales the mixture weights, trading randomness for legibility - low bias produces more natural, varied handwriting; high bias produces cleaner, more legible but more uniform strokes. The model can also be primed on a reference stroke sequence to mimic a specific handwriting style rather than generating from scratch.
+
+## Rewriting it for Apple Silicon
+
+The original implementation was TensorFlow 1 running in compatibility mode under TF2 - a codebase that doesn't build cleanly on modern toolchains and had no path to Apple Silicon's GPU. I rewrote the entire training and inference pipeline in native PyTorch, targeting MPS instead of a TF1 CPU/GPU path that was already showing its age.
+
+Output renders as SVG strokes with configurable color and width per line - real vector paths, not a rasterized image - and a pretrained checkpoint ships with the repo so inference works immediately without training from scratch.
+
+## Key decisions
+
+- **Implementing the paper directly rather than wrapping an existing pretrained model** - the point was understanding the windowed attention and mixture-density mechanics well enough to reimplement them, not just producing handwritten-looking output by any means
+- **Full PyTorch rewrite over patching the TF1 codebase** - TF1 compat mode inside TF2 is a dead end for anything targeting Apple Silicon; a clean rewrite in a framework with native MPS support was less total effort than continuing to fight TF1's compatibility shims
+- **SVG stroke output over rasterized images** - the model predicts pen positions as continuous coordinates; rendering those as vector paths preserves that precision and keeps the output scalable and stroke-editable, instead of baking it into a fixed-resolution bitmap
+
+## Built with
+
+- Python + PyTorch - full training/inference pipeline, Apple Silicon (MPS)
+- NumPy
+- `svgwrite` - SVG stroke rendering
+- Pillow / CairoSVG - desktop GUI for interactive generation

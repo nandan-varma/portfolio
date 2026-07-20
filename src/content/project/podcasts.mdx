@@ -16,12 +16,11 @@ This started as a hackathon project with two of my friends. We had a weekend to 
 - Player controls with progress tracking
 - Favourites with login system
 
-## What I learnt
+## Key decisions
 
-- React Context for shared state (audio player that persists across page navigation)
-- MongoDB for storing audio metadata
-- Coordinating work across a team - who owns what, how to merge without stepping on each other
-- How to scope a project for a tight deadline and know what to cut
+- **React Context for the audio player** — the player is a single shared instance that persists across route changes; Context is the right scope for exactly this pattern without pulling in a state management library for what is genuinely a global singleton
+- **MongoDB for audio metadata** — the metadata schema from different podcast feeds varies enough that a document model fits better than forcing it into fixed columns; flexible documents let us store whatever a feed provides without schema migrations
+- **Explicit ownership over pair programming** — splitting frontend, backend, and database across three people with clear interfaces let us work in parallel without merge conflicts; the boundary between layers was defined before any code was written
 
 ## Built with
 

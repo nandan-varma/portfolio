@@ -1,0 +1,45 @@
+---
+title: JobMatch
+description: An AI resume analyzer and job application tracker - paste a job description, get a match score and missing keywords, and track every application through to an offer.
+date: "2026-05-13"
+repository: nandan-varma/resume
+url: https://resume.nandan.fyi
+published: true
+---
+
+Tailoring a resume to a job description is a genuinely useful exercise, but doing it by eye for every application gets old fast - which keywords are actually missing, which bullets undersell something I've done. I wanted a tool that would tell me directly, and track the applications themselves instead of losing them in a spreadsheet. So I built JobMatch.
+
+## Match scoring
+
+Paste a job description - or just a URL, and a fetch endpoint parses the posting for you - and the Vercel AI SDK (Google Gemini or OpenAI, depending on config) returns a match score, a list of missing keywords, and concrete rewrite suggestions, streamed to the client rather than returned all at once. A separate job-customize endpoint takes a specific JD and rewrites individual resume bullets to match its language, without inventing experience that isn't there.
+
+## Where things live
+
+PDF resumes and LaTeX source both go to Cloudflare R2 - object storage for blobs, Neon Postgres via Drizzle ORM for the structured stuff (job records, analysis results as JSONB). That split keeps the database fast and the blob storage cheap, instead of stuffing PDFs into Postgres rows.
+
+Editing the LaTeX itself happens in-browser through a CodeMirror 6 editor, with changes saved straight back to R2.
+
+## Tracking the pipeline
+
+Every job gets a status through a real pipeline - submitted, waiting, rejected, interview, offer, accepted, withdrawn - with timestamps at each transition, so the tracker actually answers "how many days did that interview loop take" instead of just "did I apply."
+
+## A Chrome extension that follows you to LinkedIn
+
+The part I use the most: a Manifest V3 extension that watches LinkedIn job postings via a content script, extracts the job description as you browse, and calls the same analysis API the web app uses - through a background service worker authenticated against the app's session cookie. A one-shot "save job" flow runs one atomic transaction (job + analysis + empty resume placeholder) so opening the editor afterward skips straight past re-running the AI consultation.
+
+## Key decisions
+
+- **R2 for blobs, Postgres for structure** - PDFs and LaTeX source don't need to be queryable; putting them in object storage and keeping only metadata and analysis JSON in Postgres keeps both stores doing what they're actually good at
+- **Extension authenticates via the web app's session cookie** - reusing the existing Better Auth session instead of a separate extension-specific auth flow means signing in once covers both surfaces
+- **Atomic "save job" transaction** - job, analysis, and resume placeholder are created together or not at all, so a partial save never leaves an application record with no corresponding analysis to open
+
+## Built with
+
+- Next.js 16 (App Router, Turbopack)
+- Vercel AI SDK - Google Gemini / OpenAI backends
+- Better Auth - passkey (WebAuthn) support
+- Neon (Postgres) + Drizzle ORM
+- Cloudflare R2 - PDF and LaTeX storage
+- Resend + React Email - transactional email
+- CodeMirror 6 - in-browser LaTeX editor
+- Chrome Extension (Manifest V3) - LinkedIn integration

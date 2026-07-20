@@ -7,22 +7,66 @@ import Article from "@/components/content/Article.astro";
 import BaseHead from "@/components/layout/BaseHead.astro";
 import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 
-const projects = (await getCollection("project"))
-	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
-	.map((post) => post);
+const projects = await getCollection("project");
 
-const featured = projects.find((project) => project.data.title === "Replog");
-const top2 = projects.find((project) => project.data.title === "Friday");
-const top3 = projects.find((project) => project.data.title === "Productivity");
+// Impressiveness rank, mirrors the tiers in Claude/Resume/Projects.md (T1 > T2 > T3),
+// with projects that never made that list ranked below T3 by recency.
+const impressivenessRank: Record<string, number> = {
+	// T1
+	"PushStack": 1,
+	"MarsOS": 2,
+	"Nemesis": 3,
+	"Sigrun": 4,
+	"Textedit": 5,
+	"GitFlow Studio": 6,
+	"Meadows Compiler": 7,
+	"Fexer": 8,
+	"PipeForge": 9,
+	"Platex": 10,
+	"Atlas": 11,
+	// T2
+	"Replog": 12,
+	"Friday": 13,
+	"JobMatch": 14,
+	"Calendar SDK": 15,
+	"Flagbase": 16,
+	"Lost & Found": 17,
+	"CronView": 18,
+	"Music": 19,
+	"Chess Online": 20,
+	"Drift": 21,
+	"SwiftAgentKit": 22,
+	"Font Synthesis": 23,
+	"Pluto OS": 24,
+	"Neptune": 25,
+	// T3
+	"Notor": 26,
+	"NightShift": 27,
+	"Peek": 28,
+	"Calendar": 29,
+	"Chats": 30,
+	"Chain Reaction": 31,
+	"OpenBand": 32,
+	"Metarics": 33,
+	"nandanvarma.com": 34,
+	// Never made the resume's project list - ranked below T3 by recency
+	"Productivity": 35,
+	"Handwriting": 36,
+	"Puzzles": 37,
+	"Podcasts": 38,
+	"File Explorer": 39,
+	"Bingo": 40,
+};
 
-const sorted = projects.sort((a, b) => {
-	if (a.data.date && b.data.date) {
-		return (
-			new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
-		);
-	}
-	return 0;
-});
+const sorted = [...projects].sort(
+	(a, b) =>
+		(impressivenessRank[a.data.title] ?? 99) -
+		(impressivenessRank[b.data.title] ?? 99),
+);
+
+const featured = sorted.find((project) => project.data.title === "PushStack");
+const top2 = sorted.find((project) => project.data.title === "MarsOS");
+const top3 = sorted.find((project) => project.data.title === "Nemesis");
 
 // remove featured top2 top3 project from sorted list
 if (featured) sorted.splice(sorted.indexOf(featured), 1);

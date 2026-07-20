@@ -1,0 +1,31 @@
+---
+title: SwiftAgentKit
+description: A Swift-native SDK for building autonomous AI agents - protocol-based providers for OpenAI, Anthropic, and Apple Foundation Models, with a structured-concurrency agent loop.
+date: "2025-10-21"
+repository: nandan-varma/SwiftAgentKit
+published: true
+---
+
+Every agent SDK I'd used - Vercel's AI SDK, LangChain - was built for JavaScript or Python. Swift's async/await and structured concurrency model is genuinely good for this kind of work, and I wanted the same tool-calling agent loop pattern, but built the way Swift actually wants it written, not ported awkwardly from another language's concurrency model.
+
+## Providers as a protocol, not a hardcoded choice
+
+`LanguageModelProvider` is the one abstraction everything else builds on - `OpenAIProvider`, `AnthropicProvider`, and `FoundationProvider` (Apple's on-device Foundation Models) all conform to it, so swapping which model an agent talks to is a matter of passing a different provider, not rewriting the agent.
+
+`Tool` is the other core protocol: any tool an agent can call declares a JSON schema for its inputs, which get validated before the model's tool call is actually executed. The `Agent` type runs the loop itself - select a tool, execute it, feed the result back, continue - with `AgentContext` holding conversation memory behind a pluggable storage interface, so persistence isn't hardcoded to one backend.
+
+## Fully async, fully structured
+
+Everything is `async`/`await` with Swift's structured concurrency underneath - no callback-based provider APIs, no unstructured `Task { }` calls scattered through the agent loop. That mirrors the same discipline I ended up using later in [Drift](/projects/drift) for structured concurrency, but here it's the entire point of the package rather than one part of it.
+
+## Key decisions
+
+- **Protocol-based providers over a single hardcoded API client** - the same `Agent`/`Tool` code should work whether the backend is a hosted API or an on-device model; putting the provider behind a protocol means Apple Foundation Models slots in the same way OpenAI or Anthropic do
+- **JSON schema validation on tool inputs** - catching a malformed tool call before it executes is cheaper and safer than letting a tool implementation deal with unexpected input shapes itself
+- **Distributed as a Swift Package with integration tests per provider** - a mocked provider proves the agent loop logic works, but only a real integration test against each provider's actual API catches provider-specific response-shape surprises
+
+## Built with
+
+- Swift 6.2 - `async`/`await`, structured concurrency
+- Swift Package Manager
+- OpenAI API, Anthropic API, Apple Foundation Models - pluggable providers

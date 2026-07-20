@@ -1,0 +1,42 @@
+---
+title: CronView
+description: A self-hosted cron job monitoring dashboard - a drop-in Python agent reports every run to a Fastify API, with run history, failure alerts, and AI-assisted diagnosis.
+date: "2026-01-12"
+repository: nandan-varma/cronview
+published: true
+---
+
+Cron jobs fail silently by default - a script starts erroring at 2am and nobody notices until something downstream breaks. I wanted visibility into every scheduled job without rewriting any of them, so CronView's whole design constraint was: the agent has to be a drop-in wrapper, not a rewrite.
+
+## Wrapping, not rewriting
+
+```
+# Before
+0 2 * * *  /usr/bin/find /tmp -delete
+
+# After
+0 2 * * *  /path/to/agent.py --job "cleanup:temp-files" -- /usr/bin/find /tmp -delete
+```
+
+The Python agent wraps the actual command as a subprocess, captures stdout/stderr (up to 10k characters each), records start time, end time, and exit code, then POSTs the run report to the API. If the API is unreachable, the agent fails silently rather than taking down the job it's wrapping - monitoring infrastructure going down should never be the reason a real job doesn't run.
+
+## Making failures visible
+
+The Fastify API ingests run reports authenticated by a per-server agent key, and stores history via Drizzle ORM. The React dashboard turns that into something worth glancing at: a 28-day heatmap per job, stdout/stderr on each run, and alerts by email or webhook the moment a job fails - instead of the actual failure signal being "someone eventually notices the downstream thing that depends on this job is broken."
+
+There's also an AI-diagnosis mode: given a failing job's recent output and run history, it asks Claude for a first-pass read on what's going wrong, which is often enough to skip the first round of manual log-grepping.
+
+## Key decisions
+
+- **A wrapper agent, not an instrumentation library** - requiring changes to existing job scripts is exactly the adoption friction that makes monitoring tools never actually get rolled out; wrapping the command as-is means onboarding an existing crontab is a one-line edit per job
+- **Silent failure on agent-side errors** - if the reporting API is down, the wrapped job still has to run; the agent treats its own failure to report as a non-event rather than propagating it into the job's exit code
+- **Per-server agent keys over one shared credential** - scoping auth per server means a leaked key only exposes one machine's run history, and servers can be deregistered independently
+
+## Built with
+
+- Python - monitoring agent
+- Fastify + TypeScript - API
+- Drizzle ORM + SQLite/PostgreSQL
+- React - dashboard
+- Anthropic Claude - AI-assisted failure diagnosis
+- pnpm workspaces

@@ -1,0 +1,61 @@
+---
+title: Textedit
+description: A text editor built from scratch in Rust — GPU rendering via wgpu, rope text buffer, syntax highlighting, and a strict hexagonal architecture with zero GUI framework dependencies.
+date: "2026-02-10"
+repository: nandan-varma/textedit
+published: true
+---
+
+VS Code is Electron. Electron is Chromium plus Node.js. Chromium has a JavaScript engine, a full HTML renderer, a CSS layout engine, a GPU compositing pipeline. All of that runs just to show you a blinking cursor and some coloured text.
+
+I'm not saying VS Code is bad. But I wanted to understand what a text editor actually needs — stripped of everything else. So I built one from scratch. No framework. No WebView. Just Rust and the GPU.
+
+## The rendering pipeline
+
+Every pixel on screen goes through wgpu — the Rust implementation of WebGPU. There's no GUI framework involved. I built each rendering primitive by hand: glyph cache, text layout, cursor, scrollbar, line numbers, status bar, find modal.
+
+The glyph cache uses `fontdue` to rasterize glyphs at startup and pack them into GPU textures. When text needs rendering, the engine looks up glyph quads from cache and batches them into a single draw call per frame. A custom primitive renderer handles rectangles for UI chrome. All of it goes directly to a wgpu surface.
+
+This is more work than using a widget toolkit. A lot more. But it means rendering performance is entirely under control — there's no layout engine making decisions you can't inspect or override.
+
+## The text engine
+
+The buffer is a rope via `ropey`. Ropes give O(log n) insert and delete at any position — a gap buffer, which most editors use, has to shift data proportional to file size on edits far from the cursor. For a 50-line config file you'd never notice the difference. For a 100MB log file you would. It's the right data structure and I wanted to understand why.
+
+Cursor movement is Unicode-aware via `unicode-segmentation`. Pressing the right arrow key should always move one grapheme cluster — not one byte, not one code point. That distinction only matters the moment you have emoji or combining characters in a file, which is exactly when you can't get it wrong.
+
+Clipboard goes through `arboard`, file dialogs through `rfd`, native menus through `muda`. Syntax highlighting uses `syntect` with five bundled themes: Dracula, Gruvbox Dark, One Dark, Solarized Dark, and Light.
+
+## The architecture
+
+The layers are strictly separated — hexagonal architecture applied to a native desktop app, not a web service:
+
+- **Domain** — buffer, cursor, position, edit operations. Pure logic, no I/O.
+- **Application** — editor service, file service. Orchestrates the domain.
+- **Ports** — traits for ClipboardPort, FilePort, RenderPort, WindowPort.
+- **Infrastructure** — adapters that implement the ports (arboard, filesystem).
+- **Renderer** — the wgpu implementation of RenderPort. Knows nothing about editor logic.
+- **State** — geometry pipeline (hit testing, resize, DPI scaling), font state, scroll state.
+- **UI** — widget system, event router, layer stack, modals.
+
+The editor core has zero dependency on wgpu. Swapping the renderer is a port substitution. I drew this boundary on purpose because I wanted to be certain: the text editing logic and the rendering logic are genuinely separate problems, and conflating them is how editors become unmaintainable.
+
+## Key decisions
+
+- **Rope (ropey) over a gap buffer** — gap buffers shift O(n) data on edits far from the cursor; ropes give O(log n) insert and delete at any position; the difference is imperceptible on small files and significant when editing 100MB logs without the editor stalling
+- **wgpu over a GUI framework (egui, iced, tauri)** — a widget toolkit abstracts the rendering layer, which is exactly the part this project was built to understand; direct GPU access makes every draw call visible and rendering performance fully auditable with no hidden layout passes
+- **Hexagonal architecture to enforce the renderer/editor boundary** — the editor domain has no compile-time dependency on wgpu; the renderer is a port implementation; this boundary is checkable at compile time and prevents the coupling that makes most editors hard to change
+- **Glyph atlas built once at startup** — rasterising all glyphs into GPU texture atlases upfront trades a one-time cost for zero per-frame font overhead; text-heavy frames batch all glyph quads into a single draw call rather than one call per character
+- **Unicode-aware cursor movement via unicode-segmentation** — the right arrow key must move one grapheme cluster, not one byte or one code point; the distinction is invisible on ASCII and wrong the moment a file contains emoji or combining characters
+
+## Built with
+
+- Rust
+- [wgpu](https://wgpu.rs) — GPU rendering (WebGPU)
+- [winit](https://github.com/rust-windowing/winit) — cross-platform windowing
+- [ropey](https://github.com/cessen/ropey) — rope text buffer
+- [fontdue](https://github.com/mooman219/fontdue) — font rasterization
+- [syntect](https://github.com/trishume/syntect) — syntax highlighting
+- [arboard](https://github.com/1Password/arboard) — clipboard
+- [muda](https://github.com/tauri-apps/muda) — native menus
+- [rfd](https://github.com/PolyMC/rfd) — native file dialogs

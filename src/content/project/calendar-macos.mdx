@@ -1,0 +1,34 @@
+---
+title: Calendar
+description: A native macOS calendar app built directly on EventKit - reads and writes your real system calendars, with drag-and-drop rescheduling and a small in-house design-token system.
+date: "2026-03-04"
+repository: nandan-varma/cal
+published: true
+---
+
+Apple's own Calendar app is fine, but I wanted to see what building a calendar app actually on top of EventKit looked like - not a toy app with its own separate event store, but one that reads and writes the same calendars macOS itself uses. Everything you do in this app shows up in your real calendar, immediately.
+
+## Built directly on the system's own data
+
+An `@MainActor`, `ObservableObject`-based `CalendarService`, using Combine, mediates `EKEventStore` authorization state, calendar lists, and events out to SwiftUI views. There's no shadow data model duplicating what EventKit already tracks - the app's state *is* the system's calendar state, which means there's nothing to sync and nothing that can drift out of consistency with Calendar.app or any other calendar client.
+
+Events support drag-and-drop rescheduling directly against the EventKit store, so moving an event in this app's UI is the same underlying write as dragging it in Apple's own Calendar.
+
+## First-run permission, and a proper design system
+
+An `OnboardingCoordinator` handles the first-run flow of requesting calendar access - EventKit permissions are the kind of thing that need clear framing the first time, not a bare system dialog with no context. And rather than styling views ad hoc, there's a small in-house design-token system - `DesignTokens`, `ColorPalette`, `Typography`, `Spacing` - so the app has one consistent source for color, type, and spacing decisions instead of magic numbers scattered across views.
+
+The app has both unit and UI test targets, which matters more than usual here since any bug in the EventKit integration touches the user's actual calendar data, not a disposable test fixture.
+
+## Key decisions
+
+- **EventKit as the only data model, no separate store** - a calendar app with its own database would need a sync layer to stay consistent with the system calendars, and could drift out of sync; reading and writing `EKEventStore` directly means there's nothing to keep in sync
+- **A dedicated onboarding flow for calendar permissions** - EventKit's permission dialog alone doesn't explain why access is needed; a coordinated first-run flow sets that context before the system prompt appears
+- **An in-house design-token system over ad hoc SwiftUI styling** - hardcoding colors and spacing per-view means every visual tweak touches N files; centralizing them means changing a spacing value once actually changes it everywhere
+
+## Built with
+
+- Swift 5.9+ + SwiftUI + AppKit
+- EventKit (`EKEventStore`) - reads/writes real system calendars
+- Combine - `CalendarService` state
+- Unit + UI test targets

@@ -1,0 +1,38 @@
+---
+title: Fexer
+description: A professional iOS camera app built from scratch - manual exposure controls, 21 real-time LUT color grades, and a Metal-rendered viewfinder with histogram, waveform, and vectorscope overlays.
+date: "2026-06-18"
+repository: nandan-varma/fexer
+published: true
+---
+
+The built-in Camera app hides everything I actually want control over - manual ISO, shutter, white balance, a real histogram while shooting. I wanted a camera app built the way a dedicated camera works, not the way a point-and-shoot does. So I built one from scratch in SwiftUI and AVFoundation, with the color and exposure tools I kept wishing existed.
+
+## A pipeline that has to hit 60fps
+
+Frames come off `AVCaptureVideoDataOutput` into a `CaptureProcessor` running on its own dedicated session queue, get pushed through a Core Image filter chain, and land in an `MTKView` at 60fps. The one detail that matters more than it sounds like it should: a single `CIContext`, backed by `MTLCreateSystemDefaultDevice()`, created once and never recreated per frame. Naive Core Image pipelines that spin up a fresh context per frame churn the GPU and drop frames - keeping one persistent context is what makes real-time grading actually smooth.
+
+Threading follows Swift's actor model: UI work on `MainActor`, all camera and filter work confined to a dedicated `com.fexer.session` queue, with `OSAllocatedUnfairLock` guarding the handful of places state has to cross that boundary.
+
+## Shooting modes and manual controls
+
+Photo mode supports AEB bracketing and RAW/RAW+JPEG capture; video records up to 4K in HEVC, H.264, or ProRes through `AVAssetWriter`, with GPS metadata and encoder prewarming so recording starts without a visible stall. Long exposure does multi-frame compositing (up to 60 frames), plus burst, timelapse, and an anamorphic mode with a 2.39:1 crop guide.
+
+Manual controls cover ISO (25-6400), shutter speed (1/8000-30s), white balance and tint, focus, AE lock, and four metering modes. Color grading runs through 21 real-time LUTs across three categories - film stocks, genre presets, mood grades - applied live in the viewfinder via `.cube` files and baked in at capture.
+
+## Shooting like it's a real camera
+
+The viewfinder overlays are the ones you'd actually want on set: histogram (RGBL/Luma/Parade), a waveform monitor, a vectorscope, focus peaking, zebra stripes, and false color - all for judging exposure and color without guessing from the preview alone.
+
+## Key decisions
+
+- **One persistent `CIContext`, never recreated** - recreating a Core Image context per frame is a common cause of dropped frames in naive real-time filter pipelines; creating it once against a fixed `MTLDevice` keeps GPU state stable across the whole session
+- **Strict actor isolation for camera work** - confining capture and filter processing to one dedicated queue, with `OSAllocatedUnfairLock` at the few points state crosses to `MainActor`, avoids the data races that come from mixing AVFoundation's delegate callbacks with SwiftUI's main-thread expectations
+- **LUTs applied live, not just as a capture-time filter** - if a color grade only shows up in the exported file, you're composing blind; running the same `.cube` transform in the live preview means what you see while shooting is what you get
+
+## Built with
+
+- Swift + SwiftUI
+- AVFoundation - capture, `AVAssetWriter` video encoding
+- Core Image + Metal (`MTKView`) - real-time filter rendering
+- `OSAllocatedUnfairLock` - cross-actor state protection

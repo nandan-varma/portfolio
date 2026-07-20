@@ -1,0 +1,70 @@
+---
+title: PushStack
+description: A self-hosted Git repository platform built from scratch — real Git smart-HTTP protocol server on Cloudflare R2, issues, pull requests, and two extracted npm packages for running isomorphic-git off a disk.
+date: "2026-03-10"
+repository: nandan-varma/pushstack
+published: true
+---
+
+GitHub hosts your code. But how does it actually work?
+
+When you run `git push`, what happens on the other end? What does the server receive? How does it store the objects? How do you turn a raw Git object store into a file tree you can browse in a browser? I had used GitHub for years without knowing. The only way to actually find out was to build the same thing.
+
+There's no native `git` binary anywhere in the stack, including the tests — [isomorphic-git](https://isomorphic-git.org) handles every git operation, and the object store behind it is Cloudflare R2, not a disk. That single constraint — no durable filesystem — is what the rest of the architecture is a response to.
+
+## The Git layer
+
+isomorphic-git expects a filesystem: reads, writes, stats, directory listings. R2 gives you none of that for free. The fix is an `fs`-shaped adapter that maps the paths isomorphic-git actually touches onto R2 keys — `repos/{owner}/{repo}/git/objects/...`, `refs/heads/...`, and so on — stacked with an LRU cache (request coalescing, negative-result and directory-listing caching) and a retry layer with a circuit breaker in front of the network.
+
+On top of that adapter sits a git smart-HTTP implementation — `info/refs`, `upload-pack`, `receive-pack` — handling pkt-line framing, side-band packfile chunking, CAS-checked ref updates, and pack consolidation once a repo's loose packs cross a threshold. Every client-supplied ref name is validated before it reaches a single filesystem call, since `git.commit`/`git.merge`/`git.deleteBranch` don't validate ref names internally the way `git.branch` does — an unchecked ref name is a path-traversal vector on shared storage.
+
+Reads (clone, fetch, browsing) go straight against R2 through that adapter. Writes (push, in-browser file edits) hydrate the affected repo to a scratch directory, since isomorphic-git's own merge and checkout still want a real worktree, then sync the result back to R2.
+
+## The code browser
+
+Files render through Shiki, syntax-highlighted off the main thread in a web worker so a large file doesn't block the UI. Diffs are computed with the `diff` package and rendered in a custom side-by-side/unified viewer built for this app rather than a pre-packaged diff component.
+
+Heavy client-only dependencies — Markdown rendering, syntax highlighting — are lazy-loaded per route instead of bundled eagerly, since the tree view and blob pages are hot paths most visits hit.
+
+## The rest of the platform
+
+- Issues and pull requests, with comments and an activity feed per repository
+- Authentication via Better Auth for the web UI, plus Personal Access Tokens and Basic auth (rate-limited against a DB table, since the git HTTP endpoint runs across multiple cold-starting serverless instances with no shared memory) for `git push`/`git clone` over HTTPS
+- Repository stars, collaborators, and role-based access control (owner/admin/write/read/anonymous)
+- Cross-entity search across repos, issues, and users
+- Database on Neon (serverless PostgreSQL) through Drizzle ORM
+- End-to-end tests with Playwright, unit tests with Vitest and Testing Library
+
+The test suite took longer than anything else. Git operations have more edge cases than you'd expect — empty repositories, force pushes, binary files, concurrent pushes to the same repo. The Playwright suite covers user-visible flows end to end; Vitest covers the git-adapter and access-control logic in isolation, against real repos rather than mocked isomorphic-git calls.
+
+## Pulling the git layer out
+
+Once the R2 adapter and the edge-safe git operations were solid — stress-tested against real clones, pushes, and merges, not just "works on my machine" — they moved out of the app entirely into two published packages that pushstack now depends on instead of carrying that logic inline:
+
+- **[@nandan-varma/git-fs-s3](https://www.npmjs.com/package/@nandan-varma/git-fs-s3)** — the S3/R2 filesystem adapter (with the caching and retry/circuit-breaker layers), the smart-HTTP protocol handler, and a higher-level ops layer (branches, commits, trees, history, diffs) built on top of it.
+- **[@nandan-varma/git-edge](https://www.npmjs.com/package/@nandan-varma/git-edge)** — an object-level three-way merge that works without a worktree, plus a parsed-object LRU cache, for running isomorphic-git somewhere with no disk at all (Workers, edge functions).
+
+They compose but neither imports the other — both just agree on isomorphic-git's plain `{ fs, gitdir, cache }` shape, so either is usable on its own.
+
+## Key decisions
+
+- **No native git binary, anywhere** — isomorphic-git for every operation, including tests, so the same code path runs locally and in a serverless function with no OS-level git dependency to provision
+- **R2 as the object store, with a fs-shaped adapter in front of it** — git's content-addressable storage maps naturally onto keyed object storage; the adapter is what lets isomorphic-git treat a bucket as if it were a disk
+- **Reads against R2 directly, writes through a hydrated scratch directory** — clone/fetch/browse don't need a worktree and can hit the cache-backed adapter directly; push/merge/checkout still route through isomorphic-git's own worktree-based operations, so those get a real (if ephemeral) local directory
+- **Extracting the git layer into standalone packages once it was proven** — the adapter and protocol handler had no pushstack-specific logic left in them; publishing them means every bug found chasing pushstack's own performance is fixed for anyone else running isomorphic-git off object storage, not stuck in a route handler
+- **Playwright for e2e over mocking git operations** — git has more edge cases than unit tests alone catch (empty repos, force pushes, binary files, concurrent writers); running against real repositories catches failures that mock data would hide
+- **TanStack Start for SSR** — server functions get direct database and R2 access on the initial render without an extra API round-trip
+
+## Built with
+
+- [TanStack Start](https://tanstack.com/start) — SSR framework
+- React + TypeScript
+- [isomorphic-git](https://isomorphic-git.org) — all git operations
+- [@nandan-varma/git-fs-s3](https://www.npmjs.com/package/@nandan-varma/git-fs-s3) — R2 filesystem adapter, smart-HTTP protocol, ops layer
+- [@nandan-varma/git-edge](https://www.npmjs.com/package/@nandan-varma/git-edge) — worktree-free merge, parsed-object cache
+- [Shiki](https://shiki.style) — syntax highlighting (web worker)
+- [Better Auth](https://www.better-auth.com) — authentication
+- [Drizzle ORM](https://orm.drizzle.team/) + [Neon](https://neon.tech/) — PostgreSQL
+- [Cloudflare R2](https://developers.cloudflare.com/r2/) — repository storage
+- [Resend](https://resend.com) — transactional email (password reset, verification)
+- [Playwright](https://playwright.dev) — e2e tests, [Vitest](https://vitest.dev) — unit tests

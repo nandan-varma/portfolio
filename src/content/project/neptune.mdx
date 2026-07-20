@@ -1,0 +1,30 @@
+---
+title: Neptune
+description: A Raycast-style Spotlight launcher for macOS, built from scratch in Swift - global hotkey, a blur overlay window, fuzzy search, app launching, and an in-progress calculator mode.
+date: "2026-04-14"
+repository: nandan-varma/SwiftLaunch
+published: true
+---
+
+I use Raycast every day and got curious how the actual mechanics work - a global hotkey that works from any app, a floating overlay window that doesn't steal focus from whatever you were doing, fuzzy search fast enough to feel instant. So I started building the same category of launcher myself, from the hotkey up.
+
+## The overlay, without stealing focus
+
+`HotkeyService` registers the global shortcut via `CGEventTap`, which is the same low-level mechanism system-wide hotkey tools use to intercept key events before any app gets them. The search window itself is a non-activating `NSWindow` with system vibrancy and blur - it appears without taking keyboard focus away from whatever was frontmost, and closes on escape or a click outside.
+
+## Where it stands
+
+The build so far covers global hotkey activation, the overlay window itself, a search model with a results list, and app launching from those results. Calculator mode - detecting a math expression in the search field and evaluating it inline, the way Spotlight and Raycast both do - is the phase in progress now.
+
+## Key decisions
+
+- **`CGEventTap` over an `NSEvent` global monitor** - a global monitor only observes events after other apps have already had first refusal; an event tap intercepts at a lower level, which is what makes a hotkey feel instant and reliable across every other frontmost app
+- **A non-activating overlay window** - stealing focus on every hotkey press would interrupt whatever the user was doing before they've even typed a query; a non-activating window lets the search overlay appear without that disruption
+- **XcodeGen over a hand-maintained `.xcodeproj`** - a generated project file from `project.yml` means the project structure is reviewable as plain text and regenerable, instead of a binary-ish file that's painful to diff or merge
+
+## Built with
+
+- Swift + SwiftUI + AppKit
+- `CGEventTap` - global hotkey
+- `NSWindow` - non-activating overlay with vibrancy
+- XcodeGen - reproducible Xcode project generation

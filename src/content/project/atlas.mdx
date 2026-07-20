@@ -1,0 +1,36 @@
+---
+title: Atlas
+description: A native desktop app for editing video file metadata and chapters - drag-and-drop chapter reordering, cover art, and export, all offline via Tauri v2 and ffmpeg.
+date: "2026-05-16"
+repository: nandan-varma/atlas
+published: true
+---
+
+I had a folder of video files with chapter markers I wanted to clean up - retitle a few, reorder others, fix a cover image - and every tool I found either wanted a subscription or an internet connection for something entirely local. So I built a small native app: open a video, edit its metadata and chapters, export, done, no network required.
+
+## Rust for the file, React for the UI
+
+The Tauri v2 Rust backend owns everything that touches the filesystem or a subprocess: native file dialogs (`tauri-plugin-dialog`), filesystem access (`tauri-plugin-fs`), and shelling out to ffmpeg (`tauri-plugin-shell`) for the actual metadata writes. Format-compatibility checks run on the backend too - if a loaded file has editing limitations for its container format, that surfaces as a toast on the frontend right after load, before the user gets deep into editing something that won't export cleanly.
+
+The React 19 frontend never touches ffmpeg directly - it calls typed `invoke` commands and renders whatever comes back. Chapters are reorderable via `@dnd-kit/sortable`, video preview runs through `@vidstack/react`, and the export dialog handles format selection.
+
+## State that survives mistakes
+
+Metadata edits go through Zustand stores split per domain - video, chapters, metadata - with Immer for immutable updates, which is what makes undo/redo on metadata edits straightforward instead of a manual diffing exercise. A dirty-state guard checks for unsaved changes before letting you open a new file, so a chapter reorder you forgot to export doesn't just vanish.
+
+## Key decisions
+
+- **Rust owns the filesystem and ffmpeg, React owns nothing but presentation** - keeping subprocess and file I/O entirely in the Tauri backend means the frontend can't accidentally shell out unsafely, and typed `invoke` calls give a clear contract at the boundary
+- **Immer-backed Zustand over plain reducers** - metadata edits needed real undo/redo; Immer's structural sharing makes that a matter of storing snapshots rather than hand-writing inverse operations for every edit type
+- **Format-compatibility warnings surfaced immediately on load** - telling a user their file has limitations right after opening it is far more useful than letting them discover it after they've already made edits and tried to export
+
+## Built with
+
+- [Tauri v2](https://v2.tauri.app) - Rust backend, native shell
+- React 19 + TypeScript + Vite
+- Tailwind CSS + Radix UI
+- [dnd-kit](https://dndkit.com) - chapter drag-and-drop
+- Zustand + Immer - state management with undo/redo
+- [@vidstack/react](https://www.vidstack.io) - video preview
+- ffmpeg - metadata reads/writes (shelled out via Tauri)
+- Sonner - toast notifications

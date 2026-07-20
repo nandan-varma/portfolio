@@ -29,3 +29,5 @@ pnpm-debug.log*
 # coverage
 coverage/
 stats.html
+.vercel
+.env*

@@ -1,0 +1,36 @@
+---
+title: Pluto OS
+description: A modular Rust operating system bootable on three architectures - x86_64, ARM64, and RISC-V64 - from a single Cargo workspace via a shared Hardware Abstraction Layer.
+date: "2026-02-19"
+repository: nandan-varma/pluto
+published: true
+---
+
+MarsOS and Sigrun are both x86_64-only, and I kept wondering how much of a kernel actually has to change to run on a completely different instruction set. Pluto OS is that question made concrete: one kernel, one Hardware Abstraction Layer, three architectures.
+
+## One HAL, three targets
+
+The workspace is organized so arch-specific code - boot sequence, interrupt handling, low-level memory setup - lives behind a Hardware Abstraction Layer, while the kernel core, scheduler, and drivers are written once against that abstraction. The same `kernel` crate compiles and boots under QEMU for `x86_64-unknown-none`, `aarch64-unknown-none`, and `riscv64imac-unknown-none-elf` - three separate Rust targets, one shared codebase for everything above the HAL boundary.
+
+## Workspace layout
+
+- `kernel` - the OS core, arch-independent
+- `bootloader` - Limine-based, arch-specific boot
+- `drivers/framebuffer-driver`, `drivers/disk-driver`, `drivers/keyboard-driver` - userspace-style device drivers
+- `shell` - an interactive command shell
+
+Each member compiles independently, which matters more here than in a single-architecture kernel - a change that only makes sense on one architecture shouldn't force a rebuild or reasoning pass across the other two.
+
+## Key decisions
+
+- **A HAL boundary drawn before writing three ports, not after** - retrofitting hardware abstraction onto a kernel written for one architecture is much harder than deciding upfront which code is arch-specific and enforcing that boundary from the start
+- **Cargo workspace over three separate repos** - kernel logic, drivers, and the shell all depend on the same HAL contract; keeping them in one workspace means a HAL change is caught by all three architecture builds in the same CI run
+- **Rust over C for a multi-arch kernel** - cross-compiling C to three wildly different targets means re-verifying memory-safety assumptions by hand each time; Rust's target-independent safety guarantees hold the same way regardless of which `rustc` target triple is active
+
+## Built with
+
+- Rust (`no_std`) - kernel, drivers, shell
+- x86_64, ARM64 (aarch64), RISC-V64 (riscv64) - target architectures
+- Limine - bootloader
+- QEMU - emulation and testing across all three targets
+- Cargo workspaces

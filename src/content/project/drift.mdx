@@ -1,0 +1,39 @@
+---
+title: Drift
+description: A native macOS YouTube client that never talks to Google - metadata comes from the privacy-respecting Invidious API and playback runs through a yt-dlp subprocess bridge.
+date: "2026-06-26"
+repository: nandan-varma/drift
+published: true
+---
+
+I wanted a YouTube client for macOS that doesn't send my viewing habits straight to Google, and I wanted to see how far I could get with genuinely zero third-party Swift packages - no networking library, no image loader, nothing. Drift is a SwiftUI app that gets metadata from Invidious (a privacy-respecting frontend for YouTube) and pulls the actual video stream through `yt-dlp`.
+
+## No single point of failure for metadata
+
+`InvidiousAPIClient` fires requests concurrently across multiple configured Invidious instances using `withThrowingTaskGroup`, since public Invidious instances go down or rate-limit unpredictably - relying on one would make the whole app as unreliable as its least stable instance. An actor-based `APICache` sits in front, caching both in-memory and to disk with a per-endpoint TTL. Everything is built behind an `InvidiousAPIProtocol`, so a `MockInvidiousAPIClient` can drive SwiftUI previews and tests without hitting the network at all.
+
+## Playback that doesn't depend on one source
+
+Video streams resolve through `YtDlpBridge`, a subprocess bridge around `yt-dlp`, with an Invidious direct-URL/HLS path as a fallback if the subprocess route fails. Decoupling playback from any single upstream source is the same idea as the multi-instance metadata fetching - one dependency going away shouldn't mean the app stops working.
+
+## Getting `AVPlayer` right across a mini-player handoff
+
+Drift has a persistent mini-player that survives navigation, which means `AVPlayer` observers - time observers, notification observers, `MPRemoteCommandCenter` handlers - have to be torn down and re-attached correctly as playback moves between the full view and the mini-player, or they silently accumulate across repeated navigation. None of `AVPlayer.rate`, `currentTime()`, or `timeControlStatus` are `@Observable`, and periodic time-observer closures can't safely mutate SwiftUI `@State` directly - so those get surfaced reactively via `TimelineView(.periodic)` instead.
+
+Parallel per-video metadata (channel info, comments, SponsorBlock segments, chapters, captions) fans out with `async let` rather than unstructured `Task { }`, so navigating away mid-load actually cancels the in-flight requests instead of letting them finish into nothing.
+
+## Key decisions
+
+- **Zero third-party Swift packages** - forcing every piece (networking, caching, subprocess management) to be hand-written keeps the dependency surface at exactly zero and means there's no upstream package that can break the build or introduce a supply-chain risk
+- **Multi-instance concurrent fetching for both metadata and playback** - a privacy-respecting API that depends on public, volunteer-run instances needs redundancy built in from the start, not bolted on after the first outage
+- **`async let` over unstructured tasks for parallel fetches** - structured concurrency ties the lifetime of fanned-out requests to the enclosing scope, so navigating away actually cancels in-flight work instead of leaving orphaned tasks running
+- **`TimelineView(.periodic)` for non-Observable `AVPlayer` state** - polling on a periodic timeline is the correct way to reactively read player properties that don't support Combine or `@Observable` directly, without unsafe mutation from a background time-observer closure
+
+## Built with
+
+- Swift + SwiftUI - zero third-party packages
+- Invidious API - privacy-respecting metadata and browsing
+- `yt-dlp` - subprocess-based stream extraction
+- `AVPlayer` - playback, persistent mini-player
+- Actor-based caching (in-memory + disk)
+- GitHub Actions CI, SwiftLint

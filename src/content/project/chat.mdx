@@ -1,13 +1,13 @@
 ---
 title: Chats
-description: A real-time chat app with rooms - built as a challenge to understand encryption and live database sync.
+description: A real-time chat app with rooms - built to understand live database sync and the key distribution problem in end-to-end encryption.
 date: "2024-02-14"
 repository: nandan-varma/chat
 url: https://chat.nandanvarma.com
 published: true
 ---
 
-I built this to really understand two things: how real-time database updates propagate across clients, and how end-to-end encryption works in a chat context. The first part is done. Encryption is still in progress.
+I built this to really understand two things: how real-time database updates propagate across clients, and how end-to-end encryption works in a chat context. The first part is working. E2E encryption is the active focus - it turns out to be a more interesting problem than it looks.
 
 ## Features
 
@@ -15,16 +15,16 @@ I built this to really understand two things: how real-time database updates pro
 - Chat rooms
 - Clean UI with shadcn/ui
 
-## TODO
+## Key decisions
 
-- End-to-end encryption (the original reason I started this)
+- **Live subscriptions over polling** — polling requires managing intervals and introduces artificial latency; subscriptions let the database push diffs directly to the client as they happen, which is the right model for a chat app where latency is user-visible
+- **Drizzle over Prisma for explicit migration files** — schema changes in version-controlled SQL files are reviewable and auditable; Prisma generates migrations behind the scenes in a way that's harder to inspect and reason about
+- **E2E encryption requires key exchange without a trusted server** — the server can never hold decryption keys; the key distribution problem has to be solved entirely on the client, which is why it's harder than server-side encryption and why most chat apps don't do it properly
+
+## Future directions
+
+- End-to-end encryption with client-side key management
 - Migrate remaining state from Firebase to PostgreSQL
-
-## What I learnt
-
-- How to keep UI in sync with live database changes
-- Database migrations with Drizzle ORM
-- The difference between symmetric and asymmetric encryption and why E2E chat is harder than it sounds
 
 ## Built with
 

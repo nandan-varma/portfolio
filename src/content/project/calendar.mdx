@@ -19,18 +19,18 @@ Calendar apps make you do all the work. You still have to figure out when you're
 - Dashboard with calendar analytics
 - Passkey authentication (no passwords)
 
-## TODO
+## Key decisions
+
+- **Tool use over prompt engineering for calendar mutations** — the model choosing which function to call with structured arguments is more reliable than parsing free-form date/time strings out of a text completion; structured tool calls also give clear audit trails for what the agent did
+- **Silent token refresh before every Calendar API call** — Google access tokens expire after an hour; the agent path fails silently without refresh, and the user never sees a useful error; refresh has to be handled before the tool is invoked, not after it fails
+- **Passkeys over passwords for an app with calendar write access** — eliminating passwords removes the account recovery and credential stuffing surface; a passkey-only app can't be compromised through phishing for a service that can send calendar events on your behalf
+- **Explicit fallback on ambiguous input** — when the model can't resolve a time reference it asks rather than guesses; the cost of a wrong calendar event is higher than one extra clarifying question
+
+## Future directions
 
 - Edit and delete events through the AI
 - Text-to-speech responses
 - Better multi-calendar support
-
-## What I learnt
-
-- How to build an AI agent that calls external APIs (OpenAI tool use + Google Calendar)
-- OAuth flow for Google Calendar - more involved than it looks
-- Passkey / WebAuthn authentication
-- Designing for ambiguity - natural language input breaks in ways typed forms don't
 
 ## Built with
 

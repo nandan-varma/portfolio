@@ -14,7 +14,7 @@ Meadows is a compiled language with a C-style syntax. You write `.ms` files, run
 
 Source (.ms)  →  Lexer  →  Parser  →  AST  →  CodeGen  →  LLVM IR  →  clang++  →  Binary
 
-Each stage is its own module. The lexer tokenises raw source with line/column tracking for error messages. The parser is a hand-written recursive descent parser with 11 levels of operator precedence. The AST covers 11 statement types and 11 expression types. The codegen walks the AST and emits LLVM IR, which clang++ then compiles to a native executable.
+Each stage is its own module. The lexer tokenises raw source with line/column tracking for error messages. The parser is a hand-written recursive descent parser with 11 levels of operator precedence. The AST covers 11 statement types and 11 expression types. The codegen walks the AST and emits LLVM IR, which clang++ then compiles to a native executable. The Catch2 test suite covers the full parse → codegen pipeline end-to-end, including security edge cases like integer overflow and out-of-bounds access.
 
 ## What the language looks like
 
@@ -35,27 +35,26 @@ Variables, functions, conditionals, loops, arrays, objects, string escapes - the
 
 ## LSP support
 
-The compiler also ships an LSP server so editors can provide completions and diagnostics for `.ms` files. I wanted the language to feel like a real tool, not just a toy that only runs from the terminal.
+The compiler also ships an LSP server with completions and diagnostics for `.ms` files. Implementing the protocol at the compiler stage means editor integration isn't an afterthought — the same symbol table the codegen uses drives the completion candidates.
 
-## Trying to run in the browser
+## WebAssembly path
 
-I spent a while attempting to compile Meadows to WebAssembly with Emscripten so it could run entirely in the browser. LLVM dependencies do not play nicely with Emscripten, so I made the native LLVM codegen conditional and built a separate WebAssembly code path. It partially works - the parser and AST run fine; the native backend is skipped when building for the web. Getting the full pipeline to run in a browser tab is still on the TODO list.
+LLVM dependencies don't cross-compile to WebAssembly cleanly via Emscripten, so I made the native LLVM codegen conditional and built a separate WebAssembly code path. The parser and AST run in the browser today; the native backend is skipped when building for the web. The full pipeline in a browser tab is still in progress.
 
-## What I learnt
+## Key decisions
 
-- How lexers, recursive descent parsers, and ASTs are structured
-- How LLVM IR works and how to emit it from a tree walk
-- Operator precedence parsing (the 11-level precedence table is deceptively tricky)
-- How Language Server Protocol works and what editors expect from it
-- The difference between what "compiling" feels like as a user vs what it actually does
+- **Recursive descent over a parser generator (yacc/ANTLR)** — hand-written parsers give exact control over error recovery and source location tracking; the 11-level precedence table is explicit and readable rather than embedded in a grammar file requiring a separate toolchain to modify
+- **LLVM IR over direct assembly emission** — LLVM handles register allocation, instruction selection, and platform-specific ABI; targeting IR means the compiler works on any architecture LLVM supports without adding architecture-specific codegen
+- **Conditional LLVM backend with a separate WebAssembly path** — LLVM doesn't cross-compile to WebAssembly cleanly from a browser context; separating the backends lets the parser and AST run in the browser today while the native path runs locally without compromise
+- **LSP server shipped alongside the compiler** — a language without editor support is a language people don't use; implementing completions and diagnostics at the compiler stage means editor integration shares the same symbol resolution as codegen
 
-## TODO
+## Future directions
 
 - Full WebAssembly build with LLVM compiled to wasm
 - Type system and static type checking
 - Standard library (file I/O, math, strings)
 - Better error messages with source spans
-- More language features: closures, structs, pattern matching
+- Closures, structs, pattern matching
 
 ## Built with
 

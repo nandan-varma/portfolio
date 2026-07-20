@@ -7,7 +7,7 @@ date: "2023-03-28"
 published: true
 ---
 
-A portfolio that's just a collection of links isn't useful to anyone. I wanted one where each project has its own page with context - why I built it, what I learnt, what I'd do differently. So I built this site from scratch and write the project pages in MDX.
+A portfolio that's just a collection of links isn't useful to anyone. I wanted one where each project has its own page with context - why I built it, what decisions I made, what I'd do differently. So I built this site from scratch and write the project pages in MDX.
 
 ![nandanvarma.com](https://raw.githubusercontent.com/nandan-varma/portfolio/main/public/og.png)
 
@@ -20,12 +20,11 @@ A portfolio that's just a collection of links isn't useful to anyone. I wanted o
 - [PostHog](https://posthog.com) analytics to see which projects people actually read
 - [RRWeb](https://github.com/rrweb-io/rrweb) session recording to understand how people navigate
 
-## What I learnt
+## Key decisions
 
-- How Astro's content collections and static generation work
-- SEO - canonical URLs, structured data, OG metadata
-- DNS setup and managing custom domains
-- How to use analytics to actually improve a site rather than just collect numbers
+- **Astro over Next.js for a content site** — Astro ships zero JavaScript by default; a portfolio with MDX content doesn't need client-side hydration and shouldn't pay the bundle cost for it
+- **PostHog and RRWeb together** — analytics shows which projects get read; session recording shows where people drop off and why; the combination makes changes testable rather than speculative
+- **Dynamic OG images at build time** — each project page gets a unique social image without manual work when content is added or updated
 
 ## Built with
 

@@ -16,17 +16,16 @@ I wanted a place to play chess online without ads, trackers, or accounts - and I
 - Drag-and-drop piece movement
 - Board-only mode for casual play or analysis
 
-## TODO
+## Key decisions
 
-- User-specific win/loss metrics
-- Login system for saving game history
-- Swap in a stronger engine
+- **Firebase over raw WebSockets** — real-time sync and auth came bundled without managing connection state or writing a game server; for a two-player board game the latency requirements are met by Realtime Database without custom infrastructure
+- **Delegated move validation to js-chess-engine** — correctly validating chess moves (pins, en passant, castling, check detection) is roughly 2000 lines of fiddly edge cases; the library is tested and correct; the board UI shouldn't duplicate that logic
+- **React DnD over native HTML5 drag-and-drop** — cross-browser touch support and clean mid-drag cancellation; the native API has inconsistent behaviour across browsers and no good model for rejecting a drop
 
-## What I learnt
+## Future directions
 
-- How Firebase Realtime Database handles live sync between two clients
-- Drag-and-drop event handling for a game board
-- How chess move validation works at the library level vs rolling it yourself
+- Login system and win/loss history
+- Stronger engine (Stockfish via WASM)
 
 ## Built with
 

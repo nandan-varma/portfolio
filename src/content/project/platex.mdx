@@ -1,0 +1,41 @@
+---
+title: Platex
+description: A published npm package, CLI, and edge-compatible microservice that compiles LaTeX to PDF from any framework speaking the Fetch API - 100% test coverage, CI-enforced.
+date: "2026-06-13"
+repository: nandan-varma/platex
+url: https://www.npmjs.com/package/@nandan-varma/platex
+published: true
+---
+
+I keep reaching for LaTeX to generate PDFs from code - resumes, invoices, reports - and every time I do, I'm re-solving the same problem: how do I run a full TeX toolchain somewhere that isn't my laptop, ideally without provisioning a server just to run `pdflatex`. So I built `@nandan-varma/platex`: a package, a CLI, and a compile service that all share one engine.
+
+## One client, every framework
+
+`createPlatexClient()` gives you a `.compile()` call from app code. `handleCompileRequest` is a drop-in route handler with the same signature in Next.js, TanStack Start, Astro, SvelteKit, and Remix - copy the recipe, done. There's also a standalone CLI, `npx @nandan-varma/platex main.tex`, for compiling without any of that.
+
+Underneath, the library picks the right engine automatically: if a `serviceUrl` is configured it compiles remotely via Tectonic; if system TeX is present it shells out to `pdflatex`/`xelatex`/`lualatex`; if neither, it falls back to a bundled Tectonic binary. Callers never configure which path they're on.
+
+## Tectonic, and why it matters for the edge
+
+[Tectonic](https://tectonic-typesetting.github.io) is a self-contained XeTeX engine that auto-downloads missing LaTeX packages from its own CDN and handles multi-pass compilation and bibliographies without a manual `bibtex` step. That self-containment is what makes the edge-runtime build possible at all - the compile service is verified in CI to ship zero `node:` imports, so it runs on Vercel's edge runtime and Cloudflare Workers, not just a Node server.
+
+## Hardening and coverage
+
+Compiling arbitrary user-supplied LaTeX is an invitation for resource exhaustion and path traversal if you're not careful, so I added explicit timeout budgets, resource-exhaustion limits, and path-traversal/integrity fixes on top of the compile pipeline - then drove the test suite to 100% coverage and made that a CI gate, not an aspiration. A single-pass log parser (replacing an earlier multi-pass one) cut hot-path latency roughly 100x on log unwrapping, which matters on warm serverless containers where the compile loop runs repeatedly.
+
+## Key decisions
+
+- **Auto-selecting engine over a required config flag** - most callers don't care whether compilation happens locally, via system TeX, or on a remote service; picking the best available path automatically means zero-config works out of the box and a `serviceUrl` is the only thing that changes behavior
+- **Tectonic over shelling out to a system TeX install** - a self-contained engine with CDN-based package fetching is what makes an edge-runtime build possible; you can't `apt install texlive` inside a Cloudflare Worker
+- **100% coverage as a CI gate, not a target** - a LaTeX compiler that silently mishandles a resource limit or a malformed path is a security bug, not just a missing test; making coverage a merge-blocking check keeps that class of regression out
+- **CLI, client, and route handlers sharing one compile core** - three different entry points for three different use cases, but none of them reimplement engine selection or Tectonic invocation independently
+
+## Built with
+
+- TypeScript - client, CLI, and service, dual CJS/ESM + `.d.ts` build via tsup
+- [Tectonic](https://tectonic-typesetting.github.io) - self-contained XeTeX engine
+- [Hono](https://hono.dev) - compile service router
+- Vercel (serverless + edge runtime) - hosting
+- Vitest - 100% coverage, CI-enforced
+- Astro + [Starlight](https://starlight.astro.build) - documentation site
+- GitHub Actions - CI

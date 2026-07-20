@@ -16,15 +16,15 @@ I kept switching between a Pomodoro timer in one tab, notes in another, and a to
 - Notes editor
 - Persistent across sessions via PostgreSQL
 
-## TODO
+## Key decisions
 
-- AI tools for note-taking - summarisation, cross-referencing, smart search
+- **Single-page layout over tabs or separate routes** — the timer, notes, and tasks are meant to be visible simultaneously during a work session, not navigated between; the whole point is reducing context switches
+- **Schema-first design with explicit migrations** — each feature's table is versioned from the start; adding fields later doesn't require ad-hoc column additions in production
+- **Independent API endpoints per feature** — timer, notes, and tasks can evolve without coupling; adding AI features to notes later doesn't require touching the timer or task routes
 
-## What I learnt
+## Future directions
 
-- Designing a UI that surfaces multiple tools without feeling cluttered
-- Building a database schema with migrations in mind - not just for today's features
-- API design for a multi-feature app where each feature could evolve independently
+- AI tools for note-taking: summarisation, cross-referencing, smart search
 
 ## Built with
 

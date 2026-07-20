@@ -1,0 +1,42 @@
+---
+title: Sigrun
+description: A capability-based microkernel OS written in Rust, modeled on seL4's security model - boots end-to-end in QEMU and runs a real ring-3 process over SYSCALL/SYSRET.
+date: "2026-02-19"
+repository: nandan-varma/sigrun
+published: true
+---
+
+MarsOS taught me what a monolithic kernel looks like from the inside. Sigrun is the opposite question: what if the kernel itself barely does anything, and every resource - memory, IPC endpoints, interrupts - is just an unforgeable capability a process either holds or doesn't?
+
+That's the seL4 model. I wanted to actually build one, not just read about object capabilities.
+
+## Boot to ring 3
+
+GRUB2's multiboot2 loader hands off in 32-bit protected mode. From there it's a hand-written transition into 64-bit long mode, then bringing up the frame allocator, page tables, GDT/TSS, a full IDT (all 256 vectors), the APIC, and a PIT-calibrated LAPIC timer before the round-robin scheduler takes over.
+
+The part that made this feel like a real kernel rather than a boot demo: `SYSCALL`/`SYSRET` entry via the `LSTAR`/`STAR` MSRs, plus a context-switch trampoline into ring 3. There's now a userspace init process that actually calls `sys_write`, `sys_getpid`, and `sys_exit` through that path - not just an interrupt-return demo that never leaves ring 0.
+
+## Capabilities instead of permissions
+
+Every kernel resource is reached through a `CapabilitySlot` - an unforgeable reference a process either has in its `CapabilityTable` or doesn't. There's no ambient authority: a process can't name an object it doesn't hold a capability to, which is the property that makes confused-deputy bugs structurally hard to write. Capabilities support move, copy, and loan transfer modes, with bitflag `CapRights` controlling exactly what a holder can do with what it's holding.
+
+IPC is built on the same rule. `Channel` and `Endpoint` types, async `WaitSet` notifications, message queues, and `SharedMemoryRegion`s are all capability-gated at the addressing level - a process can't reach an endpoint it wasn't explicitly handed a capability to.
+
+## Why a microkernel
+
+Drivers, filesystems, and the network stack are designed to live in userspace as services communicating over capability IPC, not in the kernel. That keeps the trusted computing base small on purpose - the kernel only needs to get scheduling, memory, capabilities, and IPC right, and everything else is a userspace program that can crash without taking the system down. It's aimed at cloud-native, virtualization-aware workloads (KVM, Xen) where a minimal, auditable TCB actually matters.
+
+## Key decisions
+
+- **Object capabilities over ACLs** - an unforgeable reference you either hold or don't is checkable locally, at the point of use, instead of requiring a global permission lookup; it also means a capability can be handed to another process as a first-class value
+- **`#![forbid(unsafe_op_in_unsafe_fn)]`** - every unsafe operation inside an `unsafe fn` must still be wrapped in its own `unsafe` block, so each one carries an explicit, locally-reviewable justification instead of inheriting a blanket exemption
+- **Microkernel over monolithic** - MarsOS already explored a monolithic kernel with everything in kernel space; Sigrun exists specifically to explore the opposite tradeoff, where minimizing the TCB is the whole point even though it means more IPC round-trips
+- **x86_64 first, ARM64 planned but not started** - getting one architecture's boot path, capability model, and IPC fully correct before generalizing the abstraction, rather than building a HAL against an unproven design
+
+## Built with
+
+- Rust (nightly, `#![no_std]`) - kernel and userspace
+- GRUB2 multiboot2 - bootloader
+- x86_64 - `extern "x86-interrupt"` handlers, hand-written `global_asm!` for the long-mode transition
+- QEMU - emulation and boot testing
+- Cargo workspaces - `arch`, `capability`, `ipc`, `memory`, `scheduler`, `interrupt`, `timer` as independently testable crates
