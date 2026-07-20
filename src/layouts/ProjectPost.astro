@@ -120,18 +120,11 @@ const { title, description, date, emoji, repository, url, published } =
 
 <script is:inline define:vars={{ projectTitle: title }}>
   function setupExternalLinkTracking() {
-    var externalLinks = document.querySelectorAll('header a[target="_blank"][href*="github.com"], header a[target="_blank"]:not([href*="github.com/nandan-varma"])');
+    var externalLinks = document.querySelectorAll('header a[target="_blank"]');
     externalLinks.forEach(function(link) {
       var href = link.getAttribute('href') || '';
-      // Only track project-specific GitHub and website links (not the profile link)
-      if (href.includes('github.com/nandan-varma') && !href.includes('/projects/') && href !== 'https://github.com/nandan-varma') return;
-      link.removeEventListener('click', handleExternalLinkClick);
-      link.addEventListener('click', handleExternalLinkClick);
-    });
-
-    // Track the featured project repo/url links specifically
-    var projectLinks = document.querySelectorAll('.mx-auto.mt-10 a[target="_blank"]');
-    projectLinks.forEach(function(link) {
+      // Skip the generic profile GitHub icon - only track project-specific links
+      if (href === 'https://github.com/nandan-varma') return;
       link.removeEventListener('click', handleExternalLinkClick);
       link.addEventListener('click', handleExternalLinkClick);
     });

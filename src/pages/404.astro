@@ -34,6 +34,13 @@ import BaseHead from "@/components/layout/BaseHead.astro";
             </div>
         </div>
     </main>
+
+    <script is:inline>
+      window.posthog?.capture('page_not_found', {
+        path: window.location.pathname,
+        referrer: document.referrer || null
+      });
+    </script>
 </html>
 <style>
     body {
