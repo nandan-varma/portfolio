@@ -114,8 +114,8 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 											featured?.data.date ? (
 												<time
 													datetime={new Date(
-														featured?.data.date,
-													+ "T12:00:00").toISOString()}
+														featured?.data.date + "T12:00:00",
+													).toISOString()}
 												>
 													{Intl.DateTimeFormat(
 														undefined,
