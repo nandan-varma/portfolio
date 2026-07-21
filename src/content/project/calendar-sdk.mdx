@@ -3,7 +3,7 @@ title: Calendar SDK
 description: A published 6-package TypeScript SDK unifying Google Calendar, Microsoft Graph, and CalDAV behind one provider-agnostic API - bring your own OAuth, bring your own storage.
 date: "2026-05-12"
 repository: nandan-varma/calendar-sdk
-url: https://www.npmjs.com/package/@nandan-varma/calendar-sdk
+url: https://www.npmjs.com/package/@calendar-sdk/core
 published: true
 ---
 
@@ -15,7 +15,7 @@ I'd already built one calendar integration - [Friday](/projects/calendar) talks 
 
 ## Six packages, not one
 
-The core package holds the unified services, a `StorageAdapter` interface, hooks, and a retrying transport layer - but it doesn't ship any provider by default. Each provider (`-google`, `-microsoft`, `-caldav`) is its own package, so a consumer who only needs Google Calendar doesn't pull in Microsoft Graph's dependencies. OAuth flow, token refresh, and encrypted token-set storage live in a standalone `-auth` package, reusable on its own outside the calendar context entirely. A `-mock` provider gives an in-memory implementation for tests and examples with zero network calls or credentials required.
+The core package (`@calendar-sdk/core`) holds the unified services, a `StorageAdapter` interface, hooks, and a retrying transport layer - but it doesn't ship any provider by default. Each provider (`@calendar-sdk/google`, `@calendar-sdk/microsoft`, `@calendar-sdk/caldav`) is its own package, so a consumer who only needs Google Calendar doesn't pull in Microsoft Graph's dependencies. OAuth flow, token refresh, and encrypted token-set storage live in a standalone `@calendar-sdk/auth` package, reusable on its own outside the calendar context entirely. A `@calendar-sdk/mock` provider gives an in-memory implementation for tests and examples with zero network calls or credentials required.
 
 ## Bring your own everything
 
@@ -25,7 +25,7 @@ The SDK deliberately doesn't own persistence or OAuth credentials - callers impl
 
 - **Splitting into 6 packages instead of one with peer dependencies** - a consumer using only Google Calendar shouldn't need Microsoft Graph's SDK in their `node_modules`; independent versioning per provider also means a CalDAV-specific fix doesn't force a version bump on the Google adapter
 - **`StorageAdapter` as an interface, not a bundled database** - the SDK unifies calendar APIs, not databases; forcing a specific storage layer would make it a worse fit for every app that already has its own persistence story
-- **A mock provider as a first-class package, not a test fixture** - shipping the mock as `@nandan-varma/calendar-sdk-mock` means examples and quickstarts can run with zero credentials and zero network calls, which matters a lot for anyone evaluating the SDK before wiring up real OAuth
+- **A mock provider as a first-class package, not a test fixture** - shipping the mock as `@calendar-sdk/mock` means examples and quickstarts can run with zero credentials and zero network calls, which matters a lot for anyone evaluating the SDK before wiring up real OAuth
 
 ## Built with
 

@@ -41,8 +41,8 @@ The test suite took longer than anything else. Git operations have more edge cas
 
 Once the R2 adapter and the edge-safe git operations were solid — stress-tested against real clones, pushes, and merges, not just "works on my machine" — they moved out of the app entirely into two published packages that pushstack now depends on instead of carrying that logic inline:
 
-- **[@nandan-varma/git-fs-s3](https://www.npmjs.com/package/@nandan-varma/git-fs-s3)** — the S3/R2 filesystem adapter (with the caching and retry/circuit-breaker layers), the smart-HTTP protocol handler, and a higher-level ops layer (branches, commits, trees, history, diffs) built on top of it.
-- **[@nandan-varma/git-edge](https://www.npmjs.com/package/@nandan-varma/git-edge)** — an object-level three-way merge that works without a worktree, plus a parsed-object LRU cache, for running isomorphic-git somewhere with no disk at all (Workers, edge functions).
+- **[git-fs-s3](https://www.npmjs.com/package/git-fs-s3)** — the S3/R2 filesystem adapter (with the caching and retry/circuit-breaker layers), the smart-HTTP protocol handler, and a higher-level ops layer (branches, commits, trees, history, diffs) built on top of it.
+- **[git-edge](https://www.npmjs.com/package/git-edge)** — an object-level three-way merge that works without a worktree, plus a parsed-object LRU cache, for running isomorphic-git somewhere with no disk at all (Workers, edge functions).
 
 They compose but neither imports the other — both just agree on isomorphic-git's plain `{ fs, gitdir, cache }` shape, so either is usable on its own.
 
@@ -60,8 +60,8 @@ They compose but neither imports the other — both just agree on isomorphic-git
 - [TanStack Start](https://tanstack.com/start) — SSR framework
 - React + TypeScript
 - [isomorphic-git](https://isomorphic-git.org) — all git operations
-- [@nandan-varma/git-fs-s3](https://www.npmjs.com/package/@nandan-varma/git-fs-s3) — R2 filesystem adapter, smart-HTTP protocol, ops layer
-- [@nandan-varma/git-edge](https://www.npmjs.com/package/@nandan-varma/git-edge) — worktree-free merge, parsed-object cache
+- [git-fs-s3](https://www.npmjs.com/package/git-fs-s3) — R2 filesystem adapter, smart-HTTP protocol, ops layer
+- [git-edge](https://www.npmjs.com/package/git-edge) — worktree-free merge, parsed-object cache
 - [Shiki](https://shiki.style) — syntax highlighting (web worker)
 - [Better Auth](https://www.better-auth.com) — authentication
 - [Drizzle ORM](https://orm.drizzle.team/) + [Neon](https://neon.tech/) — PostgreSQL

@@ -6,24 +6,24 @@ draft: true
 tags: ["development", "git", "performance", "serverless"]
 ---
 
-I've been reading a lot about GitHub downtime lately. One stat stuck with me: GitHub, across all its features, is up about **90% of the time**. Read that again. That means 1 out of every 10 times you go to use some part of GitHub, something is down. (If you want to go down that rabbit hole yourself, [here's the tracker](https://mrshu.github.io/github-statuses/).)
+I've been reading a lot about GitHub downtime lately. One stat stuck with me: GitHub, across all its features, is up about **90% of the time**. Read that again. That means 1 out of every 10 times you go to use some part of GitHub, something is down. I know that feeling from the inside — the push that hangs, the Actions run that never starts, the "please try again" at the worst possible moment. (If you want to go down that rabbit hole yourself, [here's the tracker](https://mrshu.github.io/github-statuses/).)
 
-That sounds bad. So my brain did the thing it always does with a mildly interesting stat: *what would it even take to make a git hosting site?* Not "I'm going to build a better GitHub" — I had no illusions about that. Just, could I get a working origin server, one you can actually push to and pull from, running somewhere it wouldn't go down because I forgot to restart a process at 2am.
+That sounds bad. So my brain did the thing it always does with a mildly interesting stat: *what would it even take to make a git hosting site?* Not "I'm going to build a better GitHub" — I had no illusions about that. Just: could I get a working origin server, one you can actually push to and pull from, running somewhere it wouldn't go down because I forgot to restart a process at 2am.
 
 ## What even is git
 
-Before writing any code I had to actually answer that, because "build a git host" is not a real spec. So I walked backwards from things I already knew:
+Before writing any code I had to actually answer that, because "build a git host" is not a real spec. So I walked backwards from the only things I actually knew, the ones that live in muscle memory:
 
 - an invisible `.git/` folder sitting in your repo
 - `git pull`, `git push`, `git commit -m "..."`
 
-Okay. If I could support the smart HTTP protocol well enough to act as an origin, that's good enough to call it git hosting. I didn't need to reimplement git. I needed to speak its language over HTTP.
+Okay. If I could support the smart HTTP protocol well enough to act as an origin, that's good enough to call it git hosting. I didn't need to reimplement git — I needed to speak its language over HTTP.
 
-I also wanted to avoid the obvious irony of building a downtime-motivated project on top of an always-on server I'd have to babysit. So: edge/serverless from day one.
+I also wanted to dodge the obvious irony of building a downtime-motivated project on top of an always-on server I'd have to babysit myself. So: edge/serverless from day one.
 
 ## Picking a stack
 
-I went with **TanStack Start** — I like SSR, I like React, I like Vite, and it let me hook directly into the server to run my own git protocol handling instead of fighting a framework that assumes you're serving JSON to a SPA.
+I went with **TanStack Start** — I like SSR, I like React, I like Vite, and it let me hook directly into the server to run my own git protocol handling instead of fighting a framework that assumes you're just serving JSON to a SPA.
 
 Once I sat with it, the project broke down into four pieces:
 
@@ -34,21 +34,21 @@ Once I sat with it, the project broke down into four pieces:
 | The edge | where that protocol handling actually runs |
 | Object storage | an S3-shaped place to put the git objects themselves |
 
-Before writing any of this myself, I went looking for prior art and found **[isomorphic-git](https://isomorphic-git.org)** — a pure JS implementation of git for Node and the browser. Close enough to build on. Over one weekend I hacked together a proof of concept that just wrote to a directory on the server's own disk. It worked. Clone, push, pull, all fine.
+Before writing any of this myself, I went looking for prior art and found **[isomorphic-git](https://isomorphic-git.org)** — a pure JS implementation of git for Node and the browser. Close enough to build on. Over one weekend I hacked together a proof of concept that just wrote to a directory on the server's own disk. It worked. Clone, push, pull, all fine. For about a day, I let myself believe the hard part was done.
 
 Then I tried to move it to S3, and immediately hit the wall: isomorphic-git was never designed for the edge, and it was definitely never designed for S3. It wants a filesystem — reads, writes, stats, directory listings — and object storage doesn't give you any of that for free. So I ended up writing an adapter that made an S3/R2 bucket look like a filesystem to isomorphic-git, plus a layer on top for the edge-specific gaps, like merging two branches without a real worktree, since there's no durable disk to check anything out onto.
 
 ## Then I loaded a repo
 
-It broke. Everything. I'm fairly sure I saw every single error TanStack Start is capable of throwing that day.
+It broke. Everything. I'm fairly sure I saw every single error TanStack Start is capable of throwing that day, a few of them for the first time in my life.
 
 A few days of fixing those one by one got me to a page that loaded end to end — tree view, commits, the works. It just took **about 3 minutes.**
 
 > Nobody is waiting three minutes to see a file tree.
 
-I let that sit for a while, mostly because "working but slow" is an easy trap to stay in. Later, just curious where all that time was actually going, I started timing things properly — every server function, every call out to R2 — instead of guessing.
+I let that sit for a while, mostly because "working but slow" is an easy trap to stay in — it *works*, technically, and there's always something else broken to chase. Later, just curious where all that time was actually going, I started timing things properly: every server function, every call out to R2, instead of guessing.
 
-The first number I found was almost funny: adding basic caching around "does this directory exist, does this ref exist" dropped a warm blob read from 2.2 seconds to 45 milliseconds. Great, I thought, that's most of it. Except a single-file commit was still taking 3.2 to 4.5 seconds, and digging into why turned up something dumber than I expected — one of my storage keys I had added a double slash in it that could never match anything real:
+The first number I found was almost funny: adding basic caching around "does this directory exist, does this ref exist" dropped a warm blob read from 2.2 seconds to 45 milliseconds. Great, I thought, that's most of it. Except a single-file commit was still taking 3.2 to 4.5 seconds, and digging into why turned up something dumber than I expected — one of my storage keys had a double slash in it that could never match anything real:
 
 ```diff
 - repos/alice/blog//git/objects/e6/9de29bb2d1d6434b8b29ae775ad8c2e48c5391
@@ -61,9 +61,9 @@ Fixing that, along with four other bugs in the same family, brought that commit 
 
 Next was the commit history walk behind the file tree. It was eating 36 of the 39 seconds a cold page load took, and once I actually looked, the reason was almost embarrassing: it was fetching one commit's data at a time, waiting for each to finish before starting the next, even though most of that work didn't depend on the step before it.
 
-Then I found the one that actually made me chuckle. Every push was supposed to clean up old, now-redundant pack files in R2, but the cleanup step had a safety check that, once a repo's history had any overlap between packs — which happens almost immediately — refused to ever run again. Every repo I'd been testing with had been quietly getting slower, forever, with no fix in sight until someone happened to notice.
+Then I found the one that actually made me laugh out loud, alone, at my desk. Every push was supposed to clean up old, now-redundant pack files in R2, but the cleanup step had a safety check that, once a repo's history had any overlap between packs — which happens almost immediately — refused to ever run again. Every repo I'd been testing with had been quietly getting slower, forever, with no fix in sight until someone happened to notice. That someone was me, months later, wondering why my own test repo felt sluggish.
 
-Fixing that took an incremental push from 3.4-3.8 seconds down to 1.5-1.8. Last was something smaller: isomorphic-git firing off several concurrent lookups for the same thing on a cold cache, so four callers asking the same question at once turned into four real round trips instead of one. None of these were exotic — they were just bugs, and I only found them once I started measuring. Here's the whole chase, side by side:
+Fixing that took an incremental push from 3.4-3.8 seconds down to 1.5-1.8. Last was something smaller: isomorphic-git firing off several concurrent lookups for the same thing on a cold cache, so four callers asking the same question at once turned into four real round trips instead of one. None of these were exotic — they were just bugs, and I only found them once I actually started measuring instead of guessing. Here's the whole chase, side by side:
 
 | What | Before | After |
 | --- | --- | --- |
@@ -74,7 +74,7 @@ Fixing that took an incremental push from 3.4-3.8 seconds down to 1.5-1.8. Last 
 
 ## Then I got curious about the compute bill
 
-Even after the R2 side got fast, I noticed the my deployment dashboard still showed more CPU time than seemed reasonable for a project nobody but me was really using. That turned into its own rabbit hole, separate from R2 entirely — poking at which work actually belonged on the server versus the client:
+Even after the R2 side got fast, my deployment dashboard still showed more CPU time than seemed reasonable for a project nobody but me was really using. That turned into its own rabbit hole, separate from R2 entirely — poking at which work actually belonged on the server versus the client:
 
 - [x] only compute what's actually needed for a given request
 - [x] only send the client what it's actually going to render
@@ -82,22 +82,22 @@ Even after the R2 side got fast, I noticed the my deployment dashboard still sho
 - [x] patch isomorphic-git itself with shortcuts our storage model allows — skip checks that can never succeed, skip probes for files that structurally can't exist
 - [x] cache aggressively, and be deliberate about *when* that cache gets busted
 
-None of it was one clean fix. It was a lot of small, individually-obvious-in-hindsight changes, each one found by poking at the request.
+None of it was one clean fix. It was a lot of small, individually-obvious-in-hindsight changes, each one found by poking at a request and asking, honestly, *does this need to happen at all?*
 
 ## Where it landed
 
-By the time the storage adapter and the edge-safe git operations had been through enough real clones, pushes, and merges that I actually trusted them, leaving that logic buried in a route handler started to feel like a waste — like keeping the interesting part of a side project locked away where only I'd ever see it. So I pulled both pieces out and published them as their own packages:
+By the time the storage adapter and the edge-safe git operations had been through enough real clones, pushes, and merges that I actually trusted them, leaving that logic buried in a route handler started to feel like a waste — like keeping the most interesting part of a side project locked away where only I'd ever see it. So I pulled both pieces out and published them as their own packages:
 
-- **[git-fs-s3](https://www.npmjs.com/package/@nandan-varma/git-fs-s3)** — the S3/R2 filesystem adapter, plus the retry/circuit-breaker and caching layer on top
-- **[git-edge](https://www.npmjs.com/package/@nandan-varma/git-edge)** — the worktree-free merge and the rest of the edge-only git operations
+- **[git-fs-s3](https://www.npmjs.com/package/git-fs-s3)** — the S3/R2 filesystem adapter, plus the retry/circuit-breaker and caching layer on top
+- **[git-edge](https://www.npmjs.com/package/git-edge)** — the worktree-free merge and the rest of the edge-only git operations
 
 pushstack now just imports both instead of carrying that logic inline. They don't need each other, either — both just agree on isomorphic-git's plain `{ fs, gitdir, cache }` shape, no shared internals or version coupling, so either one is usable entirely on its own.
 
-Which means every one of those "why is this slow" bugs I chased down for pushstack's own load times is now fixed somewhere anyone else running isomorphic-git off a real disk might eventually hit too, instead of staying a one-off fix nobody else will ever see.
+Which means every one of those "why is this slow" bugs I chased down for pushstack's own load times is now fixed somewhere anyone else running isomorphic-git against object storage — S3, R2, whatever — might eventually hit too, instead of staying a one-off fix nobody else will ever see.
 
-Pushstack is not faster or reliable than GitHub, and honestly that was never really the point.
+Pushstack is not faster or more reliable than GitHub, and honestly that was never really the point.
 
-The point was to see if git hosting on edge is even possible, so I guess it is.
+The point was to see if git hosting on edge is even possible. Turns out it is — just, apparently, one bug at a time.
 
 {/*
 LinkedIn "read more" post:
