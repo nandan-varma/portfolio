@@ -7,7 +7,7 @@ import vercel from "@astrojs/vercel";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://www.nandanvarma.com",
+  site: "https://www.nandan.fyi",
   integrations: [mdx(), sitemap()],
 
   vite: {

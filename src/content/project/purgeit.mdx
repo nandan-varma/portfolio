@@ -1,0 +1,42 @@
+---
+title: purgeit
+description: An interactive TUI (and scriptable CLI) to find and delete regenerable dev build artifacts - node_modules, dist, target, Pods - across every project on disk, with 60+ built-in rules across 16 ecosystems.
+date: "2026-07-23"
+repository: nandan-varma/purgeit
+url: https://purgeit.nandan.fyi
+published: true
+---
+
+Every dev machine accumulates the same kind of dead weight: `node_modules` in a project you haven't opened in a year, `target/` from a Rust experiment, `Pods/` from an old iOS build. It's all safely regenerable, but finding and clearing it across a `~/dev` full of projects means either a manual `find` spree or a one-off shell script per ecosystem. purgeit is that cleanup as a real tool - scan once, see everything reclaimable, delete only what you select.
+
+It's just as useful on cloud dev environments as on a local machine - Codespaces, devcontainers, and other disk-quota-constrained remote boxes tend to run out of space from exactly this kind of regenerable build output, and purgeit's headless/JSON flags make it as easy to wire into a container's startup or a cron job there as into a local terminal.
+
+## Projects mode vs. flat mode
+
+The default scan groups matches by top-level project directory, so a size like "2.3GB" is attached to "the-old-api project" rather than a bare path three levels deep - the number that actually helps you decide what to delete is "how much does this whole project cost me," not the size of an individual `node_modules`. `--full` switches to a flat scan when you want every match everywhere, e.g. across nested monorepo packages that projects mode would otherwise fold into one parent.
+
+Sizing itself is computed via `du -s -k` on macOS/Linux, batched through a `DuBatcher` that coalesces concurrent size requests into fewer `du` process forks - one of the earlier versions shelled out per-match, which turns into hundreds of forks on a large scan. Windows has no `du`, so sizing falls back to a pure-Node recursive `stat` walker - correct, just slower on very large trees.
+
+## Safe by default
+
+Nothing is preselected, and the TUI only deletes after an explicit multi-select and confirmation - full-row highlight for selection rather than an easy-to-miss checkbox. Headless mode (`--json`, `--delete`) defaults to `--dry-run` unless `--delete` is passed explicitly, so scripting purgeit into CI or a cron job can't accidentally turn a status check into a deletion run.
+
+Rules are also gateable: a rule like matching `dist/` can require a companion file (e.g. a build config) to be present before it's offered, so a directory that happens to be named `dist` but isn't actually a build artifact doesn't get flagged. `--no-gated` restricts a run to only the always-safe rule set.
+
+## Key decisions
+
+- **`du` batching over per-match shelling** - forking a `du` process per match doesn't scale past a few dozen matches; `DuBatcher` coalesces concurrent size requests so process count grows with `concurrency`, not match count
+- **Headless defaults to dry-run** - a tool meant to be wired into cron/CI has to fail safe by default; `--delete` is the one flag that has to be typed on purpose
+- **Config files are executed as code, not data** - `purgeit.config.ts`/`.js` run like an ESLint or Jest config (same trust model), which is what makes rules extensible via arbitrary `when` conditions instead of a fixed schema
+- **Gated rules over static path matching** - some artifact directories (`dist`, `build`) are ambiguous by name alone; gating a rule on a companion file's presence cuts false positives without hardcoding project-specific exceptions
+
+Full CLI reference, configuration guide, the built-in rules list, and architecture notes are on the [hosted docs site](https://purgeit.nandan.fyi).
+
+## Built with
+
+- TypeScript
+- Ink - interactive terminal UI
+- cosmiconfig - config file resolution
+- tsup - library + CLI build
+- Vitest - tests (100% coverage threshold outside the UI layer)
+- Astro Starlight - hosted docs site

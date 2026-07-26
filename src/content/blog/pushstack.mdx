@@ -1,8 +1,8 @@
 ---
 title: I built a git host to see if I can
 description: Needed to publish a couple of npm packages in the process, but turns out I can.
-date: "2026-07-20"
-draft: true
+date: "2026-07-28"
+draft: false
 tags: ["development", "git", "performance", "serverless"]
 ---
 
@@ -84,6 +84,8 @@ Even after the R2 side got fast, my deployment dashboard still showed more CPU t
 
 None of it was one clean fix. It was a lot of small, individually-obvious-in-hindsight changes, each one found by poking at a request and asking, honestly, *does this need to happen at all?*
 
+You can see more about the architecture here : https://www.nandan.fyi/project/pushstack
+
 ## Where it landed
 
 By the time the storage adapter and the edge-safe git operations had been through enough real clones, pushes, and merges that I actually trusted them, leaving that logic buried in a route handler started to feel like a waste — like keeping the most interesting part of a side project locked away where only I'd ever see it. So I pulled both pieces out and published them as their own packages:
@@ -109,16 +111,13 @@ Across all its features, that means roughly 1 out of every 10 times you go to us
 That got me thinking: what would it even take to make a git hosting site?
 
 Wrote git protocol handling,
-ran it on the edge/serverless,
-wrote couple of npm packages along the way to make my life easier
+tried running it on the edge/serverless, ran into too many issues
+wrote and published couple of npm packages along the way to make it work
 Debugged a lot of performance issues
-In the end, You can commit, push, pull, and browse a repo in a browser with all the features github has
+In the end, Got a really good workflow similar to GitHub
 
-Read more: https://www.nandanvarma.com/blog/pushstack
+Read more: https://www.nandan.fyi/blog/pushstack
 
-Here is a link to a tracker if you want to go down that rabbit hole yourself: https://mrshu.github.io/github-statuses/
+Here is a link to that github tracker if you want to go down that rabbit hole yourself: https://mrshu.github.io/github-statuses/
 
-
-
-#buildinpublic #softwareengineering #serverless #opensource
 */}

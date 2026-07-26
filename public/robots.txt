@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.nandanvarma.com/sitemap-index.xml
+Sitemap: https://www.nandan.fyi/sitemap-index.xml
