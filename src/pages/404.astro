@@ -1,13 +1,15 @@
 ---
 // 404 page referenced from https://codepen.io/GLITCHXploitR/pen/OxGKrq
 import BaseHead from "@/components/layout/BaseHead.astro";
+import { SITE_TITLE } from "@/consts";
 ---
 
-<html>
+<html lang="en">
     <head>
         <BaseHead
-            title={"404 - Page not found"}
-            description={"404 - Page not found"}
+            title={`404 - Page not found | ${SITE_TITLE}`}
+            description={"The page you're looking for doesn't exist."}
+            noindex
         />
     </head>
 

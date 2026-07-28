@@ -3,15 +3,17 @@ import Navigation from "@/components/layout/Navigation.astro";
 import BaseHead from "@/components/layout/BaseHead.astro";
 import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 import GlassCard from "@/components/cards/GlassCard.astro";
-import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+import { SITE_TITLE } from "../consts";
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead
-			title={SITE_TITLE}
-			description={SITE_DESCRIPTION}
+			title={`Contact | ${SITE_TITLE}`}
+			description={
+				"Get in touch with Nandan Varma via email, GitHub, or LinkedIn."
+			}
 			image="/og/contact.png"
 		/>
 	</head>
@@ -23,12 +25,12 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 				class="px-6 pt-16 mx-auto space-y-8 max-w-7xl lg:px-8 md:space-y-16 md:pt-24 lg:pt-32"
 			>
 				<div class="max-w-2xl mx-auto lg:mx-0">
-					<h2
+					<h1
 						class="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl"
 						transition:name={"Contact"}
 					>
 						Contact
-					</h2>
+					</h1>
 				</div>
 				<div>
 					<div

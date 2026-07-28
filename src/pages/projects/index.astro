@@ -6,8 +6,11 @@ import GlassCard from "@/components/cards/GlassCard.astro";
 import Article from "@/components/content/Article.astro";
 import BaseHead from "@/components/layout/BaseHead.astro";
 import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
+import { SITE_TITLE } from "@/consts";
 
-const projects = await getCollection("project");
+const projects = (await getCollection("project")).filter(
+	(project) => project.data.published,
+);
 
 // Impressiveness rank, mirrors the tiers in Claude/Resume/Projects.md (T1 > T2 > T3),
 // with projects that never made that list ranked below T3 by recency.
@@ -79,8 +82,10 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 <html lang="en">
 	<head>
 		<BaseHead
-			title={"Projects"}
-			description={"Projects"}
+			title={`Projects | ${SITE_TITLE}`}
+			description={
+				"Software projects by Nandan Varma - operating systems, compilers, developer tools, and full-stack apps built from scratch."
+			}
 			image="/og/projects.png"
 		/>
 	</head>
@@ -92,12 +97,12 @@ if (top3) sorted.splice(sorted.indexOf(top3), 1);
 				class="px-6 pt-16 mx-auto space-y-8 max-w-7xl lg:px-8 md:space-y-16 md:pt-24 lg:pt-32"
 			>
 				<div class="max-w-2xl lg:mx-0">
-					<h2
+					<h1
 						class="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl"
 						transition:name={"Projects"}
 					>
 						Projects
-					</h2>
+					</h1>
 				</div>
 
 				<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">

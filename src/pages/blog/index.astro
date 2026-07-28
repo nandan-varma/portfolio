@@ -6,6 +6,7 @@ import GlassCard from "@/components/cards/GlassCard.astro";
 import Blog from "@/components/content/Blog.astro";
 import BaseHead from "@/components/layout/BaseHead.astro";
 import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
+import { SITE_TITLE } from "@/consts";
 
 const sorted = (await getCollection("blog"))
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
@@ -22,7 +23,13 @@ const remaining = sorted.slice(3);
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={"Blog"} description={"Blog"} image="/og/blog.png" />
+		<BaseHead
+			title={`Blog | ${SITE_TITLE}`}
+			description={
+				"Writing by Nandan Varma on software engineering, side projects, and what building them taught him."
+			}
+			image="/og/blog.png"
+		/>
 	</head>
 	<body class="bg-black">
 		<BackgroundAnimation />
@@ -32,12 +39,12 @@ const remaining = sorted.slice(3);
 				class="px-6 pt-16 mx-auto space-y-8 max-w-7xl lg:px-8 md:space-y-16 md:pt-24 lg:pt-32"
 			>
 				<div class="max-w-2xl lg:mx-0">
-					<h2
+					<h1
 						class="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl"
 						transition:name={"Blog"}
 					>
 						Blog
-					</h2>
+					</h1>
 				</div>
 
 				<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">

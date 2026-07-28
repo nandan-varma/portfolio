@@ -6,6 +6,7 @@ import "@/styles/mdx.css";
 
 import { render } from "astro:content";
 import BaseHead from "@/components/layout/BaseHead.astro";
+import { SITE_TITLE } from "@/consts";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("project");
@@ -23,9 +24,10 @@ const { Content } = await render(post);
 <html lang="en">
 	<head>
 		<BaseHead
-			title={post.data.title}
+			title={`${post.data.title} | ${SITE_TITLE}`}
 			description={post.data.description}
 			image={`/og/project/${post.id}.png`}
+			noindex={!post.data.published}
 		/>
 	</head>
 	<body>
