@@ -7,6 +7,10 @@
 	color: var(--fg);
 }
 
+.mdx-body > :first-child {
+	margin-top: 0;
+}
+
 .mdx-body h1 {
 	margin-top: 0.5rem;
 	scroll-margin-top: 5rem;

@@ -6,7 +6,7 @@ type Props = CollectionEntry<"project">["data"];
 const { title, description, repository, url } = Astro.props;
 ---
 
-<header class="relative overflow-hidden pt-32 pb-16 sm:pt-40 sm:pb-24 px-4 sm:px-6">
+<header class="relative overflow-hidden pt-32 pb-10 sm:pt-40 sm:pb-12 px-4 sm:px-6">
 	<div class="mx-auto max-w-3xl text-center flex flex-col items-center">
 		<h1
 			class="text-4xl sm:text-6xl font-bold tracking-tight text-fg"
@@ -52,6 +52,12 @@ const { title, description, repository, url } = Astro.props;
 
 <div class="container mx-auto px-4 sm:px-6 max-w-3xl w-full pb-24">
 	<slot />
+
+	<div class="mt-16 pt-8 border-t border-border">
+		<a href="/projects" class="nav-link px-0! text-sm font-semibold text-brand hover:bg-transparent hover:opacity-70">
+			&larr; Back to all projects
+		</a>
+	</div>
 </div>
 
 <script is:inline define:vars={{ projectTitle: title }}>

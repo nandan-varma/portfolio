@@ -26,9 +26,9 @@ const recentPosts = (await getCollection("blog"))
 	navPosition="bottom"
 	navShowBack={false}
 >
-	<div class="flex-1 flex flex-col pb-32">
+	<div class="flex-1 flex flex-col pb-40">
 		<section
-			class="px-6 pt-28 pb-16 max-w-5xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-10 items-center"
+			class="px-6 pt-24 pb-12 max-w-5xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
 		>
 			<div class="flex flex-col items-center lg:items-start gap-6 text-center lg:text-left">
 				<p class="chip animate-fade-up">👋 hey, I build things</p>
@@ -58,7 +58,7 @@ const recentPosts = (await getCollection("blog"))
 			</div>
 		</section>
 
-		<section class="px-6 pb-16 max-w-5xl mx-auto w-full" data-reveal>
+		<section class="px-6 pb-12 max-w-5xl mx-auto w-full" data-reveal>
 			<div class="flex items-center justify-between mb-6">
 				<h2 class="text-xl sm:text-2xl font-bold text-fg">Selected work</h2>
 				<a

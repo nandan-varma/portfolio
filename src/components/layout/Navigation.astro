@@ -16,7 +16,8 @@ const { position = "top", showBack = true } = Astro.props;
 >
 	<nav
 		class:list={[
-			"flex items-center gap-4 mx-auto max-w-3xl px-4 py-2.5 rounded-lg border border-card-border bg-card/90 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.08),0_8px_20px_-8px_rgba(0,0,0,0.15)]",
+			"flex items-center gap-4 mx-auto px-4 py-2.5 rounded-lg border border-card-border bg-card/90 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.08),0_8px_20px_-8px_rgba(0,0,0,0.15)]",
+			position === "bottom" ? "max-w-md" : "max-w-3xl",
 			showBack ? "justify-between" : "justify-center",
 		]}
 	>
@@ -45,7 +46,12 @@ const { position = "top", showBack = true } = Astro.props;
 			)
 		}
 
-		<div class="flex items-center gap-0.5 sm:gap-1 text-sm sm:text-base">
+		<div
+			class:list={[
+				"flex items-center text-sm sm:text-base",
+				position === "bottom" ? "gap-2 sm:gap-4" : "gap-0.5 sm:gap-1",
+			]}
+		>
 			<a
 				href="/projects"
 				class="nav-link px-2.5! sm:px-4! text-muted-fg hover:text-fg hover:bg-bg-soft"

@@ -24,17 +24,14 @@ const remaining = sorted.slice(3);
 	image="/og/blog.png"
 >
 	<div class="px-6 pt-32 pb-16 mx-auto space-y-12 max-w-6xl w-full lg:px-8 lg:pt-40">
-		<h1
-			class="text-4xl sm:text-5xl font-bold tracking-tight text-fg gradient-text"
-			transition:name={"Blog"}
-		>
+		<h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-fg" transition:name={"Blog"}>
 			Blog
 		</h1>
 
 		<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 			<a href={`/blog/${featured?.id}`} class="block h-full group">
 				<Card reveal class="h-full">
-					<article class="relative w-full p-6 md:p-10 flex flex-col min-h-full">
+					<article class="relative w-full h-full p-6 md:p-10 flex flex-col">
 						<span class="text-xs font-medium text-muted-fg">
 							{featured?.data.date ? (
 								<time datetime={new Date(featured?.data.date + "T12:00:00").toISOString()}>
@@ -51,21 +48,19 @@ const remaining = sorted.slice(3);
 							{featured?.data.title}
 						</h2>
 						<p
-							class="mt-4 leading-8 text-muted-fg flex-1"
+							class="mt-4 leading-8 text-muted-fg"
 							transition:name={"blog-desc-" + featured?.data.title}
 						>
 							{featured?.data.description}
 						</p>
-						<div class="pt-4">
-							<p class="text-brand font-semibold hidden lg:block">
-								Read more <span aria-hidden="true">&rarr;</span>
-							</p>
-						</div>
+						<p class="mt-auto pt-6 text-brand font-semibold hidden lg:block">
+							Read more <span aria-hidden="true">&rarr;</span>
+						</p>
 					</article>
 				</Card>
 			</a>
 
-			<div class="flex flex-col w-full gap-6">
+			<div class="grid grid-rows-2 w-full gap-6">
 				{[top2, top3].filter((b) => b !== undefined).map((blog, i) => (
 					<Card reveal style={`transition-delay: ${(i + 1) * 80}ms`}>
 						<Blog id={blog.id} blog={blog.data} views={0} />
@@ -74,28 +69,12 @@ const remaining = sorted.slice(3);
 			</div>
 		</div>
 
-		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-			<div class="grid grid-cols-1 gap-4">
-				{remaining.filter((_, i) => i % 3 === 0).map((blog, i) => (
-					<Card reveal style={`transition-delay: ${(i % 5) * 60}ms`}>
-						<Blog id={blog.id} blog={blog.data} views={0} />
-					</Card>
-				))}
-			</div>
-			<div class="grid grid-cols-1 gap-4">
-				{remaining.filter((_, i) => i % 3 === 1).map((blog, i) => (
-					<Card reveal style={`transition-delay: ${(i % 5) * 60}ms`}>
-						<Blog id={blog.id} blog={blog.data} views={0} />
-					</Card>
-				))}
-			</div>
-			<div class="grid grid-cols-1 gap-4">
-				{remaining.filter((_, i) => i % 3 === 2).map((blog, i) => (
-					<Card reveal style={`transition-delay: ${(i % 5) * 60}ms`}>
-						<Blog id={blog.id} blog={blog.data} views={0} />
-					</Card>
-				))}
-			</div>
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			{remaining.map((blog, i) => (
+				<Card reveal style={`transition-delay: ${(i % 6) * 50}ms`}>
+					<Blog id={blog.id} blog={blog.data} views={0} />
+				</Card>
+			))}
 		</div>
 	</div>
 </Layout>
