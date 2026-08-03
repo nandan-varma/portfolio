@@ -1,6 +1,22 @@
 ---
+import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
+import Card from "@/components/cards/Card.astro";
+import Article from "@/components/content/Article.astro";
+import Blog from "@/components/content/Blog.astro";
+import TerminalHero from "@/components/TerminalHero.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+
+const allProjects = await getCollection("project");
+const featuredTitles = ["PushStack", "MarsOS", "Nemesis"];
+const featuredProjects = featuredTitles
+	.map((t) => allProjects.find((p) => p.data.title === t && p.data.published))
+	.filter((p) => p !== undefined);
+
+const recentPosts = (await getCollection("blog"))
+	.filter((post) => !post.data.draft)
+	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
+	.slice(0, 2);
 ---
 
 <Layout
@@ -10,23 +26,78 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 	navPosition="bottom"
 	navShowBack={false}
 >
-	<div class="flex-1 flex flex-col items-center justify-center gap-8 px-6 pb-28 text-center">
-		<p class="chip animate-fade-up">👋 hey, I build things</p>
-
-		<h1
-			class="text-5xl sm:text-7xl md:text-8xl font-extrabold tracking-tight gradient-text animate-fade-up"
-			style="animation-delay: 0.08s;"
-			transition:name={"Nandan Varma"}
+	<div class="flex-1 flex flex-col pb-32">
+		<section
+			class="px-6 pt-28 pb-16 max-w-5xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-10 items-center"
 		>
-			Nandan Varma
-		</h1>
+			<div class="flex flex-col items-center lg:items-start gap-6 text-center lg:text-left">
+				<p class="chip animate-fade-up">👋 hey, I build things</p>
 
-		<p
-			class="max-w-xl text-lg sm:text-xl text-muted-fg animate-fade-up"
-			style="animation-delay: 0.16s;"
-		>
-			Software engineer building operating systems, compilers, and
-			full-stack apps &mdash; usually all three before breakfast.
-		</p>
+				<h1
+					class="text-4xl sm:text-6xl font-extrabold tracking-tight gradient-text animate-fade-up"
+					style="animation-delay: 0.08s;"
+					transition:name={"Nandan Varma"}
+				>
+					Nandan Varma
+				</h1>
+
+				<p
+					class="max-w-md text-lg sm:text-xl text-muted-fg animate-fade-up"
+					style="animation-delay: 0.16s;"
+				>
+					Software engineer building operating systems, compilers, and
+					full-stack apps &mdash; usually all three before breakfast.
+				</p>
+			</div>
+
+			<div
+				class="flex justify-center lg:justify-end animate-fade-up"
+				style="animation-delay: 0.24s;"
+			>
+				<TerminalHero />
+			</div>
+		</section>
+
+		<section class="px-6 pb-16 max-w-5xl mx-auto w-full" data-reveal>
+			<div class="flex items-center justify-between mb-6">
+				<h2 class="text-xl sm:text-2xl font-bold text-fg">Selected work</h2>
+				<a
+					href="/projects"
+					class="nav-link px-0! text-sm font-semibold text-brand hover:bg-transparent hover:opacity-70"
+				>
+					View all &rarr;
+				</a>
+			</div>
+			<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+				{
+					featuredProjects.map((project, i) => (
+						<Card reveal data-tilt style={`transition-delay: ${i * 80}ms`}>
+							<Article id={project.id} project={project.data} views={0} />
+						</Card>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="px-6 max-w-5xl mx-auto w-full" data-reveal>
+			<div class="flex items-center justify-between mb-6">
+				<h2 class="text-xl sm:text-2xl font-bold text-fg">Recent writing</h2>
+				<a
+					href="/blog"
+					class="nav-link px-0! text-sm font-semibold text-brand hover:bg-transparent hover:opacity-70"
+				>
+					View all &rarr;
+				</a>
+			</div>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				{
+					recentPosts.map((post, i) => (
+						<Card reveal data-tilt style={`transition-delay: ${i * 80}ms`}>
+							<Blog id={post.id} blog={post.data} views={0} />
+						</Card>
+					))
+				}
+			</div>
+		</section>
 	</div>
 </Layout>

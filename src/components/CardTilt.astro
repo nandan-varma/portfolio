@@ -1,0 +1,36 @@
+---
+---
+
+<script is:inline>
+	function setupCardTilt() {
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+		if (!window.matchMedia("(pointer: fine)").matches) return;
+
+		document.querySelectorAll("[data-tilt]").forEach(function (card) {
+			card.removeEventListener("mousemove", onTiltMove);
+			card.removeEventListener("mouseleave", onTiltLeave);
+			card.addEventListener("mousemove", onTiltMove);
+			card.addEventListener("mouseleave", onTiltLeave);
+		});
+	}
+
+	function onTiltMove(event) {
+		var card = event.currentTarget;
+		var rect = card.getBoundingClientRect();
+		var x = (event.clientX - rect.left) / rect.width - 0.5;
+		var y = (event.clientY - rect.top) / rect.height - 0.5;
+		card.style.transform =
+			"perspective(800px) rotateX(" +
+			(-y * 6).toFixed(2) +
+			"deg) rotateY(" +
+			(x * 6).toFixed(2) +
+			"deg) translateY(-3px)";
+	}
+
+	function onTiltLeave(event) {
+		event.currentTarget.style.transform = "";
+	}
+
+	document.addEventListener("DOMContentLoaded", setupCardTilt);
+	document.addEventListener("astro:page-load", setupCardTilt);
+</script>

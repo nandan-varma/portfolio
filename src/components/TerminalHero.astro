@@ -1,0 +1,83 @@
+---
+const lines = [
+	{ prompt: true, text: "whoami" },
+	{ prompt: false, text: "nandan varma — software engineer", accent: true },
+	{ prompt: true, text: "ls ./currently-building" },
+	{ prompt: false, text: "operating-systems/  compilers/  dev-tools/" },
+	{ prompt: true, text: "cat mission.txt" },
+	{ prompt: false, text: "ship things that used to feel impossible.", accent: true },
+];
+---
+
+<div class="card overflow-hidden w-full max-w-md" data-tilt>
+	<div class="flex items-center gap-1.5 px-4 py-3 border-b border-border bg-bg-soft">
+		<span class="w-2.5 h-2.5 rounded-full bg-red-400/80"></span>
+		<span class="w-2.5 h-2.5 rounded-full bg-amber-400/80"></span>
+		<span class="w-2.5 h-2.5 rounded-full bg-emerald-400/80"></span>
+		<span class="ml-2 text-xs text-muted-fg font-mono">~/nandan</span>
+	</div>
+	<div
+		id="terminal-body"
+		class="p-5 font-mono text-[13px] sm:text-sm leading-relaxed min-h-[210px] whitespace-pre-wrap"
+		data-lines={JSON.stringify(lines)}
+	></div>
+</div>
+
+<script is:inline>
+	function setupTerminal() {
+		var body = document.getElementById("terminal-body");
+		if (!body || body.dataset.typed) return;
+		body.dataset.typed = "1";
+
+		var lines = JSON.parse(body.dataset.lines || "[]");
+		var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+		function renderStatic() {
+			body.innerHTML = "";
+			lines.forEach(function (line) {
+				var div = document.createElement("div");
+				div.className = line.accent ? "text-brand" : "";
+				div.textContent = (line.prompt ? "$ " : "") + line.text;
+				body.appendChild(div);
+			});
+		}
+
+		if (reduceMotion) {
+			renderStatic();
+			return;
+		}
+
+		body.innerHTML = "";
+		var lineIndex = 0;
+		var charIndex = 0;
+		var currentEl = null;
+
+		function typeNext() {
+			if (lineIndex >= lines.length) return;
+			var line = lines[lineIndex];
+
+			if (charIndex === 0) {
+				currentEl = document.createElement("div");
+				currentEl.className = line.accent ? "text-brand" : "";
+				body.appendChild(currentEl);
+			}
+
+			var full = (line.prompt ? "$ " : "") + line.text;
+			charIndex++;
+			currentEl.textContent = full.slice(0, charIndex);
+
+			if (charIndex >= full.length) {
+				lineIndex++;
+				charIndex = 0;
+				setTimeout(typeNext, line.prompt ? 260 : 420);
+			} else {
+				setTimeout(typeNext, line.prompt ? 32 : 18);
+			}
+		}
+
+		setTimeout(typeNext, 300);
+	}
+
+	document.addEventListener("DOMContentLoaded", setupTerminal);
+	document.addEventListener("astro:page-load", setupTerminal);
+</script>
