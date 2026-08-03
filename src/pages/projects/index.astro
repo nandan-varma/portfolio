@@ -1,11 +1,8 @@
 ---
 import { getCollection } from "astro:content";
-import Navigation from "@/components/layout/Navigation.astro";
-import "../../styles/global.css";
-import GlassCard from "@/components/cards/GlassCard.astro";
+import Layout from "@/layouts/Layout.astro";
+import Card from "@/components/cards/Card.astro";
 import Article from "@/components/content/Article.astro";
-import BaseHead from "@/components/layout/BaseHead.astro";
-import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 import { SITE_TITLE } from "@/consts";
 
 const projects = (await getCollection("project")).filter(
@@ -78,169 +75,116 @@ if (top2) sorted.splice(sorted.indexOf(top2), 1);
 if (top3) sorted.splice(sorted.indexOf(top3), 1);
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead
-			title={`Projects | ${SITE_TITLE}`}
-			description={
-				"Software projects by Nandan Varma - operating systems, compilers, developer tools, and full-stack apps built from scratch."
-			}
-			image="/og/projects.png"
-		/>
-	</head>
-	<body class="bg-black">
-		<BackgroundAnimation />
-		<Navigation />
-		<div class="relative pb-16">
-			<div
-				class="px-6 pt-16 mx-auto space-y-8 max-w-7xl lg:px-8 md:space-y-16 md:pt-24 lg:pt-32"
-			>
-				<div class="max-w-2xl lg:mx-0">
-					<h1
-						class="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl"
-						transition:name={"Projects"}
-					>
-						Projects
-					</h1>
-				</div>
+<Layout
+	title={`Projects | ${SITE_TITLE}`}
+	description={
+		"Software projects by Nandan Varma - operating systems, compilers, developer tools, and full-stack apps built from scratch."
+	}
+	image="/og/projects.png"
+>
+	<div class="px-6 pt-32 pb-16 mx-auto space-y-12 max-w-6xl w-full lg:px-8 lg:pt-40">
+		<h1
+			class="text-4xl sm:text-5xl font-bold tracking-tight text-fg gradient-text"
+			transition:name={"Projects"}
+		>
+			Projects
+		</h1>
 
-				<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-					<a href={`/projects/${featured?.id}`} class="block h-full">
-						<GlassCard class="h-full">
-							<article
-								class="relative w-full p-4 md:p-8 flex flex-col min-h-full"
-								tabindex={-1}
-							>
-								<div
-									class="flex justify-between gap-2 items-center"
-								>
-									<div class="text-xs text-zinc-100">
-										{
-											featured?.data.date ? (
-												<time
-													datetime={new Date(
-														featured?.data.date + "T12:00:00",
-													).toISOString()}
-												>
-													{Intl.DateTimeFormat(
-														undefined,
-														{
-															dateStyle: "medium",
-														},
-													).format(
-														new Date(
-															featured?.data.date + "T12:00:00",
-														),
-													)}
-												</time>
-											) : (
-												<span>SOON</span>
-											)
-										}
-									</div>
-								</div>
-
-								<h2
-									id="featured?-post"
-									class="mt-4 text-3xl font-bold text-zinc-100 group-hover:text-white sm:text-4xl font-display"
-									transition:name={"project-title-" +
-										featured?.data.title}
-								>
-									{featured?.data.title}
-								</h2>
-								<p
-									class="mt-4 leading-8 duration-150 text-zinc-400 group-hover:text-zinc-300 flex-1"
-									transition:name={"project-desc-" +
-										featured?.data.title}
-								>
-									{featured?.data.description}
-								</p>
-								<div class="pt-4">
-									<p
-										class="text-zinc-200 hover:text-zinc-50 hidden lg:block"
+		<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+			<a href={`/projects/${featured?.id}`} class="block h-full group">
+				<Card reveal class="h-full">
+					<article class="relative w-full p-6 md:p-10 flex flex-col min-h-full">
+						<span class="text-xs font-medium text-muted-fg">
+							{
+								featured?.data.date ? (
+									<time
+										datetime={new Date(
+											featured?.data.date + "T12:00:00",
+										).toISOString()}
 									>
-										Read more <span aria-hidden="true"
-											>&rarr;</span
-										>
-									</p>
-								</div>
-							</article>
-						</GlassCard>
-					</a>
+										{Intl.DateTimeFormat(undefined, {
+											dateStyle: "medium",
+										}).format(
+											new Date(featured?.data.date + "T12:00:00"),
+										)}
+									</time>
+								) : (
+									<span>SOON</span>
+								)
+							}
+						</span>
 
-					<div
-						class="flex flex-col w-full gap-8 border-t border-gray-900/10 lg:border-t-0"
-					>
-						{
-							[top2, top3]
-								.filter((project) => project !== undefined)
-								.map((project) => (
-									<GlassCard>
-										<Article
-											id={project.id}
-											project={project.data}
-											views={0}
-										/>
-									</GlassCard>
-								))
-						}
-					</div>
-				</div>
+						<h2
+							class="mt-4 text-3xl sm:text-4xl font-bold text-fg transition-colors duration-300 group-hover:text-brand"
+							transition:name={"project-title-" + featured?.data.title}
+						>
+							{featured?.data.title}
+						</h2>
+						<p
+							class="mt-4 leading-8 text-muted-fg flex-1"
+							transition:name={"project-desc-" + featured?.data.title}
+						>
+							{featured?.data.description}
+						</p>
+						<div class="pt-4">
+							<p class="text-brand font-semibold hidden lg:block">
+								Read more <span aria-hidden="true">&rarr;</span>
+							</p>
+						</div>
+					</article>
+				</Card>
+			</a>
 
-				<div
-					class="grid grid-cols-1 gap-4 lg:mx-0 md:grid-cols-3"
-				>
-					<div class="grid grid-cols-1 gap-4">
-						{
-							sorted
-								.filter((_, i) => i % 3 === 0)
-								.map((project) => (
-									<GlassCard>
-										<Article
-											id={project.id}
-											project={project.data}
-											views={0}
-										/>
-									</GlassCard>
-								))
-						}
-					</div>
-					<div class="grid grid-cols-1 gap-4">
-						{
-							sorted
-								.filter((_, i) => i % 3 === 1)
-								.map((project) => (
-									<GlassCard>
-										<Article
-											id={project.id}
-											project={project.data}
-											views={0}
-										/>
-									</GlassCard>
-								))
-						}
-					</div>
-					<div class="grid grid-cols-1 gap-4">
-						{
-							sorted
-								.filter((_, i) => i % 3 === 2)
-								.map((project) => (
-									<GlassCard>
-										<Article
-											id={project.id}
-											project={project.data}
-											views={0}
-										/>
-									</GlassCard>
-								))
-						}
-					</div>
-				</div>
+			<div class="flex flex-col w-full gap-6">
+				{
+					[top2, top3]
+						.filter((project) => project !== undefined)
+						.map((project, i) => (
+							<Card reveal style={`transition-delay: ${(i + 1) * 80}ms`}>
+								<Article id={project.id} project={project.data} views={0} />
+							</Card>
+						))
+				}
 			</div>
 		</div>
-	</body>
-</html>
+
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+			<div class="grid grid-cols-1 gap-4">
+				{
+					sorted
+						.filter((_, i) => i % 3 === 0)
+						.map((project, i) => (
+							<Card reveal style={`transition-delay: ${(i % 5) * 60}ms`}>
+								<Article id={project.id} project={project.data} views={0} />
+							</Card>
+						))
+				}
+			</div>
+			<div class="grid grid-cols-1 gap-4">
+				{
+					sorted
+						.filter((_, i) => i % 3 === 1)
+						.map((project, i) => (
+							<Card reveal style={`transition-delay: ${(i % 5) * 60}ms`}>
+								<Article id={project.id} project={project.data} views={0} />
+							</Card>
+						))
+				}
+			</div>
+			<div class="grid grid-cols-1 gap-4">
+				{
+					sorted
+						.filter((_, i) => i % 3 === 2)
+						.map((project, i) => (
+							<Card reveal style={`transition-delay: ${(i % 5) * 60}ms`}>
+								<Article id={project.id} project={project.data} views={0} />
+							</Card>
+						))
+				}
+			</div>
+		</div>
+	</div>
+</Layout>
 
 <script is:inline>
   function setupProjectsTracking() {

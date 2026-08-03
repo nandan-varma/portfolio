@@ -1,11 +1,10 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import ProjectPost from "../../layouts/ProjectPost.astro";
-import "@/styles/global.css";
+import Layout from "@/layouts/Layout.astro";
 import "@/styles/mdx.css";
 
 import { render } from "astro:content";
-import BaseHead from "@/components/layout/BaseHead.astro";
 import { SITE_TITLE } from "@/consts";
 
 export async function getStaticPaths() {
@@ -21,34 +20,27 @@ const post = Astro.props;
 const { Content } = await render(post);
 ---
 
-<html lang="en">
-	<head>
-		<BaseHead
-			title={`${post.data.title} | ${SITE_TITLE}`}
-			description={post.data.description}
-			image={`/og/project/${post.id}.png`}
-			noindex={!post.data.published}
-		/>
-	</head>
-	<body>
-		<ProjectPost {...post.data}>
-			<article
-				class="w-full md:w-3xl py-4 mx-auto prose prose-zinc prose-quoteless max-w-full px-4 sm:px-6"
-			>
-				<Content class="mdx" />
-			</article>
-		</ProjectPost>
-	</body>
-</html>
+<Layout
+	title={`${post.data.title} | ${SITE_TITLE}`}
+	description={post.data.description}
+	image={`/og/project/${post.id}.png`}
+	noindex={!post.data.published}
+>
+	<ProjectPost {...post.data}>
+		<article class="w-full py-4 mdx-body">
+			<Content />
+		</article>
+	</ProjectPost>
+</Layout>
 
 <script is:inline define:vars={{ postId: post.id, postTitle: post.data.title }}>
-  function trackProjectOpened() {
-    window.posthog?.capture('project_opened', {
-      project_id: postId,
-      project_title: postTitle
-    });
-  }
+	function trackProjectOpened() {
+		window.posthog?.capture("project_opened", {
+			project_id: postId,
+			project_title: postTitle,
+		});
+	}
 
-  document.addEventListener('DOMContentLoaded', trackProjectOpened);
-  document.addEventListener('astro:page-load', trackProjectOpened);
+	document.addEventListener("DOMContentLoaded", trackProjectOpened);
+	document.addEventListener("astro:page-load", trackProjectOpened);
 </script>

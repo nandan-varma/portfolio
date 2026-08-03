@@ -77,5 +77,14 @@ const { title, description, image = "/og.png", noindex = false } = Astro.props;
 <!-- view transitions -->
 <ClientRouter />
 
+<!-- Theme init: runs before paint so there's no flash of the wrong theme -->
+<script is:inline>
+	(function () {
+		var stored = localStorage.getItem("theme");
+		var isDark = stored ? stored === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+		document.documentElement.classList.toggle("dark", isDark);
+	})();
+</script>
+
 <!-- PostHog Analytics -->
 <PostHog />

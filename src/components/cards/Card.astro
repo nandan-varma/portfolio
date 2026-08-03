@@ -1,10 +1,17 @@
 ---
-const { className, ...props } = Astro.props;
+interface Props {
+	class?: string;
+	reveal?: boolean;
+	[key: string]: unknown;
+}
+
+const { class: className = "", reveal = false, ...rest } = Astro.props;
 ---
 
 <div
-    data-slot="card"
-    class={`bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm ${className}`}
-    {...props}
+	class:list={["card overflow-hidden relative", className]}
+	data-reveal={reveal ? "" : undefined}
+	{...rest}
 >
+	<slot />
 </div>

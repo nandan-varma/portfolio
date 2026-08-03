@@ -1,46 +1,32 @@
 ---
-import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
-import BaseHead from "@/components/layout/BaseHead.astro";
+import Layout from "@/layouts/Layout.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead
-			title={SITE_TITLE}
-			description={SITE_DESCRIPTION}
-			image="/og/index.png"
-		/>
-	</head>
-	<body class="m-0 p-0 flex flex-col min-h-screen relative">
-		<BackgroundAnimation text="Nandan Varma" />
-		<h1 class="sr-only">Nandan Varma</h1>
-		<div
-			id="content"
-			class="flex-1 flex justify-center items-end pb-40 gap-4 md:gap-12 text-2xl md:text-3xl font-bold z-20"
-		>
-			<a
-				href="/projects"
-				class="duration-500 text-white/50 hover:text-white/80 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-				transition:name={"Projects"}>Projects</a
-			>
-			<a
-				href="/blog"
-				class="duration-500 text-white/50 hover:text-white/80 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-				transition:name={"Blog"}>Blog</a
-			>
-			<a
-				href="/contact"
-				class="duration-500 text-white/50 hover:text-white/80 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-				transition:name={"Contact"}>Contact</a
-			>
-		</div>
-	</body>
-</html>
+<Layout
+	title={SITE_TITLE}
+	description={SITE_DESCRIPTION}
+	image="/og/index.png"
+	navPosition="bottom"
+	navShowBack={false}
+>
+	<div class="flex-1 flex flex-col items-center justify-center gap-8 px-6 pb-28 text-center">
+		<p class="chip animate-fade-up">👋 hey, I build things</p>
 
-<style>
-	body {
-		background-color: black;
-	}
-</style>
+		<h1
+			class="text-5xl sm:text-7xl md:text-8xl font-extrabold tracking-tight gradient-text animate-fade-up"
+			style="animation-delay: 0.08s;"
+			transition:name={"Nandan Varma"}
+		>
+			Nandan Varma
+		</h1>
+
+		<p
+			class="max-w-xl text-lg sm:text-xl text-muted-fg animate-fade-up"
+			style="animation-delay: 0.16s;"
+		>
+			Software engineer building operating systems, compilers, and
+			full-stack apps &mdash; usually all three before breakfast.
+		</p>
+	</div>
+</Layout>

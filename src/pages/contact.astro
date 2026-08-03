@@ -1,224 +1,97 @@
 ---
-import Navigation from "@/components/layout/Navigation.astro";
-import BaseHead from "@/components/layout/BaseHead.astro";
-import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
-import GlassCard from "@/components/cards/GlassCard.astro";
+import Layout from "@/layouts/Layout.astro";
+import Card from "@/components/cards/Card.astro";
 import { SITE_TITLE } from "../consts";
+
+const links = [
+	{
+		type: "email",
+		value: "contact@nandan.fyi",
+		href: "mailto:contact@nandan.fyi",
+		label: "Email",
+		icon: `<rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>`,
+	},
+	{
+		type: "github",
+		value: "nandan-varma",
+		href: "https://github.com/nandan-varma",
+		label: "GitHub",
+		icon: `<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path>`,
+	},
+	{
+		type: "linkedin",
+		value: "nandanvarma",
+		href: "https://www.linkedin.com/in/nandanvarma/",
+		label: "LinkedIn",
+		icon: `<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle>`,
+	},
+];
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead
-			title={`Contact | ${SITE_TITLE}`}
-			description={
-				"Get in touch with Nandan Varma via email, GitHub, or LinkedIn."
-			}
-			image="/og/contact.png"
-		/>
-	</head>
-	<body class="bg-black min-h-screen">
-		<BackgroundAnimation />
-		<Navigation />
-		<div class="relative pb-16">
-			<div
-				class="px-6 pt-16 mx-auto space-y-8 max-w-7xl lg:px-8 md:space-y-16 md:pt-24 lg:pt-32"
-			>
-				<div class="max-w-2xl mx-auto lg:mx-0">
-					<h1
-						class="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl"
-						transition:name={"Contact"}
-					>
-						Contact
-					</h1>
-				</div>
-				<div>
-					<div
-						class="container flex items-start justify-center mx-auto"
-					>
-						<div
-							class="grid w-full grid-cols-1 gap-6 mx-auto sm:mt-0 sm:grid-cols-3 lg:gap-16 lg:grid-rows-1"
+<Layout
+	title={`Contact | ${SITE_TITLE}`}
+	description={"Get in touch with Nandan Varma via email, GitHub, or LinkedIn."}
+	image="/og/contact.png"
+>
+	<div class="px-6 pt-32 pb-16 mx-auto space-y-12 max-w-5xl w-full lg:px-8 lg:pt-40">
+		<h1
+			class="text-4xl sm:text-5xl font-bold tracking-tight text-fg text-center gradient-text"
+			transition:name={"Contact"}
+		>
+			Let's talk
+		</h1>
+
+		<div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+			{
+				links.map((link, i) => (
+					<Card reveal class="h-full" style={`transition-delay: ${i * 80}ms`}>
+						<a
+							href={link.href}
+							target="_blank"
+							class="group flex flex-col items-center justify-center gap-4 px-6 py-16 h-full"
+							data-contact-type={link.type}
+							data-contact-value={link.value}
 						>
-							<GlassCard class="h-full flex flex-col">
-								<a
-									href="mailto:contact@nandan.fyi"
-									target="_blank"
-									class="p-4 relative flex flex-col items-center justify-center gap-4 duration-700 md:gap-8 md:py-24 md:p-16 flex-1"
-									data-contact-type="email"
-									data-contact-value="contact@nandan.fyi"
-								>
-									<span
-										class="absolute w-px h-2/3"
-										aria-hidden="true"></span>
-									<span
-										class="relative z-10 flex items-center justify-center w-20 h-20 text-sm duration-1000 border rounded-full text-zinc-200 group-hover:text-white group-hover:bg-zinc-900 border-zinc-500 bg-zinc-900 group-hover:border-zinc-200 drop-shadow-orange"
-									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="24"
-											height="24"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											class="lucide lucide-mail-icon lucide-mail"
-											><rect
-												width="20"
-												height="16"
-												x="2"
-												y="4"
-												rx="2"></rect><path
-												d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"
-											></path></svg
-										>
-									</span>
-									<div
-										class="z-10 flex flex-col items-center"
-									>
-										<span
-											class="text-xl font-medium duration-150 lg:text-xl text-zinc-200 group-hover:text-white font-display"
-										>
-											contact@nandan.fyi
-										</span>
-										<span
-											class="mt-4 text-sm text-center duration-1000 text-zinc-400 group-hover:text-zinc-200"
-										>
-											Email
-										</span>
-									</div>
-								</a>
-							</GlassCard>
-							<GlassCard class="h-full flex flex-col">
-								<a
-									href="https://github.com/nandan-varma"
-									target="_blank"
-									class="p-4 relative flex flex-col items-center justify-center gap-4 duration-700 md:gap-8 md:py-24 md:p-16 flex-1"
-									data-contact-type="github"
-									data-contact-value="nandan-varma"
-								>
-									<span
-										class="absolute w-px h-2/3"
-										aria-hidden="true"></span>
-									<span
-										class="relative z-10 flex items-center justify-center w-20 h-20 text-sm duration-1000 border rounded-full text-zinc-200 group-hover:text-white group-hover:bg-zinc-900 border-zinc-500 bg-zinc-900 group-hover:border-zinc-200 drop-shadow-orange"
-									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="24"
-											height="24"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											class="lucide lucide-github-icon lucide-github"
-											><path
-												d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"
-											></path><path
-												d="M9 18c-4.51 2-5-2-7-2"
-											></path></svg
-										>
-									</span>
-									<div
-										class="z-10 flex flex-col items-center"
-									>
-										<span
-											class="text-xl font-medium duration-150 lg:text-xl text-zinc-200 group-hover:text-white font-display"
-										>
-											nandan-varma
-										</span>
-										<span
-											class="mt-4 text-sm text-center duration-1000 text-zinc-400 group-hover:text-zinc-200"
-										>
-											Github
-										</span>
-									</div>
-								</a>
-							</GlassCard>
-							<GlassCard class="h-full flex flex-col">
-								<a
-									href="https://www.linkedin.com/in/nandanvarma/"
-									target="_blank"
-									class="p-4 relative flex flex-col items-center justify-center gap-4 duration-700 md:gap-8 md:py-24 md:p-16 flex-1"
-									data-contact-type="linkedin"
-									data-contact-value="nandanvarma"
-								>
-									<span
-										class="absolute w-px h-2/3"
-										aria-hidden="true"></span>
-									<span
-										class="relative z-10 flex items-center justify-center w-20 h-20 text-sm duration-1000 border rounded-full text-zinc-200 group-hover:text-white group-hover:bg-zinc-900 border-zinc-500 bg-zinc-900 group-hover:border-zinc-200 drop-shadow-orange"
-									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="24"
-											height="24"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											class="lucide lucide-linkedin-icon lucide-linkedin"
-											><path
-												d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"
-											></path><rect
-												width="4"
-												height="12"
-												x="2"
-												y="9"></rect><circle
-												cx="4"
-												cy="4"
-												r="2"></circle></svg
-										>
-									</span>
-									<div
-										class="z-10 flex flex-col items-center"
-									>
-										<span
-											class="text-xl font-medium duration-150 lg:text-xl text-zinc-200 group-hover:text-white font-display"
-										>
-											nandanvarma
-										</span>
-										<span
-											class="mt-4 text-sm text-center duration-1000 text-zinc-400 group-hover:text-zinc-200"
-										>
-											LinkedIn
-										</span>
-									</div>
-								</a>
-							</GlassCard>
-						</div>
-					</div>
-				</div>
-			</div>
+							<span
+								class="flex items-center justify-center w-16 h-16 rounded-md bg-brand text-white transition-transform duration-150 group-hover:-translate-y-0.5 group-active:translate-y-0.5"
+								style="box-shadow: inset 0 1px 0 color-mix(in srgb, white 30%, transparent), inset 0 -2px 0 color-mix(in srgb, black 15%, transparent), 0 6px 14px -4px color-mix(in srgb, var(--brand) 45%, transparent);"
+								set:html={`<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${link.icon}</svg>`}
+							/>
+							<div class="flex flex-col items-center text-center">
+								<span class="text-lg font-semibold text-fg">
+									{link.value}
+								</span>
+								<span class="mt-1 text-sm text-muted-fg">
+									{link.label}
+								</span>
+							</div>
+						</a>
+					</Card>
+				))
+			}
 		</div>
-	</body>
-</html>
+	</div>
+</Layout>
 
 <script is:inline>
-  function setupContactTracking() {
-    // Track contact link clicks
-    const contactLinks = document.querySelectorAll('[data-contact-type]');
-    contactLinks.forEach(function(link) {
-      link.removeEventListener('click', handleContactClick);
-      link.addEventListener('click', handleContactClick);
-    });
-  }
+	function setupContactTracking() {
+		const contactLinks = document.querySelectorAll("[data-contact-type]");
+		contactLinks.forEach(function (link) {
+			link.removeEventListener("click", handleContactClick);
+			link.addEventListener("click", handleContactClick);
+		});
+	}
 
-  function handleContactClick(event) {
-    var link = event.currentTarget;
-    var contactType = link.getAttribute('data-contact-type');
-    var contactValue = link.getAttribute('data-contact-value');
-    window.posthog?.capture('contact_link_clicked', {
-      contact_type: contactType,
-      contact_value: contactValue
-    });
-  }
+	function handleContactClick(event) {
+		var link = event.currentTarget;
+		var contactType = link.getAttribute("data-contact-type");
+		var contactValue = link.getAttribute("data-contact-value");
+		window.posthog?.capture("contact_link_clicked", {
+			contact_type: contactType,
+			contact_value: contactValue,
+		});
+	}
 
-  document.addEventListener('DOMContentLoaded', setupContactTracking);
-  document.addEventListener('astro:page-load', setupContactTracking);
+	document.addEventListener("DOMContentLoaded", setupContactTracking);
+	document.addEventListener("astro:page-load", setupContactTracking);
 </script>

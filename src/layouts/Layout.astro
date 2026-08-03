@@ -1,19 +1,39 @@
 ---
-import { ClientRouter } from "astro:transitions";
+import BaseHead from "@/components/layout/BaseHead.astro";
+import Navigation from "@/components/layout/Navigation.astro";
+import ScrollReveal from "@/components/ScrollReveal.astro";
+
+interface Props {
+	title: string;
+	description: string;
+	image?: string;
+	noindex?: boolean;
+	nav?: boolean;
+	navPosition?: "top" | "bottom";
+	navShowBack?: boolean;
+}
+
+const {
+	title,
+	description,
+	image,
+	noindex = false,
+	nav = true,
+	navPosition = "top",
+	navShowBack = true,
+} = Astro.props;
 ---
 
+<!doctype html>
 <html lang="en">
-    <head>
-        <ClientRouter />
-        <link rel="sitemap" href="/sitemap.xml" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Parkinsans:wght@300..800&display=swap"
-            rel="stylesheet"
-        />
-    </head>
-    <body>
-        <slot />
-    </body>
+	<head>
+		<BaseHead title={title} description={description} image={image} noindex={noindex} />
+	</head>
+	<body class="min-h-screen flex flex-col">
+		{nav && <Navigation position={navPosition} showBack={navShowBack} />}
+		<main class="relative z-10 flex-1 flex flex-col">
+			<slot />
+		</main>
+		<ScrollReveal />
+	</body>
 </html>
