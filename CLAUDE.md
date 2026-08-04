@@ -34,7 +34,7 @@ There is no lint script and no test suite/framework configured in this repo. `pn
 - `[data-reveal]` elements start hidden and get `.is-visible` added by `ScrollReveal.astro`'s `IntersectionObserver` script — use this attribute (optionally on `Card` via its `reveal` prop) rather than inventing new scroll-animation logic.
 - `[data-tilt]` elements get a mouse-driven 3D tilt from `CardTilt.astro` (opt-in per element, skipped under `prefers-reduced-motion` and on non-`pointer: fine` devices) — it's wired globally in `Layout` but only affects elements that explicitly opt in.
 - `src/styles/mdx.css` styles MDX prose and is scoped under `.mdx-body` (the wrapper div in the slug pages) rather than bare element selectors — this matters because Astro applies a `class` passed to `<Content />` to each top-level rendered element individually, not to a wrapping container, so a bare-selector stylesheet can't be reliably scoped that way.
-- `ThemeToggle.astro` exists but is currently not rendered anywhere (removed from `Navigation.astro`). Dark mode still activates via `prefers-color-scheme` (see the no-flash inline init script in `BaseHead.astro`, which also re-runs on every view transition) — there's just no manual toggle exposed right now.
+- Theme is purely OS-driven — no manual toggle, no stored override. The init script in `BaseHead.astro` applies `.dark` from `matchMedia("(prefers-color-scheme: dark)")`, live-updates on an OS theme change, and re-applies on `astro:before-swap` (view transitions morph `<html>` against the incoming page's static markup, which never has `class="dark"`, so without this hook the class gets stripped after every soft navigation).
 
 ### Content collections
 

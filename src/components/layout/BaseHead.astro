@@ -77,12 +77,28 @@ const { title, description, image = "/og.png", noindex = false } = Astro.props;
 <!-- view transitions -->
 <ClientRouter />
 
-<!-- Theme init: runs before paint so there's no flash of the wrong theme -->
+<!-- Theme: purely follows the device's OS-level color scheme, no manual
+     toggle or stored override. Applied on load, live if the OS theme
+     changes mid-session, and on every Astro view transition - the
+     ClientRouter morphs <html> against the incoming page's static markup
+     (which never has class="dark", since it's only ever added here), so
+     without re-applying it in astro:before-swap the class gets stripped
+     back off after every soft navigation. -->
 <script is:inline>
 	(function () {
-		var stored = localStorage.getItem("theme");
-		var isDark = stored ? stored === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-		document.documentElement.classList.toggle("dark", isDark);
+		var media = matchMedia("(prefers-color-scheme: dark)");
+
+		function applyTheme(root) {
+			root.classList.toggle("dark", media.matches);
+		}
+
+		applyTheme(document.documentElement);
+		media.addEventListener("change", function () {
+			applyTheme(document.documentElement);
+		});
+		document.addEventListener("astro:before-swap", function (event) {
+			applyTheme(event.newDocument.documentElement);
+		});
 	})();
 </script>
 

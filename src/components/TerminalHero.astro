@@ -9,7 +9,7 @@ const lines = [
 ];
 ---
 
-<div class="card overflow-hidden w-full max-w-md" data-tilt>
+<div class="card overflow-hidden w-full h-full flex flex-col" data-glow>
 	<div class="flex items-center gap-1.5 px-4 py-3 border-b border-border bg-bg-soft">
 		<span class="w-2.5 h-2.5 rounded-full bg-red-400/80"></span>
 		<span class="w-2.5 h-2.5 rounded-full bg-amber-400/80"></span>
@@ -18,7 +18,7 @@ const lines = [
 	</div>
 	<div
 		id="terminal-body"
-		class="p-5 font-mono text-[13px] sm:text-sm leading-relaxed min-h-[210px] whitespace-pre-wrap"
+		class="p-5 font-mono text-[13px] sm:text-sm leading-relaxed flex-1 min-h-[210px] whitespace-pre-wrap"
 		data-lines={JSON.stringify(lines)}
 	></div>
 </div>

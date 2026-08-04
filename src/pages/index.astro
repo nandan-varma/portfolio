@@ -8,6 +8,7 @@ import TerminalHero from "@/components/TerminalHero.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 
 const allProjects = await getCollection("project");
+const publishedProjects = allProjects.filter((p) => p.data.published);
 const featuredTitles = ["PushStack", "MarsOS", "Nemesis"];
 const featuredProjects = featuredTitles
 	.map((t) => allProjects.find((p) => p.data.title === t && p.data.published))
@@ -17,6 +18,9 @@ const recentPosts = (await getCollection("blog"))
 	.filter((post) => !post.data.draft)
 	.sort((a, b) => Date.parse(b.data.date) - Date.parse(a.data.date))
 	.slice(0, 2);
+
+const marqueeTitles = publishedProjects.map((p) => p.data.title);
+const marqueeItems = [...marqueeTitles, ...marqueeTitles];
 ---
 
 <Layout
@@ -27,38 +31,83 @@ const recentPosts = (await getCollection("blog"))
 	navShowBack={false}
 >
 	<div class="flex-1 flex flex-col pb-40">
-		<section
-			class="px-6 pt-24 pb-12 max-w-5xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
-		>
-			<div class="flex flex-col items-center lg:items-start gap-6 text-center lg:text-left">
-				<p class="chip animate-fade-up">👋 hey, I build things</p>
-
-				<h1
-					class="text-4xl sm:text-6xl font-extrabold tracking-tight gradient-text animate-fade-up"
-					style="animation-delay: 0.08s;"
-					transition:name={"Nandan Varma"}
+		<section class="px-6 pt-24 pb-16 max-w-5xl mx-auto w-full">
+			<div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+				<div
+					class="lg:col-span-2 card flex flex-col justify-center gap-5 p-8 sm:p-10 animate-fade-up"
+					data-glow
 				>
-					Nandan Varma
-				</h1>
+					<p class="chip w-fit">👋 hey, I build things</p>
+					<h1
+						class="text-4xl sm:text-5xl font-extrabold tracking-tight gradient-text leading-[0.95]"
+						transition:name={"Nandan Varma"}
+					>
+						Nandan
+						<br />
+						Varma
+					</h1>
+					<p class="max-w-sm text-base sm:text-lg text-muted-fg">
+						Software engineer building operating systems, compilers, and
+						full-stack apps &mdash; usually all three before breakfast.
+					</p>
+				</div>
 
-				<p
-					class="max-w-md text-lg sm:text-xl text-muted-fg animate-fade-up"
-					style="animation-delay: 0.16s;"
+				<div class="lg:col-span-2 animate-fade-up" style="animation-delay: 0.1s;">
+					<TerminalHero />
+				</div>
+
+				<div
+					class="lg:col-span-2 card flex items-center p-6 sm:p-8 animate-fade-up"
+					style="animation-delay: 0.18s;"
+					data-glow
 				>
-					Software engineer building operating systems, compilers, and
-					full-stack apps &mdash; usually all three before breakfast.
-				</p>
-			</div>
+					<p class="text-xl sm:text-2xl font-bold text-fg leading-snug">
+						Systems. Compilers. Full&#8209;stack.
+						<span class="text-brand">Whatever it takes to ship.</span>
+					</p>
+				</div>
 
-			<div
-				class="flex justify-center lg:justify-end animate-fade-up"
-				style="animation-delay: 0.24s;"
-			>
-				<TerminalHero />
+				<div
+					class="card flex flex-col justify-center gap-1 p-6 animate-fade-up"
+					style="animation-delay: 0.26s;"
+					data-glow
+				>
+					<span class="text-4xl font-extrabold gradient-text">
+						{publishedProjects.length}+
+					</span>
+					<span class="text-sm text-muted-fg font-medium">projects shipped</span>
+				</div>
+
+				<div
+					class="rounded-lg bg-brand text-white flex items-center justify-center p-6 animate-fade-up"
+					style="animation-delay: 0.34s;"
+				>
+					<p class="flex items-center gap-2 text-sm font-semibold">
+						<span class="status-dot"></span>
+						status: shipping
+					</p>
+				</div>
 			</div>
 		</section>
 
-		<section class="px-6 pb-12 max-w-5xl mx-auto w-full" data-reveal>
+		<section class="bg-brand overflow-hidden" data-reveal>
+			<div class="marquee py-3">
+				<div class="marquee-track">
+					{
+						marqueeItems.map((title) => (
+							<span class="inline-flex items-center gap-8 px-4 font-mono text-sm sm:text-base font-semibold uppercase tracking-wide text-white whitespace-nowrap">
+								{title}
+								<span aria-hidden="true" class="opacity-50">
+									/
+								</span>
+							</span>
+						))
+					}
+				</div>
+			</div>
+		</section>
+
+		<section class="px-6 pt-12 pb-12 max-w-5xl mx-auto w-full" data-reveal>
 			<div class="flex items-center justify-between mb-6">
 				<h2 class="text-xl sm:text-2xl font-bold text-fg">Selected work</h2>
 				<a
@@ -71,7 +120,7 @@ const recentPosts = (await getCollection("blog"))
 			<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 				{
 					featuredProjects.map((project, i) => (
-						<Card reveal data-tilt style={`transition-delay: ${i * 80}ms`}>
+						<Card reveal data-glow style={`transition-delay: ${i * 80}ms`}>
 							<Article id={project.id} project={project.data} views={0} />
 						</Card>
 					))
@@ -92,7 +141,7 @@ const recentPosts = (await getCollection("blog"))
 			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 				{
 					recentPosts.map((post, i) => (
-						<Card reveal data-tilt style={`transition-delay: ${i * 80}ms`}>
+						<Card reveal data-glow style={`transition-delay: ${i * 80}ms`}>
 							<Blog id={post.id} blog={post.data} views={0} />
 						</Card>
 					))

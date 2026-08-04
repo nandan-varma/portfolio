@@ -1,0 +1,24 @@
+---
+---
+
+<script is:inline>
+	function setupCardGlow() {
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+		if (!window.matchMedia("(pointer: fine)").matches) return;
+
+		document.querySelectorAll("[data-glow]").forEach(function (card) {
+			card.removeEventListener("mousemove", onGlowMove);
+			card.addEventListener("mousemove", onGlowMove);
+		});
+	}
+
+	function onGlowMove(event) {
+		var card = event.currentTarget;
+		var rect = card.getBoundingClientRect();
+		card.style.setProperty("--glow-x", event.clientX - rect.left + "px");
+		card.style.setProperty("--glow-y", event.clientY - rect.top + "px");
+	}
+
+	document.addEventListener("DOMContentLoaded", setupCardGlow);
+	document.addEventListener("astro:page-load", setupCardGlow);
+</script>
