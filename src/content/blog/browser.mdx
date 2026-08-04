@@ -1,0 +1,49 @@
+---
+title: I have too many browser windows and tabs, so I fixed it
+description: Also built an app in the process.
+date: "2026-08-04"
+draft: true
+tags: ["development", "productivity", "browser"]
+---
+
+import BrowserGrid from "@/components/content/BrowserGrid.tsx";
+import BrowserFleetDiagram from "@/components/content/BrowserFleetDiagram.tsx";
+import PeekPreview from "@/components/content/PeekPreview.tsx";
+
+I've always had too many browser windows open, and juggling them made it hard to actually work. So I fixed it, and built an app along the way.
+
+## The problem, with data
+
+After a work session, here's what I'd find open:
+
+- One major window with all my active work.
+- A couple of smaller windows I'd forgotten to close: research and documentation I only needed once.
+- One-tab windows for random Google searches, ChatGPT chats, directions to weekend plans, and so on.
+
+That doesn't sound like much, but it was all duplicated across two profiles: work and personal.
+
+## Finding the pattern
+
+Back in my notebook, I found a pattern. Everything fell into a 2x2: logged in vs. logged out, one-off vs. not one-off, across both profiles.
+
+<BrowserGrid client:visible />
+
+So I went looking for existing solutions, and found a few good ones.
+
+## What I found
+
+[Dia Browser](https://diabrowser.com) auto-organizes deep navigation trails into tab groups, something I'd never do manually.
+
+I also noticed that a handful of sites — a dashboard, a chat, a quick reference — stayed open constantly just so I could glance at them, each one burning a full browser window for something that only needed a corner of the screen. So I built an app called **Peek**: it pins any URL as a small floating widget, rendered at iPhone dimensions so the mobile layout looks right, always on top of everything else, and pinned in place between sessions.
+
+<PeekPreview client:visible />
+
+It auto-refreshes on an interval too, so the dashboards and chats stay live without me ever switching to their tab — because most of the time, there's no tab at all.
+
+## The final setup
+
+Finally, I separated work and personal into two separate browsers instead of browser profiles: personal went to Brave, work went to Dia. There's a third one that doesn't fit the 2x2 at all — a plain Chrome that's never logged into anything, shared by both profiles. It's where logged-out browsing goes, and it's also what I point Claude and other browser MCPs at, so an agent poking around the web can't stumble onto an authenticated session or leak anything of mine.
+
+<BrowserFleetDiagram client:visible />
+
+Four apps now instead of one browser with a pile of windows, but I always know exactly where to look.

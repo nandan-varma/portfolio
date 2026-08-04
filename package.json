@@ -10,21 +10,28 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.6",
+    "@astrojs/react": "^5.0.7",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
     "@astrojs/vercel": "^10.0.7",
     "@resvg/resvg-js": "^2.6.2",
-    "@tailwindcss/vite": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.3",
     "astro": "^6.3.6",
     "astro-og-canvas": "^0.11.1",
     "astro-opengraph-images": "^1.16.1",
     "canvaskit-wasm": "^0.41.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.6.0",
-    "tailwindcss": "^4.3.0",
+    "tailwindcss": "^4.3.3",
     "tailwindcss-animate": "^1.0.7",
     "tw-to-css": "^0.0.12"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4"
   }
 }
