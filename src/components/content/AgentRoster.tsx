@@ -91,7 +91,7 @@ export default function AgentRoster() {
 
   const hubLabel =
     activeAgents.length === 0
-      ? "idle — nothing queued right now"
+      ? "idle, nothing queued right now"
       : activeAgents
           .map((a) => `${a.label} ×${a.frames[frame]}`)
           .join("  ·  ");
@@ -102,31 +102,35 @@ export default function AgentRoster() {
         The roster
       </div>
       <p className="mb-6 text-xs leading-relaxed text-zinc-500">
-        Not one worker type, and not one at a time — the orchestrator boots
+        Not one worker type, and not one at a time. The orchestrator boots
         however many of whichever kind the backlog in front of it calls for,
         several types running at once, scaling each up or down independently.
       </p>
 
       <div
-        className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 transition-all duration-500 ease-out"
+        className="mb-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 transition-all duration-500 ease-out"
         style={{ opacity: mounted ? 1 : 0, transform: `translateY(${mounted ? 0 : 8}px)` }}
       >
-        <span className="relative flex h-2 w-2 shrink-0">
-          {totalInFlight > 0 && (
-            <span className="pf-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400" />
-          )}
-          <span
-            className="relative inline-flex h-2 w-2 rounded-full"
-            style={{ background: totalInFlight > 0 ? "#6366f1" : "#a1a1aa" }}
-          />
-        </span>
-        <span className="text-[11px] leading-snug text-zinc-600 sm:text-xs">
-          <span className="font-semibold text-zinc-900">Orchestrator</span>{" "}
-          <span className="font-mono">{hubLabel}</span>
-        </span>
-        <span className="ml-auto shrink-0 rounded-full bg-zinc-900 px-2 py-0.5 text-[10px] font-bold tabular-nums text-white">
-          {totalInFlight}/6 in flight
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2 shrink-0">
+            {totalInFlight > 0 && (
+              <span className="pf-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400" />
+            )}
+            <span
+              className="relative inline-flex h-2 w-2 rounded-full"
+              style={{ background: totalInFlight > 0 ? "#6366f1" : "#a1a1aa" }}
+            />
+          </span>
+          <span className="text-xs font-semibold text-zinc-900">Orchestrator</span>
+          <span className="ml-auto shrink-0 rounded-full bg-zinc-900 px-2 py-0.5 text-[10px] font-bold tabular-nums text-white">
+            {totalInFlight}/6 in flight
+          </span>
+        </div>
+        {/* fixed-height, line-clamped: the label's length changes every frame,
+            reserving 2 lines up front keeps the card from reflowing the grid below */}
+        <p className="mt-1.5 line-clamp-2 min-h-[28px] font-mono text-[11px] leading-snug text-zinc-600">
+          {hubLabel}
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
@@ -205,7 +209,7 @@ export default function AgentRoster() {
 
       <p className="mt-5 border-t border-zinc-100 pt-4 text-[11px] leading-relaxed text-zinc-500">
         Only <span className="font-mono text-zinc-700">browser-sweeper</span>{" "}
-        loads the CDP browser extension at all — every other agent physically
+        loads the CDP browser extension at all. Every other agent physically
         cannot open a tab. And it never runs alongside a judge wave: Chrome is
         RAM-bound, judges are token-bound, so the orchestrator keeps them off
         the clock at the same time on purpose.

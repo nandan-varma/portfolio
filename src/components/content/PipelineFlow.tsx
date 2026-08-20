@@ -89,7 +89,7 @@ export default function PipelineFlow() {
         </span>
       </div>
       <p className="mb-6 text-xs leading-relaxed text-zinc-500">
-        No fixed worker count — the orchestrator runs one rolling loop,
+        No fixed worker count. The orchestrator runs one rolling loop,
         claiming the next chunk off the queue and launching a fresh judge the
         instant a slot opens, up to the swarm budget.
       </p>

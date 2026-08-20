@@ -105,8 +105,8 @@ export default function SwarmBudget() {
       </div>
 
       <p className="mt-5 border-t border-zinc-100 pt-4 text-xs leading-relaxed text-zinc-500">
-        2026-08-14: a "fan out everything" wave OOM'd a 16 GB machine — every
-        browser-capable subagent owns an ephemeral Chrome (~0.5–1.5 GB each).
+        2026-08-14: a "fan out everything" wave OOM'd a 16 GB machine, since
+        every browser-capable subagent owns an ephemeral Chrome (~0.5 to 1.5 GB each).
         Never overlap a browser wave with a full reviewer wave.
       </p>
     </div>

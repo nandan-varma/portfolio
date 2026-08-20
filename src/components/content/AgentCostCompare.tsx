@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useCountUp } from "./useCountUp";
 
 const AGENTS = [
   {
@@ -27,29 +28,9 @@ const AGENTS = [
 
 const OVERHEAD_TOTAL = 1_100_000;
 
-function useCountUp(target: number, mounted: boolean, duration = 1200) {
-  const [value, setValue] = useState(0);
-
-  useEffect(() => {
-    if (!mounted) return;
-    let raf: number;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setValue(Math.round(target * eased));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [mounted, target, duration]);
-
-  return value;
-}
-
 export default function AgentCostCompare() {
   const [mounted, setMounted] = useState(false);
-  const overhead = useCountUp(OVERHEAD_TOTAL, mounted);
+  const overhead = Math.round(useCountUp(OVERHEAD_TOTAL, mounted));
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 30);

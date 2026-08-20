@@ -1,0 +1,88 @@
+---
+title: I built an AI orchestrator that read 45,000 job postings so I didn't have to
+description: In five days, an orchestrator I built swept 144 career sites, judged 45,419 postings, and wrote 2,078 tailored resumes. No fixed headcount, just agents spinning up and down as the work demanded.
+date: "2026-08-20"
+draft: true
+tags: ["development", "ai", "agents"]
+---
+
+import PipelineFlow from "@/components/content/PipelineFlow.tsx";
+import AgentRoster from "@/components/content/AgentRoster.tsx";
+import SwarmBudget from "@/components/content/SwarmBudget.tsx";
+import AgentCostCompare from "@/components/content/AgentCostCompare.tsx";
+import RunStats from "@/components/content/RunStats.tsx";
+
+So, I started looking for a job.
+
+Sweep a dozen career sites, read hundreds of postings, throw out the ones you're not eligible for, hand-write a resume for every one that's left. Four separate chores, all boring, all exactly the kind of thing I'd rather write code for than actually sit down and do.
+
+So I built an AI orchestrator that boots up agents.
+
+Not a chatbot. Not "paste your resume, get some tips." One orchestrator that runs a loop, figures out what kind of help it needs right now, and spins up exactly that: however many, of whichever kind, for as long as there's work. I say "start," walk away, come back to a dashboard full of jobs I can apply to.
+
+## Two rules, and one I kept breaking
+
+Everything here comes down to two layers:
+
+- **Agents judge.** CS-field or not? Eligible or blocked? How good is the fit? Every one of those is an LLM reading the posting. Never a regex.
+- **Code plumbs.** Fetching, parsing HTML, chunking, merging into the database. Boring, deterministic, on purpose.
+
+The rule I kept breaking: regex doesn't get an opinion. I let a keyword filter drop "senior" roles once, and it quietly killed a new-grad listing whose title just happened to contain the word. Now the only thing code excludes on its own is something unambiguous, like an explicit non-US location or an explicit "5+ years," and even that runs through one named, auditable step instead of hiding inside a fetcher somewhere.
+
+## No fixed headcount
+
+There's no "launch 5 agents and wait" step anywhere in here. The fan-out logic is one loop: while there's work in the queue, claim the next chunk, launch an agent for it. The second any agent finishes, grab the next chunk, launch its replacement. Concurrency isn't something I set. It falls out of how fast agents finish versus how much is left.
+
+<PipelineFlow client:visible />
+
+Give it a few seconds. It climbs to budget, holds there while finished agents get swapped for fresh ones mid-flight, then tapers to zero exactly when the queue does. Extraction doesn't even need an agent. Plain code hits the Ashby/Greenhouse/Lever/Workday APIs directly. Only two sites (Meta, Uber) skip the public API, so those get a real browser-driving agent. Everything after that (eligibility, fit, resumes) runs through this exact same loop, just pointed at a different queue.
+
+The judges are where it gets interesting. Each one reads a chunk of ~150 roles and a page of rules, then hands back a verdict: CS-field or not, eligible or blocked (blockers only: citizenship, years required, non-US, nothing softer), and if eligible, how good a fit. The second a judge finishes, its verdict gets merged and written to the database, not batched, not held until the run ends. Roles that fail the CS check get dropped but kept for the record. Anything nobody's judged yet sits in a visibly greyed "needs review" pile. Nothing vanishes quietly, and nothing gets waved through either.
+
+## Not one worker. Not one at a time.
+
+It's not cloning one agent five times. It's running several different agent definitions at once, each one scaled to however deep its own queue happens to be right now.
+
+<AgentRoster client:visible />
+
+Watch the numbers, not the names. `browser-sweeper` climbs to 2 while Meta and Uber need sweeping, then drops to zero the second judgment work starts. That's on purpose: Chrome is RAM-hungry and judges are token-hungry, so the orchestrator never runs both at once. `title-triage` and `review-writer` ramp independently inside the same shared budget. `verdict-writer` (the expensive one, full inherited context, thinking cranked up) barely spins up at all, saved for the handful of calls that actually need it. And `browser-sweeper` is the only definition with a browser tool wired up at all, so no judge can quietly go rogue and start clicking around the internet. It's not that it wouldn't. It physically can't.
+
+## Ingest is what makes any of this trustworthy
+
+Every agent that finishes hands its output to the same narrow door: one upsert into a real hosted database (Turso), keyed by a stable ID. Run the same sweep twice and nothing breaks. A verdict never gets clobbered by a re-fetch, a resume link never gets blanked out, a skipped chunk just stays visibly pending instead of disappearing. Idempotent everything means I never have to think about ordering. Agents finish whenever they finish, and the database always converges on the right answer.
+
+Which is also what makes the dashboard worth leaving open in a tab. It reads straight off the live database, refreshing every few seconds. Not a snapshot, not something I have to remember to regenerate. I watch eligible roles and resume links show up mid-run, in something close to real time.
+
+## The crash that taught me to budget
+
+First version of this fanned out one browser agent per site, all at once. Each one owns its own headless Chrome, half a gig to a gig and a half of RAM apiece. On my 16 GB machine, that wave didn't finish. It took the whole box down with it.
+
+<SwarmBudget client:visible />
+
+The fix wasn't cleverer code, just a number written down so I'd stop relearning it every few weeks. Browser agents are RAM-bound, so they get a tight cap no matter how "parallel" the work looks. Pure LLM judgment is token-bound instead, so it can run wider. Never overlap a browser wave with a full judge wave, never go past six agents total. And because every step is an idempotent merge, a wave that crashes loses nothing. The next one just picks up where it died.
+
+## Paying for context you don't need
+
+<AgentCostCompare client:visible />
+
+This one cost me the most, and I learned it before `title-triage` existed. A 39-agent triage wave, back when every judge ran heavy with full inherited context, burned over a million tokens before a single title got classified. Each agent was paying a ~29,000-token tax just to load the whole project before it looked at one job title. The task didn't need any of that. "Does this title sound like engineering" doesn't get smarter with more context. `title-triage` exists specifically so I never make that mistake twice: no inherited context, no thinking budget, just the 500 titles it's there to sort.
+
+## Stop it anytime
+
+Resume building runs off an actual queue file, and every worker claims a job from it atomically before touching it. Two workers can't grab the same job. A worker that dies mid-build just leaves its claim stale for the next wave to notice.
+
+Which means I can kill the whole thing mid-run, close my laptop, come back the next day, and say "start" again. Nothing gets redone. Nothing gets lost. It just picks up exactly where the queue says it stopped.
+
+## The receipt
+
+Five days in, I pulled the numbers instead of guessing. Every session and subagent run leaves a transcript.
+
+<RunStats client:visible />
+
+2,150 subagent runs did the reading and judging. 17 main orchestrator sessions told them what to do next. That's the split this whole thing runs on: a handful of sessions deciding, a swarm doing.
+
+## What's on the other end
+
+I open the dashboard while it's still running. Roles sorted by fit, gaps and blockers spelled out, resume PDFs showing up next to rows that had nothing a minute ago, all of it live, off the same database the orchestrator is writing to right now. Nothing gets excluded on a heuristic I can't see. No resume recycles a summary from a different job. Every single one of those 2,078 is written from scratch, which is the part I never had the patience for by hand.
+
+One instruction. A workforce spins up, reads tens of thousands of postings, tails itself back down to nothing. And I spend the afternoon clicking Apply instead of reading job descriptions.
