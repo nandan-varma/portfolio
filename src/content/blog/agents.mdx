@@ -1,0 +1,79 @@
+---
+title: I put an orchestrator in charge of my job search
+description: One orchestrator agent dynamically spawns and kills its own workforce, judges hundreds of postings in parallel, ingests verdicts straight into a live database, and hands me a dashboard that updates in real time.
+date: "2026-08-20"
+draft: true
+tags: ["development", "ai", "agents"]
+---
+
+import PipelineFlow from "@/components/content/PipelineFlow.tsx";
+import AgentRoster from "@/components/content/AgentRoster.tsx";
+import SwarmBudget from "@/components/content/SwarmBudget.tsx";
+import AgentCostCompare from "@/components/content/AgentCostCompare.tsx";
+
+Job hunting is a data pipeline wearing a trench coat. You sweep dozens of career sites, read hundreds of postings, throw out the ones you're not eligible for, and hand-tailor a resume for the handful that are worth it. I was doing all four steps by hand and hating every minute of it, so I handed the whole thing to one orchestrator agent and let it hire its own workforce.
+
+This isn't a chatbot that answers questions about my resume. There is no fixed cast of agents sitting around waiting for work. One orchestrator session runs a single loop, claims the next unit of work off a live queue, and launches a fresh subagent for it the instant a slot opens — spinning its swarm up and down in real time as the queue drains, never idling, never overcommitting. I say "start," and for the next hour a workforce that didn't exist a second ago sweeps every career site I track, judges every posting against my actual eligibility, writes verdicts straight into a live database, and tails off to zero the moment there's nothing left to claim.
+
+## Two layers, and a rule I kept breaking
+
+The architecture only has two layers:
+
+- **Agents judge.** Is this a CS-field role or pure hardware? Am I eligible, or is there a blocker? How good is the fit? Every one of those is a call an LLM makes by reading the actual posting — never a keyword regex.
+- **Code plumbs.** Fetching the JSON, converting HTML to text, chunking postings for the judges, merging verdicts into the database. Mechanical, deterministic, boring on purpose.
+
+The rule that took me the longest to actually follow: **regex never gets an opinion.** Early on I let a title-matching heuristic filter out "senior" roles, and it silently dropped a new-grad listing whose title just happened to contain the word. Now the only thing code is allowed to exclude on its own is unambiguous fact — an explicit non-US location, an explicit "5+ years senior" title — and even that runs through a named, auditable pre-filter step instead of hiding inside a fetcher somewhere.
+
+## No fixed workforce — a rolling claim loop
+
+There's no "launch 5 agents and wait" step anywhere in this system. The orchestrator runs one script, and the entire fan-out logic is a loop that's almost embarrassingly small: while the queue isn't empty, claim the next chunk, launch a judge for it, and race every agent currently in flight — the instant any one of them finishes, its slot is free and the loop immediately claims the next chunk and launches a replacement. Concurrency isn't a number you set once; it's an emergent property of how fast agents finish versus how much work is left:
+
+<PipelineFlow client:visible />
+
+Watch it for a few seconds and you can see the shape of a real run: the swarm climbs to its budget cap, holds there as finished judges get replaced by freshly-claimed chunks mid-flight, and drains to zero exactly when the queue does — no idle workers, no manual wave-by-wave babysitting. Extraction itself doesn't even need an agent: `fetch.py` hits the Ashby/Greenhouse/Lever/Workday APIs directly in-process. Only the two sites without a public API (Meta, Uber) get a real browser-driving agent; everything downstream of that — judging eligibility, judging fit, writing LaTeX — is this same rolling claim loop, just pointed at a different queue and a different worker definition.
+
+The judges are where the actual intelligence lives. Each one reads a ~150-role chunk and one page of rules, then returns a verdict per role: is this CS-field engineering, is the candidate eligible (blockers only — citizenship, explicit years-required, non-US location, nothing softer), and if eligible, how strong is the fit. The moment a judge finishes, its verdict doesn't sit in a buffer waiting for the run to end — it's merged and ingested immediately, so the database is always a live reflection of exactly how far the swarm has gotten, never a stale snapshot from whenever the last wave happened to finish. Roles that fail the CS gate get marked dropped but kept for provenance. Roles nobody's judged yet sit in a visibly greyed "needs review" section — nothing is ever silently discarded, and nothing is ever auto-approved either.
+
+## It's not one worker type — and it's not one at a time
+
+"Launch an agent" undersells it. The orchestrator isn't stamping out clones or working through a list one at a time — at any given moment it's running several *different* agent definitions simultaneously, each scaled to however deep its own backlog happens to be right now, tools and thinking budget picked per definition, not per run:
+
+<AgentRoster client:visible />
+
+Watch the counts, not just the names: `browser-sweeper` climbs to 2 while it's got Meta and Uber to sweep, then goes to zero the moment judgment work starts — not a coincidence, the orchestrator deliberately never lets a Chrome-bound wave and a token-bound judge wave overlap. `title-triage` and `review-writer` then ramp up and down independently of each other inside the same shared budget, and `verdict-writer` — the expensive one, full inherited context, thinking cranked to high — barely spins up at all, only for the handful of genuinely ambiguous calls that need it. `browser-sweeper` is also the only definition that loads the CDP browser extension at all, so it's the only agent in the swarm physically capable of opening a tab; a judge can't go rogue and start browsing because the tool simply isn't in its hands. Same species, five different loadouts, each one scaled independently to real, live backlog.
+
+## Ingest is the part that makes it trustworthy
+
+Every finished agent hands its output to the same narrow door: one `ingest.py` upsert into Turso, a real hosted database, not a local file I sync by hand later. The merge is keyed by a stable source ID, so re-running the exact same sweep twice is a no-op — a judge verdict never gets clobbered by a re-fetch, a resume registration never blanks out a file that already exists, and a chunk that a judge skipped just stays visibly pending instead of silently vanishing. Because every write is idempotent, I don't have to reason about *ordering* at all: agents finish in whatever order they finish, and the database converges to the same correct state regardless.
+
+That's what makes the live-updating dashboard possible instead of terrifying. It reads straight off Turso — not a cache I have to remember to invalidate, not a static export — on a rolling few-second window, so I can leave it open in a tab while the swarm runs and watch eligible roles, confidence scores, and resume links land in near real time as agents finish work half a world away from the browser tab.
+
+## The crash that taught me to budget concurrency
+
+The first version of this fanned out one browser-driving agent per career site, all at once. Every one of those agents owns its own headless Chrome instance — half a gig to a gig and a half of RAM each. On a 16 GB machine, that wave didn't finish; it OOM'd the box.
+
+The fix wasn't smarter code, it was an explicit budget, written down so I stop re-learning it every few weeks:
+
+<SwarmBudget client:visible />
+
+The shape of the constraint is what made it click: agents that touch a browser are RAM-bound, so they get a tight concurrency cap regardless of how "parallelizable" the work looks. Agents that are pure LLM judgment are token-bound instead, so they can run wider. Never overlap a browser wave with a full judging wave, and never exceed six agents in flight, full stop. Because every step is an idempotent JSON merge, a wave that dies loses nothing — it just means the next wave picks up where the crash left off. Slow and resumable beats fast and gone.
+
+## Paying for context you don't need
+
+The roster above isn't cosmetic — inherited context is where the second big lesson lives, and I paid for it before `title-triage` existed to prevent it.
+
+<AgentCostCompare client:visible />
+
+A 39-agent triage wave, back when every judge ran on a heavy, fully-inherited-context definition, burned over a million tokens before a single title got classified — each agent paying a ~29,000-token tax for a full copy of the project's rules and history before it ever looked at a job title. The task itself needed none of that: "does this title sound like engineering" doesn't get better with more context or more thinking budget. `title-triage` exists specifically so that mistake can't happen twice — zero inherited context, thinking off, nothing but the 500 title lines it's there to classify. The lesson generalizes past this one incident: match the agent's weight to the judgment it's actually making, not to the judgment the hardest step in the pipeline happens to be making.
+
+## Stop it anytime, resume without thinking
+
+Resume building — the slowest stage, hundreds of individual LaTeX compiles — doesn't even go through the rolling loop above. It works off a literal queue file (`state/queue-resume.json`), and every worker agent claims one job from it atomically with an `fcntl` file lock before touching it, then marks it done when the PDF compiles clean. Two workers can never grab the same job, and a worker that dies mid-build just leaves its claim stale for the next wave to notice and retry.
+
+That means the whole pipeline is stop-anytime by construction, not by discipline. I can kill the orchestrator mid-sweep, close my laptop, come back tomorrow, and say "start" again — it doesn't redo finished work and it doesn't lose in-flight work, it just resumes exactly where the queue says it stopped. That's the same instinct as designing crash-only software: don't build a graceful shutdown path, build a system where an ungraceful one is indistinguishable from normal operation.
+
+## What's on the other end
+
+I open the dashboard while the swarm is still running and watch it happen: eligible roles sorted by fit confidence with gaps and blockers spelled out, resume PDF links appearing next to rows that had none a few refreshes ago, all of it live off the same database the orchestrator is writing to right now. No role ever gets excluded on a heuristic I can't see, and no resume ever recycles a summary from a different job — every posting is judged and written from scratch, which is exactly the part I never had the patience to do by hand at this volume.
+
+One instruction spins up a workforce, that workforce judges hundreds of postings and tails itself back down to nothing, and I spend my afternoon clicking Apply instead of reading job descriptions.
