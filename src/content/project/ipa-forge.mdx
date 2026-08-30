@@ -1,0 +1,45 @@
+---
+title: ipa-forge
+description: A generic, data-driven iOS IPA patcher framework - extract an IPA, apply version-aware patches from external YAML, and re-sign it for AltStore Classic.
+date: "2026-08-25"
+repository: nandan-varma/ipa-forge
+url: https://ipa-forge.nandan.fyi
+published: true
+---
+
+Patching an iOS app for sideloading usually means a bespoke, throwaway script per app - hardcoded byte offsets, a hand-rolled re-signing step, no way to tell if a patch still applies once the app updates. I wanted the actual engine separated from any one app's specifics: take a user-supplied `.ipa`, apply patches described in plain YAML, and get back a correctly re-signed IPA that AltStore Classic can install and refresh on a real iPhone - with the app-specific knowledge living entirely outside the core.
+
+## A 17-stage pipeline, one-way dependencies
+
+`forge patch` runs a fixed pipeline: validate and extract the IPA, inventory the bundle bottom-up, resolve which patch definitions apply, then a hard dry-run gate - every patch operation must report `dry_run_ok` before anything mutates. Only then do resource patches, binary patches, and dylib injection apply, in that fixed order (injection last, since LIEF's rewrites can shift the byte offsets binary patches depend on). The bundle is re-validated immediately after mutation, before any signing begins - entitlement reconciliation, profile embedding, recursive bottom-up codesigning, verification, repackaging, and a final re-extract-from-scratch validation close it out.
+
+The engine itself is app-agnostic: it understands `binary_replace`, `resource_replace`, `dylib_inject`, and `plist_edit` as operation types, never a specific bundle id or byte pattern - those only ever come from user-supplied YAML. `patch/` and `signing/` never import each other; they're connected only through a shared `AppBundle` model, and every actual signing operation shells out to `codesign`/`security` rather than reimplementing Apple's CodeDirectory/CMS/SuperBlob format, which Apple has changed repeatedly and treats as an internal detail, not a stable API.
+
+## Hook verification as a safety net for version drift
+
+Dylib-injection tweaks depend on ObjC runtime hooks - a method swizzle on a specific class and selector - that a newer app version can silently break by renaming or removing the target. A `hooks:` block in the patch definition declares every hook a tweak relies on, and the pipeline verifies each one against the app's main binary (class table, method lists, `__objc_selrefs`, chained-fixup aware) during the dry-run gate, before anything mutates. The verifier distinguishes soft cases - `unverified` (declared but not in a parsed method list, likely still attaches), `referenced-only` (referenced but never declared as a method anywhere, so there's no IMP to swizzle - a dead-hook detector), `ok-inherited` (resolves to a system superclass) - from hard failures like a missing class or selector. Porting a patch set to a new app version becomes: bump the version, read the report, fix exactly what it flags, instead of debugging a silent no-op on-device.
+
+## Two bugs only findable empirically
+
+Signing a bundle-kind executable (main app, framework, extension) has to target the *bundle directory*, not the raw Mach-O file inside it - otherwise `codesign` never creates the bundle-level `_CodeSignature/CodeResources` seal, and a later `--verify --strict` fails with "a sealed resource is missing or invalid." And LIEF's `Binary.write()`, called on a single arch slice pulled from a fat/universal Mach-O, silently overwrites the *entire file* with just that slice, discarding every other architecture - so `machO/injector.py` always writes back through the parent `FatBinary` container instead. Neither is documented anywhere; both came from testing against a real synthetic fixture.
+
+## Both a CLI and a GUI over the same pipeline
+
+The `forge` CLI (Typer) covers `inspect`, `validate`, `patch`, `hooks`, and `analysis`. `forge gui` launches a FastAPI app wrapping the identical in-process pipeline for a drop-a-file, click-Patch flow aimed at users who don't want to hand-write YAML - it detects the app and matching patch set, and warns (without blocking) on a version mismatch, since hook verification is the actual safety net rather than a strict version match. A separate `analysis/` module reuses the same ObjC-analysis engine as hook verification to provide general-purpose reverse engineering - class-dump rendering, type-encoding decode, strings, symbols, security posture, and version diffing - for any IPA, patched or not.
+
+## Key decisions
+
+- **Patch definitions as external YAML, not code** - the engine ships no app-specific patches at all; anyone can define byte patches, resource swaps, or dylib injection for their own app without touching the core, and a `patches/<app>/` directory is a self-contained, shareable unit
+- **A hard dry-run gate before any mutation** - partial patch application on a signed app bundle is much harder to recover from than a failed dry run; every operation must prove it will succeed before any of them run for real
+- **Never reimplementing Apple's signature format** - `codesign`/`security` are the only things that ever produce a valid signature; hand-rolling CodeDirectory/CMS construction would need to track every macOS SDK change indefinitely for a format Apple explicitly doesn't treat as stable
+- **Hook verification instead of a strict app-version pin** - blocking a patch outright on a version bump is overly conservative when most updates don't touch the specific classes a hook targets; verifying the actual selectors and classes gets much closer to "will this hook still work" than a version string does
+
+## Built with
+
+- Python 3.11+, Typer CLI
+- [LIEF](https://lief.re) - Mach-O parsing, arch selection, dylib injection
+- Pydantic + PyYAML - patch schema and validation
+- FastAPI + Uvicorn - local GUI server
+- `codesign`/`security` (macOS) - all real signing operations, shelled out
+- pytest - test suite, including real codesign signing on macOS
+- [Fumadocs](https://fumadocs.dev) - documentation site
