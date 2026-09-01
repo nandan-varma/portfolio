@@ -5,6 +5,7 @@ import "@/styles/global.css";
 import { SITE_TITLE } from "@/consts";
 import { ClientRouter } from "astro:transitions";
 import PostHog from "@/components/posthog.astro";
+import PerfDebug from "@/components/PerfDebug.astro";
 
 interface Props {
 	title: string;
@@ -101,3 +102,6 @@ const { title, description, image = "/og.png", noindex = false } = Astro.props;
 
 <!-- PostHog Analytics -->
 <PostHog />
+
+<!-- TEMPORARY: click-latency investigation, remove after -->
+<PerfDebug />

@@ -1,0 +1,67 @@
+---
+// TEMPORARY DIAGNOSTIC - remove once the click-latency investigation is done.
+// Logs a per-navigation timing breakdown to the console so we can see, from
+// a real user's browser/network, where time actually goes between a click
+// and the next page becoming usable: network (dns/connect/tls/ttfb/download)
+// vs. Astro's swap/script-rerun work.
+---
+
+<script is:inline>
+  if (!window.__perfDebugInstalled) {
+    window.__perfDebugInstalled = true;
+
+    let navStart = 0;
+    let navUrl = "";
+
+    document.addEventListener("click", (e) => {
+      const link = e.target && e.target.closest && e.target.closest("a");
+      if (link && link.href && new URL(link.href).origin === location.origin) {
+        navStart = performance.now();
+        navUrl = link.href;
+      }
+    }, true);
+
+    const log = (label, t) => {
+      console.log(`[PERF-DEBUG] ${label}: +${(t - navStart).toFixed(1)}ms`);
+    };
+
+    document.addEventListener("astro:before-preparation", () => log("before-preparation (click handled)", performance.now()));
+    document.addEventListener("astro:after-preparation", () => log("after-preparation (HTML fetched)", performance.now()));
+    document.addEventListener("astro:before-swap", () => log("before-swap", performance.now()));
+    document.addEventListener("astro:after-swap", () => log("after-swap (DOM replaced)", performance.now()));
+
+    document.addEventListener("astro:page-load", () => {
+      log("page-load (scripts re-run, page usable)", performance.now());
+
+      // Pull the actual network breakdown for the document fetch that just
+      // happened, so we can see dns/connect/tls/ttfb/download separately.
+      if (!navUrl) return;
+      const path = new URL(navUrl).pathname;
+      const entries = performance.getEntriesByType("resource")
+        .filter((r) => r.name.includes(path) && r.initiatorType === "fetch")
+        .slice(-1);
+
+      const entry = entries[0];
+      if (!entry) {
+        console.log("[PERF-DEBUG] no resource timing entry found for", path);
+        return;
+      }
+
+      console.log("[PERF-DEBUG] network breakdown for", path, {
+        dns: (entry.domainLookupEnd - entry.domainLookupStart).toFixed(1) + "ms",
+        connect: (entry.connectEnd - entry.connectStart).toFixed(1) + "ms",
+        tls: entry.secureConnectionStart > 0
+          ? (entry.connectEnd - entry.secureConnectionStart).toFixed(1) + "ms"
+          : "n/a (reused/no-tls-info)",
+        ttfb: (entry.responseStart - entry.requestStart).toFixed(1) + "ms",
+        download: (entry.responseEnd - entry.responseStart).toFixed(1) + "ms",
+        totalFetch: (entry.responseEnd - entry.startTime).toFixed(1) + "ms",
+        transferSize: entry.transferSize,
+        encodedBodySize: entry.encodedBodySize,
+        nextHopProtocol: entry.nextHopProtocol,
+        reusedConnection: entry.connectStart === entry.connectEnd,
+      });
+      navUrl = "";
+    });
+  }
+</script>
