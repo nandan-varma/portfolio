@@ -33,7 +33,12 @@ const PARTICLE_CONFIG = {
 
 const LIGHTING_CONFIG = {
     baseOpacity: 0.06,
-    maxOpacityMultiplier: 0.55,
+    // Kept low on purpose: per-brick opacity is a flat fill across an 80x50
+    // cell, so any large swing here reads as a hard, blocky step between
+    // neighboring bricks. The soft, continuous part of the light comes from
+    // drawAmbientGlow()'s native canvas gradient instead - this only adds a
+    // subtle brick-level highlight on top of it.
+    maxOpacityMultiplier: 0.22,
     particleOffsetX: 35,
     particleOffsetY: 30,
     particleRadiusBase: 0.85,
@@ -43,6 +48,19 @@ const LIGHTING_CONFIG = {
         { stop: 0.4, color: '180, 180, 180', alpha: 0.09 },
         { stop: 0.7, color: '130, 130, 130', alpha: 0.04 },
         { stop: 1, color: '50, 50, 50', alpha: 0 },
+    ],
+    // A single large radial gradient centered on the torch. Canvas gradients
+    // interpolate per-pixel, so - unlike the per-brick opacity above - this
+    // falls off genuinely smoothly. It's the main light source; everything
+    // else is texture on top of it.
+    ambientRadiusMultiplier: 2.4,
+    ambientStops: [
+        { stop: 0, alpha: 0.16 },
+        { stop: 0.2, alpha: 0.13 },
+        { stop: 0.4, alpha: 0.09 },
+        { stop: 0.6, alpha: 0.055 },
+        { stop: 0.8, alpha: 0.025 },
+        { stop: 1, alpha: 0 },
     ],
 } as const;
 
@@ -527,12 +545,35 @@ export class TorchEffect {
         if (!this.animationFrame) {
             this.updateFlameAnimation();
         }
-        
+
+        this.drawAmbientGlow();
+
         this.flameParticles.forEach((particle, i) => {
             if (i % 2 === 0) {
                 this.drawParticleLight(particle);
             }
         });
+    }
+
+    private drawAmbientGlow(): void {
+        const radius = TORCH_CONFIG.baseRadius * LIGHTING_CONFIG.ambientRadiusMultiplier;
+        const gradient = this.ctx.createRadialGradient(
+            this.mouseX, this.mouseY, 0,
+            this.mouseX, this.mouseY, radius
+        );
+
+        LIGHTING_CONFIG.ambientStops.forEach(({ stop, alpha }) => {
+            gradient.addColorStop(stop, `rgba(230, 225, 210, ${alpha * this.globalIntensity})`);
+        });
+
+        const prevComposite = this.ctx.globalCompositeOperation;
+        this.ctx.globalCompositeOperation = 'lighter';
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(
+            this.mouseX - radius, this.mouseY - radius,
+            radius * 2, radius * 2
+        );
+        this.ctx.globalCompositeOperation = prevComposite;
     }
     
     private drawParticleLight(particle: FlameParticle): void {
