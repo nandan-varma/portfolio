@@ -77,5 +77,27 @@ const { title, description, image = "/og.png", noindex = false } = Astro.props;
 <!-- view transitions -->
 <ClientRouter />
 
+<script is:inline>
+	// The native View Transitions API (which Astro's ClientRouter uses)
+	// throws "InvalidStateError: Transition was aborted because of invalid
+	// state" if a new transition starts before the previous one has settled
+	// - e.g. clicking two nav links back to back. The navigation itself
+	// still completes correctly; only the transition animation is skipped.
+	// Without this, every occurrence surfaces as an uncaught error and gets
+	// reported to PostHog (capture_exceptions is on), which is just noise.
+	if (!window.__viewTransitionRejectionFilterInstalled) {
+		window.__viewTransitionRejectionFilterInstalled = true;
+		window.addEventListener("unhandledrejection", (event) => {
+			if (
+				event.reason instanceof DOMException &&
+				event.reason.name === "InvalidStateError" &&
+				event.reason.message.includes("Transition was aborted")
+			) {
+				event.preventDefault();
+			}
+		});
+	}
+</script>
+
 <!-- PostHog Analytics -->
 <PostHog />
