@@ -33,12 +33,7 @@ const PARTICLE_CONFIG = {
 
 const LIGHTING_CONFIG = {
     baseOpacity: 0.06,
-    // Kept low on purpose: per-brick opacity is a flat fill across an 80x50
-    // cell, so any large swing here reads as a hard, blocky step between
-    // neighboring bricks. The soft, continuous part of the light comes from
-    // drawAmbientGlow()'s native canvas gradient instead - this only adds a
-    // subtle brick-level highlight on top of it.
-    maxOpacityMultiplier: 0.22,
+    maxOpacityMultiplier: 0.55,
     particleOffsetX: 35,
     particleOffsetY: 30,
     particleRadiusBase: 0.85,
@@ -49,19 +44,6 @@ const LIGHTING_CONFIG = {
         { stop: 0.7, color: '130, 130, 130', alpha: 0.04 },
         { stop: 1, color: '50, 50, 50', alpha: 0 },
     ],
-    // A single large radial gradient centered on the torch. Canvas gradients
-    // interpolate per-pixel, so - unlike the per-brick opacity above - this
-    // falls off genuinely smoothly. It's the main light source; everything
-    // else is texture on top of it.
-    ambientRadiusMultiplier: 2.4,
-    ambientStops: [
-        { stop: 0, alpha: 0.16 },
-        { stop: 0.2, alpha: 0.13 },
-        { stop: 0.4, alpha: 0.09 },
-        { stop: 0.6, alpha: 0.055 },
-        { stop: 0.8, alpha: 0.025 },
-        { stop: 1, alpha: 0 },
-    ],
 } as const;
 
 const BRICK_CONFIG = {
@@ -71,14 +53,6 @@ const BRICK_CONFIG = {
     noiseScale: 0.1,
     noiseAmount: 0.02,
 } as const;
-
-// calculateBrickOpacity clamps flameShape to [0.6, 0.9] (see
-// getFlameIntensityAt), so effectiveRadius * 1.5 never exceeds
-// baseRadius * (1.4 + 0.9 * 0.4) * 1.5. Any brick further than this from the
-// torch is guaranteed to resolve to baseOpacity - i.e. exactly what's
-// already in the static layer - so it's safe to skip entirely.
-const MAX_RELIGHT_RADIUS = TORCH_CONFIG.baseRadius * (1.4 + 0.9 * 0.4) * 1.5;
-const MAX_RELIGHT_RADIUS_SQ = MAX_RELIGHT_RADIUS * MAX_RELIGHT_RADIUS;
 
 interface FlameParticle {
     angle: number;
@@ -116,13 +90,6 @@ export class TorchEffect {
     private globalIntensity = 1;
     private targetIntensity = 1;
     private nextIntensityChange = 0;
-
-    // Pre-rendered brick wall at rest (baseOpacity everywhere). Redrawing
-    // every brick from scratch every frame is wasted work: only bricks near
-    // the torch ever differ from this cached image, so each frame blits it
-    // once and re-draws just the lit subset on top.
-    private staticLayer: HTMLCanvasElement | null = null;
-    private staticCtx: CanvasRenderingContext2D | null = null;
 
     constructor(
         private readonly ctx: CanvasRenderingContext2D,
@@ -381,62 +348,15 @@ export class TorchEffect {
         animate();
     }
 
-    private ensureStaticLayer(): void {
-        if (
-            this.staticLayer &&
-            this.staticLayer.width === this.canvas.width &&
-            this.staticLayer.height === this.canvas.height
-        ) {
-            return;
-        }
-
-        if (!this.staticLayer) {
-            this.staticLayer = document.createElement('canvas');
-            this.staticCtx = this.staticLayer.getContext('2d');
-        }
-        this.staticLayer.width = this.canvas.width;
-        this.staticLayer.height = this.canvas.height;
-        this.renderStaticLayer();
-    }
-
-    private renderStaticLayer(): void {
-        if (!this.staticLayer || !this.staticCtx) return;
-        const { width, height, mortarSize } = BRICK_CONFIG;
-
-        this.staticCtx.clearRect(0, 0, this.staticLayer.width, this.staticLayer.height);
-        for (let y = 0; y < this.canvas.height + height; y += height) {
-            const offset = (Math.floor(y / height) % 2) * (width / 2);
-            for (let x = -width; x < this.canvas.width + width; x += width) {
-                this.drawBrick(x + offset, y, width, height, mortarSize, LIGHTING_CONFIG.baseOpacity, this.staticCtx);
-            }
-        }
-    }
-
     drawBrickWall(): void {
-        this.ensureStaticLayer();
-        if (this.staticLayer) {
-            this.ctx.drawImage(this.staticLayer, 0, 0);
-        }
-
         const { width, height, mortarSize } = BRICK_CONFIG;
 
         for (let y = 0; y < this.canvas.height + height; y += height) {
             const offset = (Math.floor(y / height) % 2) * (width / 2);
-
+            
             for (let x = -width; x < this.canvas.width + width; x += width) {
                 const brickX = x + offset;
                 const brickY = y;
-
-                // Cheap reject using the worst-case possible light radius
-                // (see calculateBrickOpacity) before paying for the
-                // per-particle flame trig below - bricks outside this can
-                // never differ from the static layer already blitted above.
-                const bcx = brickX + width / 2;
-                const bcy = brickY + height / 2;
-                const dx = bcx - this.mouseX;
-                const dy = bcy - this.mouseY;
-                if (dx * dx + dy * dy > MAX_RELIGHT_RADIUS_SQ) continue;
-
                 const opacity = this.calculateBrickOpacity(brickX, brickY, width, height);
 
                 if (opacity > 0.05) {
@@ -445,28 +365,28 @@ export class TorchEffect {
             }
         }
     }
-
+    
     private calculateBrickOpacity(brickX: number, brickY: number, width: number, height: number): number {
         const brickCenterX = brickX + width / 2;
         const brickCenterY = brickY + height / 2;
         const distanceFromLight = this.getDistance(brickCenterX, brickCenterY, this.mouseX, this.mouseY);
-
+        
         const flameShape = this.getFlameIntensityAt(brickCenterX, brickCenterY, this.mouseX, this.mouseY);
         const { baseOpacity, maxOpacityMultiplier } = LIGHTING_CONFIG;
         const maxOpacity = maxOpacityMultiplier * this.globalIntensity;
         const effectiveRadius = TORCH_CONFIG.baseRadius * (1.4 + flameShape * 0.4);
-
+        
         if (distanceFromLight >= effectiveRadius * 1.5) {
             return baseOpacity;
         }
-
+        
         const normalizedDistance = distanceFromLight / effectiveRadius;
         const falloff = Math.pow(Math.max(0, 1 - normalizedDistance), 2.5);
         const shapedFalloff = falloff * (0.7 + flameShape * 0.3);
-
+        
         let opacity = baseOpacity + (shapedFalloff * (maxOpacity - baseOpacity));
         opacity += this.getBrickNoise(brickX, brickY);
-
+        
         return Math.max(baseOpacity, opacity);
     }
     
@@ -475,64 +395,64 @@ export class TorchEffect {
         return Math.sin(brickX * noiseScale) * Math.cos(brickY * noiseScale) * noiseAmount;
     }
     
-    private drawBrick(x: number, y: number, width: number, height: number, mortarSize: number, opacity: number, ctx: CanvasRenderingContext2D = this.ctx): void {
+    private drawBrick(x: number, y: number, width: number, height: number, mortarSize: number, opacity: number): void {
         const borderRadius = 3;
         const brickX = x + mortarSize;
         const brickY = y + mortarSize;
         const brickWidth = width - mortarSize * 2;
         const brickHeight = height - mortarSize * 2;
-
+        
         // Main brick base
-        ctx.fillStyle = `rgba(180, 180, 180, ${opacity})`;
-        ctx.beginPath();
-        ctx.roundRect(brickX, brickY, brickWidth, brickHeight, borderRadius);
-        ctx.fill();
+        this.ctx.fillStyle = `rgba(180, 180, 180, ${opacity})`;
+        this.ctx.beginPath();
+        this.ctx.roundRect(brickX, brickY, brickWidth, brickHeight, borderRadius);
+        this.ctx.fill();
 
         // Subtle horizontal lines for texture
-        ctx.fillStyle = `rgba(140, 140, 140, ${opacity * 0.25})`;
-        ctx.beginPath();
-        ctx.roundRect(
+        this.ctx.fillStyle = `rgba(140, 140, 140, ${opacity * 0.25})`;
+        this.ctx.beginPath();
+        this.ctx.roundRect(
             brickX + 5,
             brickY + brickHeight * 0.3,
             brickWidth - 10,
             1.5,
             0.5
         );
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.roundRect(
+        this.ctx.fill();
+        
+        this.ctx.beginPath();
+        this.ctx.roundRect(
             brickX + 8,
             brickY + brickHeight * 0.65,
             brickWidth - 16,
             1,
             0.5
         );
-        ctx.fill();
+        this.ctx.fill();
 
         // Light highlight on top edge
-        ctx.fillStyle = `rgba(200, 200, 200, ${opacity * 0.4})`;
-        ctx.beginPath();
-        ctx.roundRect(
+        this.ctx.fillStyle = `rgba(200, 200, 200, ${opacity * 0.4})`;
+        this.ctx.beginPath();
+        this.ctx.roundRect(
             brickX + 3,
             brickY + 2,
             brickWidth - 6,
             brickHeight * 0.2,
             borderRadius - 1
         );
-        ctx.fill();
-
+        this.ctx.fill();
+        
         // Darker bottom edge for depth
-        ctx.fillStyle = `rgba(100, 100, 100, ${opacity * 0.3})`;
-        ctx.beginPath();
-        ctx.roundRect(
+        this.ctx.fillStyle = `rgba(100, 100, 100, ${opacity * 0.3})`;
+        this.ctx.beginPath();
+        this.ctx.roundRect(
             brickX + 3,
             brickY + brickHeight * 0.8,
             brickWidth - 6,
             brickHeight * 0.18,
             borderRadius - 1
         );
-        ctx.fill();
+        this.ctx.fill();
     }
     
     private getDistance(x1: number, y1: number, x2: number, y2: number): number {
@@ -545,35 +465,12 @@ export class TorchEffect {
         if (!this.animationFrame) {
             this.updateFlameAnimation();
         }
-
-        this.drawAmbientGlow();
-
+        
         this.flameParticles.forEach((particle, i) => {
             if (i % 2 === 0) {
                 this.drawParticleLight(particle);
             }
         });
-    }
-
-    private drawAmbientGlow(): void {
-        const radius = TORCH_CONFIG.baseRadius * LIGHTING_CONFIG.ambientRadiusMultiplier;
-        const gradient = this.ctx.createRadialGradient(
-            this.mouseX, this.mouseY, 0,
-            this.mouseX, this.mouseY, radius
-        );
-
-        LIGHTING_CONFIG.ambientStops.forEach(({ stop, alpha }) => {
-            gradient.addColorStop(stop, `rgba(230, 225, 210, ${alpha * this.globalIntensity})`);
-        });
-
-        const prevComposite = this.ctx.globalCompositeOperation;
-        this.ctx.globalCompositeOperation = 'lighter';
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(
-            this.mouseX - radius, this.mouseY - radius,
-            radius * 2, radius * 2
-        );
-        this.ctx.globalCompositeOperation = prevComposite;
     }
     
     private drawParticleLight(particle: FlameParticle): void {
