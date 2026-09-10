@@ -5,3 +5,8 @@ allowBuilds:
   esbuild: true
   protobufjs: true
   sharp: true
+# Transitive deps pinned by unmaintained astro-opengraph-images/@vercel/routing-utils chains
+overrides:
+  postcss: '>=8.5.23'
+  fflate: '>=0.7.5'
+  path-to-regexp: '>=6.3.0'
