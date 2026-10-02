@@ -26,6 +26,7 @@ export default defineConfig({
       "https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlwdChqLZue7hJ43mSDHQtXwVdx90vZ8kIKgM5",
     "/resume":
       "https://qujr12qsco.ufs.sh/f/66ba979a-9fcd-4ed7-ae19-a564d45889a6-fgc05v.pdf",
+    "/resume/apple": "/resume/apple.pdf",
   },
 
   adapter: vercel(),
