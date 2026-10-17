@@ -1,4 +1,6 @@
 ---
+import Fonts from "@/components/layout/Fonts.astro";
+import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
 ---
 
@@ -6,12 +8,7 @@ import { ClientRouter } from "astro:transitions";
     <head>
         <ClientRouter />
         <link rel="sitemap" href="/sitemap.xml" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Parkinsans:wght@300..800&display=swap"
-            rel="stylesheet"
-        />
+        <Fonts />
     </head>
     <body>
         <slot />

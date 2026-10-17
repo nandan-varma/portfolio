@@ -19,8 +19,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
-        display: ["var(--font-calsans)"]
+        sans: ["Source Sans 3", ...defaultTheme.fontFamily.sans],
+        display: ["Bitter", ...defaultTheme.fontFamily.sans]
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(50% 50% at 50% 50%, var(--tw-gradient-stops))'

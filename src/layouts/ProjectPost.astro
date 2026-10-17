@@ -75,7 +75,7 @@ const { title, description, date, emoji, repository, url, published } =
                     {title}
                 </h1>
                 <p
-                    class="mt-6 text-base sm:text-lg leading-8 text-zinc-300"
+                    class="mt-6 text-lg leading-8 text-zinc-300 text-left"
                     transition:name={"project-desc-" + title}
                 >
                     {description}
@@ -148,9 +148,6 @@ const { title, description, date, emoji, repository, url, published } =
 </script>
 
 <style>
-    .font-display {
-        font-family: "Lora", serif;
-    }
     .white-back {
         color: white !important;
     }
