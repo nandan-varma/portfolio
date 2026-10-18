@@ -4,6 +4,7 @@ export class TextManager {
     private glyphs?: ImageData;
     private originX = 0;
     private originY = 0;
+    private gradient?: CanvasGradient;
     private textBounds: TextBounds = { left: 0, right: 0, top: 0, bottom: 0 };
 
     constructor(
@@ -44,6 +45,13 @@ export class TextManager {
             top: textY - textHeight / 2,
             bottom: textY + textHeight / 2,
         };
+
+        this.gradient = this.ctx.createLinearGradient(
+            this.textBounds.left, this.textBounds.top,
+            this.textBounds.right, this.textBounds.bottom,
+        );
+        this.gradient.addColorStop(0, "rgba(255, 255, 255, 0.9)");
+        this.gradient.addColorStop(1, "rgba(200, 200, 200, 0.8)");
 
         // Rasterize only the text box (not the whole viewport) and keep glyphs at
         // the exact subpixel position they have on the main canvas. The readback
@@ -146,17 +154,7 @@ export class TextManager {
         this.ctx.shadowOffsetX = 0;
         this.ctx.shadowOffsetY = 0;
 
-        // Create gradient for text
-        const gradient = this.ctx.createLinearGradient(
-            this.textBounds.left,
-            this.textBounds.top,
-            this.textBounds.right,
-            this.textBounds.bottom,
-        );
-        gradient.addColorStop(0, "rgba(255, 255, 255, 0.9)");
-        gradient.addColorStop(1, "rgba(200, 200, 200, 0.8)");
-
-        this.ctx.fillStyle = gradient;
+        if (this.gradient) this.ctx.fillStyle = this.gradient;
         this.ctx.fillText(this.text, textX, textY);
 
         // Reset shadow

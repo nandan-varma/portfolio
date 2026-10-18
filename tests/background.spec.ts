@@ -122,3 +122,62 @@ test('handles a new navigation during an unfinished transition', async ({ page }
   await expect.poll(() => page.evaluate(() => !!window.__backgroundController)).toBe(false);
   expect(errors).toEqual([]);
 });
+
+test('keeps homepage CSS small and preserves styles across route changes', async ({ page }) => {
+  const response = await page.goto('/');
+  await page.waitForFunction(() => !!window.__backgroundController);
+  const initialStyles = await page.evaluate(html => {
+    const document = new DOMParser().parseFromString(html, 'text/html');
+    return Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'))
+      .map(link => link.getAttribute('href')!);
+  }, await response!.text());
+  const sizes = await Promise.all(initialStyles.map(async href => {
+    const stylesheet = await page.request.get(new URL(href, page.url()).href);
+    expect(stylesheet.ok()).toBe(true);
+    return (await stylesheet.body()).length;
+  }));
+  expect(sizes.length).toBeGreaterThan(0);
+  // The landing page must not regress to downloading the ~53 KB site sheet.
+  expect(sizes.reduce((sum, bytes) => sum + bytes, 0)).toBeLessThan(20_000);
+  const sectionStyles = page.locator('link[rel="prefetch"][as="style"]');
+  await expect(sectionStyles).toHaveCount(1);
+  await expect(sectionStyles).toHaveAttribute('fetchpriority', 'low');
+  const sectionCSS = await page.request.get(new URL((await sectionStyles.getAttribute('href'))!, page.url()).href);
+  expect(sectionCSS.ok()).toBe(true);
+  const initial = await page.locator('a[href="/projects"]').evaluate(element => {
+    const style = getComputedStyle(element);
+    return { font: style.fontFamily, weight: style.fontWeight, size: style.fontSize, filter: style.filter };
+  });
+  expect(initial.font).toContain('Source Sans 3');
+  expect(initial.weight).toBe('700');
+  expect(initial.filter).toContain('drop-shadow');
+  await page.locator('a[href="/projects"]').click();
+  await expect(page).toHaveURL(/\/projects$/);
+  expect(await page.locator('canvas').evaluate(element => getComputedStyle(element).position)).toBe('fixed');
+  await page.locator('a[href="/"]').first().click();
+  await expect(page).toHaveURL(new URL('/', page.url()).href);
+  const returned = await page.locator('a[href="/projects"]').evaluate(element => {
+    const style = getComputedStyle(element);
+    return { font: style.fontFamily, weight: style.fontWeight, size: style.fontSize, filter: style.filter };
+  });
+  expect(returned).toEqual(initial);
+});
+
+test('reuses the hero text gradient until the viewport changes', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => !!window.__backgroundController);
+  const gradients = await page.evaluate(async () => {
+    const canvas = document.querySelector('canvas')!;
+    const context = canvas.getContext('2d')!;
+    const create = context.createLinearGradient.bind(context);
+    let created = 0;
+    context.createLinearGradient = (...args) => { created++; return create(...args); };
+    await new Promise<void>(resolve => {
+      let remaining = 8;
+      function frame() { if (--remaining) requestAnimationFrame(frame); else resolve(); }
+      requestAnimationFrame(frame);
+    });
+    return created;
+  });
+  expect(gradients).toBe(0);
+});

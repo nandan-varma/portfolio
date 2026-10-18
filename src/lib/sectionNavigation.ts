@@ -10,12 +10,15 @@ function direction(from: URL, to: URL) {
 // Animate live content: a named ancestor snapshot creates a backdrop root,
 // preventing glass cards from sampling the canvas behind them.
 document.addEventListener("astro:before-swap", (event) => {
+  // Both a deliberate section skip and a superseding navigation can cancel
+  // ready before it settles. Observe every transition, including home/detail
+  // routes, while keeping unexpected failures visible to error monitoring.
+  void event.viewTransition.ready.catch((error) => {
+    if (!(error instanceof DOMException && error.name === "AbortError")) throw error;
+  });
   const travel = direction(event.from, event.to);
   if (!travel) return;
   // Section navigation uses live transforms; detail routes retain view transitions.
-  // A deliberate skip rejects the native ready promise with AbortError.
-  // Handle that promise locally rather than reporting an unhandled error.
-  void event.viewTransition.ready.catch(() => {});
   event.viewTransition.skipTransition();
   const content = event.newDocument.querySelector<HTMLElement>("[data-section-content]");
   if (content && !reducedMotion()) content.dataset.enterFrom = String(-travel * 24);

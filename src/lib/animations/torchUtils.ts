@@ -73,6 +73,17 @@ interface NoiseSystem {
     speeds: Float32Array;
 }
 
+interface BrickFillLayer {
+    brightness: number;
+    opacityScale: number;
+    paths: Path2D[][];
+    activeAlphas: number[];
+}
+
+function brickFillLayer(brightness: number, opacityScale: number): BrickFillLayer {
+    return { brightness, opacityScale, paths: Array.from({ length: 256 }, () => []), activeAlphas: [] };
+}
+
 import type { Brick, Viewport } from './types';
 
 export class TorchEffect {
@@ -100,6 +111,12 @@ export class TorchEffect {
     // per-frame work to fills only, with byte-identical colours.
     private bricks: Brick[] = [];
     private colorTables = new Map<number, string[]>();
+    private readonly brickLayers = [
+        brickFillLayer(180, 1),
+        brickFillLayer(140, 0.25),
+        brickFillLayer(200, 0.4),
+        brickFillLayer(100, 0.3),
+    ];
 
     constructor(
         private readonly ctx: CanvasRenderingContext2D,
@@ -370,6 +387,12 @@ export class TorchEffect {
                 const x0 = brickX + mortarSize;
                 const y0 = brickY + mortarSize;
 
+                // The grid includes padding cells for staggered rows. Cells
+                // wholly outside the viewport cannot contribute any pixels.
+                if (x0 > viewWidth || y0 > viewHeight || x0 + brickWidth < 0 || y0 + brickHeight < 0) {
+                    continue;
+                }
+
                 const base = new Path2D();
                 base.roundRect(x0, y0, brickWidth, brickHeight, radius);
 
@@ -421,9 +444,37 @@ export class TorchEffect {
     }
 
     drawBrickWall(): void {
-        for (const brick of this.bricks) {
-            this.drawBrick(brick, this.calculateBrickOpacity(brick));
+        for (const layer of this.brickLayers) {
+            for (const alpha of layer.activeAlphas) layer.paths[alpha].length = 0;
+            layer.activeAlphas.length = 0;
         }
+
+        for (const brick of this.bricks) {
+            const opacity = this.calculateBrickOpacity(brick);
+            this.queueBrickFill(this.brickLayers[0], opacity, brick.base);
+            this.queueBrickFill(this.brickLayers[1], opacity, brick.lineA, brick.lineB);
+            this.queueBrickFill(this.brickLayers[2], opacity, brick.highlight);
+            this.queueBrickFill(this.brickLayers[3], opacity, brick.shade);
+        }
+
+        // Brick cells do not overlap. Retain each original path and its layer
+        // order, but set a fill colour once for all paths that share it.
+        // Unlike merging paths or raster caching, this preserves antialiasing.
+        for (const layer of this.brickLayers) {
+            const colors = this.colorTable(layer.brightness);
+            for (const alpha of layer.activeAlphas) {
+                this.ctx.fillStyle = colors[alpha];
+                for (const path of layer.paths[alpha]) this.ctx.fill(path);
+            }
+        }
+    }
+
+    private queueBrickFill(layer: BrickFillLayer, opacity: number, path: Path2D, secondPath?: Path2D) {
+        const alpha = this.alphaIndex(opacity * layer.opacityScale);
+        const paths = layer.paths[alpha];
+        if (paths.length === 0) layer.activeAlphas.push(alpha);
+        paths.push(path);
+        if (secondPath) paths.push(secondPath);
     }
 
     private calculateBrickOpacity(brick: Brick): number {
@@ -458,27 +509,6 @@ export class TorchEffect {
     private getBrickNoise(brickX: number, brickY: number): number {
         const { noiseScale, noiseAmount } = BRICK_CONFIG;
         return Math.sin(brickX * noiseScale) * Math.cos(brickY * noiseScale) * noiseAmount;
-    }
-
-    private drawBrick(brick: Brick, opacity: number): void {
-        const ctx = this.ctx;
-
-        // Main brick base
-        ctx.fillStyle = this.colorTable(180)[this.alphaIndex(opacity)];
-        ctx.fill(brick.base);
-
-        // Subtle horizontal lines for texture (same style for both lines)
-        ctx.fillStyle = this.colorTable(140)[this.alphaIndex(opacity * 0.25)];
-        ctx.fill(brick.lineA);
-        ctx.fill(brick.lineB);
-
-        // Light highlight on top edge
-        ctx.fillStyle = this.colorTable(200)[this.alphaIndex(opacity * 0.4)];
-        ctx.fill(brick.highlight);
-
-        // Darker bottom edge for depth
-        ctx.fillStyle = this.colorTable(100)[this.alphaIndex(opacity * 0.3)];
-        ctx.fill(brick.shade);
     }
 
     drawTorchLight(): void {
@@ -541,6 +571,10 @@ export class TorchEffect {
 
     cleanup(): void {
         this.bricks = [];
+        for (const layer of this.brickLayers) {
+            for (const alpha of layer.activeAlphas) layer.paths[alpha].length = 0;
+            layer.activeAlphas.length = 0;
+        }
         document.removeEventListener('mousemove', this.handleMouseMove);
         document.removeEventListener('touchmove', this.handleTouch);
         document.removeEventListener('touchstart', this.handleTouch);

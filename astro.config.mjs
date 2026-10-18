@@ -5,6 +5,7 @@ import sitemap from "@astrojs/sitemap";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import vercel from "@astrojs/vercel";
+import prefetchSectionStyles from "./integrations/prefetchSectionStyles.mjs";
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,6 +16,7 @@ export default defineConfig({
       filter: (page) => !page.includes("/recommend"),
     }),
     react(),
+    prefetchSectionStyles(),
   ],
 
   vite: {

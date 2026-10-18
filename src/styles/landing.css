@@ -1,0 +1,5 @@
+@import "tailwindcss" source(none);
+@import "./shared.css";
+
+@source "../pages/index.astro";
+@source "../components/animations/BackgroundAnimationCanvas.astro";
