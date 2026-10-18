@@ -1,5 +1,5 @@
 ---
-import { pageEvent } from "@/lib/analyticsEvents";
+import { clickEvent, pageEvent } from "@/lib/analyticsEvents";
 // 404 page referenced from https://codepen.io/GLITCHXploitR/pen/OxGKrq
 import BaseHead from "@/components/layout/BaseHead.astro";
 import { SITE_TITLE } from "@/consts";
@@ -26,9 +26,9 @@ import { SITE_TITLE } from "@/consts";
                     <header>Page not found</header>
                     <ul>
                         <li class="active">
-                            <a href="/" title="">Main Menu</a>
+                            <a href="/" title="" {...clickEvent("navigation_link_clicked", { nav_destination: "/", nav_label: "Main Menu", nav_location: "not_found" })}>Main Menu</a>
                         </li>
-                        <li><a href="/contact" title="">Contact</a></li>
+                        <li><a href="/contact" title="" {...clickEvent("navigation_link_clicked", { nav_destination: "/contact", nav_label: "Contact", nav_location: "not_found" })}>Contact</a></li>
                     </ul>
                     <footer>
                         <div class="key">Exit: <span>1</span></div>

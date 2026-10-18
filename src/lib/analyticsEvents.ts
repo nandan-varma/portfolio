@@ -6,7 +6,7 @@
 type CardPlacement = "grid" | "featured" | "selected_work";
 
 type ClickEvents = {
-  navigation_link_clicked: { nav_destination: string; nav_label: string };
+  navigation_link_clicked: { nav_destination: string; nav_label: string; nav_location: "header" | "home" | "not_found" };
   project_card_clicked: { project_id?: string; project_title?: string; card_placement: CardPlacement };
   blog_post_card_clicked: { post_id?: string; post_title?: string; card_placement: CardPlacement };
   contact_link_clicked: { contact_type: "email" | "github" | "linkedin"; contact_value: string };

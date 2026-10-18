@@ -86,8 +86,8 @@ export default function AgentRoster() {
   }, []);
 
   const counts = AGENTS.map((a) => a.frames[frame]);
-  const totalInFlight = counts.reduce((a, b) => a + b, 0);
-  const activeAgents = AGENTS.filter((a, i) => counts[i] > 0);
+  const totalInFlight = counts.reduce<number>((sum, count) => sum + count, 0);
+  const activeAgents = AGENTS.filter((_, i) => counts[i] > 0);
 
   const hubLabel =
     activeAgents.length === 0

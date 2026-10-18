@@ -50,16 +50,19 @@ const highlights = highlightTitles
 			<nav class="mt-8 flex gap-6 text-sm font-medium sm:mt-10 sm:text-base">
 				<a
 					href="/projects"
+					{...clickEvent("navigation_link_clicked", { nav_destination: "/projects", nav_label: "Projects", nav_location: "home" })}
 					class="text-white/50 transition-colors duration-300 hover:text-white"
 					transition:name="Projects">Projects</a
 				>
 				<a
 					href="/blog"
+					{...clickEvent("navigation_link_clicked", { nav_destination: "/blog", nav_label: "Blog", nav_location: "home" })}
 					class="text-white/50 transition-colors duration-300 hover:text-white"
 					transition:name="Blog">Blog</a
 				>
 				<a
 					href="/contact"
+					{...clickEvent("navigation_link_clicked", { nav_destination: "/contact", nav_label: "Contact", nav_location: "home" })}
 					class="text-white/50 transition-colors duration-300 hover:text-white"
 					transition:name="Contact">Contact</a
 				>

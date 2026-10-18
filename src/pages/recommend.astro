@@ -9,7 +9,16 @@ const experienceBullets = [
     "Built an intelligent meeting summarization tool that searched distributed content repositories and injected relevant video clips into summaries for visual context.",
 ];
 
-const sections = [
+type Field = {
+    label: string;
+    value: string;
+    sensitive?: boolean;
+    copyValue?: string;
+    note?: string;
+    plain?: boolean;
+};
+
+const sections: { title: string; note?: string; fields: Field[] }[] = [
     {
         title: "Personal Info",
         fields: [

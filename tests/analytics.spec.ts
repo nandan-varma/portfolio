@@ -53,7 +53,7 @@ test('captures declared card, navigation, project, contact, and outbound clicks'
   await expect(page).toHaveURL(/\/projects$/);
   await page.locator('a[href="/contact"]').first().click();
   await expect(page).toHaveURL(/\/contact$/);
-  expect((await captured(page, 'navigation_link_clicked')).at(-1)!.properties.nav_destination).toBe('/contact');
+  expect((await captured(page, 'navigation_link_clicked')).at(-1)!.properties).toMatchObject({ nav_destination: '/contact', nav_location: 'header' });
   await page.locator('[data-analytics-event="contact_link_clicked"]').first().evaluate(preventNavigation);
   expect((await captured(page, 'contact_link_clicked'))[0].properties.contact_type).toBe('email');
   // Declared events are not double-counted as outbound links.
@@ -73,4 +73,17 @@ test('records 404s and keeps private recommendation values out of analytics', as
   expect(privateValue).toBeTruthy();
   expect(JSON.stringify(await captured(page))).not.toContain(privateValue!);
   await expect(page.locator('main.ph-no-capture')).toHaveCount(1);
+});
+
+test('captures landing and 404 navigation links with their location and in-site referrer', async ({ page }) => {
+  for (const [path, location] of [['/', 'home'], ['/new', 'home'], ['/this-page-does-not-exist', 'not_found']] as const) {
+    await page.goto(path);
+    await page.locator('[data-analytics-event="navigation_link_clicked"][href="/contact"]').first().evaluate(preventNavigation);
+    expect((await captured(page, 'navigation_link_clicked')).at(-1)!.properties).toMatchObject({ nav_destination: '/contact', nav_location: location });
+  }
+
+  await page.goto('/projects');
+  await page.locator('[data-analytics-event="project_card_clicked"]').first().click();
+  await expect.poll(async () => (await captured(page, 'project_opened')).length).toBe(1);
+  expect((await captured(page, 'project_opened'))[0].properties.referrer).toMatch(/\/projects$/);
 });

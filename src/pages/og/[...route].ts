@@ -39,7 +39,6 @@ const pages = {
 };
 
 const ogImageRoute = await OGImageRoute({
-    param: 'route',
     pages: pages,
     getImageOptions: (path, page) => ({
         title: page.title,

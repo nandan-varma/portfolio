@@ -1,4 +1,5 @@
 ---
+import { clickEvent } from "@/lib/analyticsEvents";
 import BackgroundAnimation from "@/components/animations/BackgroundAnimation.astro";
 import LandingHead from "@/components/layout/LandingHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
@@ -23,16 +24,19 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 		>
 			<a
 				href="/projects"
+				{...clickEvent("navigation_link_clicked", { nav_destination: "/projects", nav_label: "Projects", nav_location: "home" })}
 				class="duration-500 text-white/50 hover:text-white/80 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
 				transition:name={"Projects"}>Projects</a
 			>
 			<a
 				href="/blog"
+				{...clickEvent("navigation_link_clicked", { nav_destination: "/blog", nav_label: "Blog", nav_location: "home" })}
 				class="duration-500 text-white/50 hover:text-white/80 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
 				transition:name={"Blog"}>Blog</a
 			>
 			<a
 				href="/contact"
+				{...clickEvent("navigation_link_clicked", { nav_destination: "/contact", nav_label: "Contact", nav_location: "home" })}
 				class="duration-500 text-white/50 hover:text-white/80 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
 				transition:name={"Contact"}>Contact</a
 			>
