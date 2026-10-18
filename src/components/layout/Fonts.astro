@@ -1,2 +1,28 @@
-<link rel="preload" href="/fonts/bitter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin />
+---
+// Display font is only needed on pages that render a visible heading.
+// Preloading it elsewhere (e.g. the canvas-only landing page) wastes ~34KB.
+export interface Props {
+	preloadDisplay?: boolean;
+}
+
+const { preloadDisplay = true } = Astro.props;
+---
+
+{
+	preloadDisplay && (
+		<link
+			rel="preload"
+			href="/fonts/bitter.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin
+		/>
+	)
+}
+<link
+	rel="preload"
+	href="/fonts/source-sans-3.woff2"
+	as="font"
+	type="font/woff2"
+	crossorigin
+/>

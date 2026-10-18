@@ -224,7 +224,7 @@ table {
   font-family: "Bitter";
   src: url("/fonts/bitter.woff2") format("woff2");
   font-style: normal;
-  font-weight: 600 700;
+  font-weight: 500 700;
   font-display: swap;
 }
 
@@ -251,4 +251,23 @@ h1, h2, h3, h4, h5, h6, .font-display {
   font-family: var(--font-display);
   font-weight: 650;
   letter-spacing: 0.01em;
+}
+
+/* Visually hidden text never needs the display font. Without this, the
+   sr-only <h1> on the canvas-only landing page still downloads Bitter (~34KB). */
+.sr-only {
+  font-family: var(--font-sans);
+}
+
+/* Smooth shared-element movement; preserve Astro's existing page fades. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(*) {
+    animation-duration: 280ms;
+    animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+}
+
+/* A small weight step below page headings. */
+.card-title {
+  font-weight: 550;
 }

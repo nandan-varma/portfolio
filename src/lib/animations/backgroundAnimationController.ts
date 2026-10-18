@@ -29,7 +29,11 @@ export class BackgroundAnimationController {
         private canvas: HTMLCanvasElement,
         private text?: string
     ) {
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        // No `willReadFrequently`: the only pixel readback is the one-off text
+        // raster in TextManager, while this context is used for a full-frame
+        // animation every tick. The flag would force a CPU-backed canvas and
+        // cost GPU acceleration on every frame.
+        const ctx = canvas.getContext("2d");
         if (!ctx) {
             throw new Error("Could not get canvas context");
         }

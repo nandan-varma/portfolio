@@ -28,14 +28,12 @@ const enablePostHog = !import.meta.env.DEV;
       // no other error monitoring on this static site
       capture_exceptions: true,
       // Honor the browser's Do Not Track signal
-      respect_dnt: true,
-      // Disable heavy features we don't use to reduce bundle size
-      session_recording: false,
-      surveys: false,
-      autocapture: false,
-      // Disable feature flags - not needed for simple analytics
-      feature_flags: [],
-      advanced_feature_flags: false
+      respect_dnt: true
+      // Product features (session replay, surveys, autocapture, flags) are
+      // intentionally left to the project's remote config so PostHog's
+      // dashboard is the single source of truth. Do not add
+      // `session_recording: false` / `surveys: false` here - remote config
+      // overrides them, so they only hide the real behaviour.
     });
   }
 </script>

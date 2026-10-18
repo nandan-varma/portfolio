@@ -1,0 +1,126 @@
+---
+import { getCollection } from "astro:content";
+import BaseHead from "@/components/layout/BaseHead.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+
+const projects = await getCollection("project");
+const highlightTitles = ["PushStack", "ipa-forge", "MarsOS"];
+const highlights = highlightTitles
+	.map((title) => projects.find((p) => p.data.title === title))
+	.filter((p) => p !== undefined && p.data.published);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead
+			title={SITE_TITLE}
+			description={SITE_DESCRIPTION}
+			image="/og/index.png"
+		/>
+	</head>
+	<body class="bg-black min-h-screen">
+		<div class="glow" aria-hidden="true"></div>
+
+		<main
+			class="relative z-10 mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-20 sm:px-8 sm:py-24 lg:px-12"
+		>
+			<header>
+				<h1
+					class="text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl"
+				>
+					Nandan Varma
+				</h1>
+				<p class="mt-4 text-xl text-white/60 sm:text-2xl">
+					chasing interesting problems
+				</p>
+				<p class="mt-2 text-sm text-white/35">Seattle, WA</p>
+			</header>
+
+			<p
+				class="mt-8 max-w-xl text-base leading-7 text-white/70 sm:mt-10 sm:text-lg sm:leading-8"
+			>
+				Software engineer building full-stack apps, developer tools,
+				and AI agent systems. Previously an Associate Engineer Intern
+				at Highspot, working across the frontend, API, and LLM layers
+				of a feature that went from idea to shipped product.
+			</p>
+
+			<nav class="mt-8 flex gap-6 text-sm font-medium sm:mt-10 sm:text-base">
+				<a
+					href="/projects"
+					class="text-white/50 transition-colors duration-300 hover:text-white"
+					transition:name="Projects">Projects</a
+				>
+				<a
+					href="/blog"
+					class="text-white/50 transition-colors duration-300 hover:text-white"
+					transition:name="Blog">Blog</a
+				>
+				<a
+					href="/contact"
+					class="text-white/50 transition-colors duration-300 hover:text-white"
+					transition:name="Contact">Contact</a
+				>
+			</nav>
+
+			{
+				highlights.length > 0 && (
+					<section class="mt-16 sm:mt-20">
+						<h2 class="text-xs font-semibold uppercase tracking-wider text-white/35">
+							Selected work
+						</h2>
+						<ul class="mt-4 divide-y divide-white/10 border-t border-white/10">
+							{highlights.map((project) => (
+								<li>
+									<a
+										href={`/projects/${project!.id}`}
+										class="group flex items-baseline justify-between gap-6 py-4"
+									>
+										<span
+											class="text-white/80 transition-colors duration-300 group-hover:text-white"
+											transition:name={`project-title-${project!.data.title}`}
+										>
+											{project!.data.title}
+										</span>
+										<span
+											class="hidden max-w-sm truncate text-right text-sm text-white/40 transition-colors duration-300 group-hover:text-white/60 sm:block"
+											transition:name={`project-desc-${project!.data.title}`}
+										>
+											{project!.data.description}
+										</span>
+									</a>
+								</li>
+							))}
+						</ul>
+					</section>
+				)
+			}
+		</main>
+	</body>
+</html>
+
+<style>
+	body {
+		background-color: black;
+	}
+
+	.glow {
+		position: fixed;
+		top: -20%;
+		left: 50%;
+		width: 60vw;
+		height: 60vw;
+		max-width: 900px;
+		max-height: 900px;
+		transform: translateX(-50%);
+		background: radial-gradient(
+			circle,
+			rgba(99, 102, 241, 0.12),
+			rgba(99, 102, 241, 0) 70%
+		);
+		filter: blur(60px);
+		pointer-events: none;
+		z-index: 0;
+	}
+</style>

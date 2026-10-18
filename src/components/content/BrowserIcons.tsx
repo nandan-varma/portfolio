@@ -45,6 +45,10 @@ export function BraveIcon({ className = "h-11 w-11" }: IconProps) {
       <img
         src="/blog/browser/brave.png"
         alt="Brave"
+        width={214}
+        height={256}
+        loading="lazy"
+        decoding="async"
         className="h-[68%] w-[68%] object-contain"
       />
     </Mark>
@@ -56,6 +60,10 @@ export function DiaIcon({ className = "h-11 w-11" }: IconProps) {
     <img
       src="/blog/browser/dia.png"
       alt="Dia"
+      width={256}
+      height={255}
+      loading="lazy"
+      decoding="async"
       className={`shrink-0 rounded-2xl object-cover shadow-sm ${className}`}
     />
   );

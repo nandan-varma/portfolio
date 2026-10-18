@@ -23,6 +23,9 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
+# agent workspace artifacts
+.pi/
+
 # jetbrains setting folder
 .idea/
 
