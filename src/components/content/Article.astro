@@ -1,4 +1,5 @@
 ---
+import { clickEvent } from "@/lib/analyticsEvents";
 import type { Project } from "@/content.config";
 
 interface Props {
@@ -11,7 +12,10 @@ const { id, project, views } = Astro.props;
 ---
 
 
-<a href={`/projects/${id}`}>
+<a
+  href={`/projects/${id}`}
+  {...clickEvent("project_card_clicked", { project_id: id, project_title: project.title, card_placement: "grid" })}
+>
   <article class="p-4 md:p-8" tabindex={-1}>
     <div class="flex justify-between gap-2 items-center">
       <span class="text-xs duration-1000 text-zinc-200 group-hover:text-white group-hover:border-zinc-200 drop-shadow-orange">

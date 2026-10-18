@@ -1,4 +1,5 @@
 ---
+import { clickEvent } from "@/lib/analyticsEvents";
 import { getCollection } from "astro:content";
 import BaseHead from "@/components/layout/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
@@ -75,6 +76,7 @@ const highlights = highlightTitles
 								<li>
 									<a
 										href={`/projects/${project!.id}`}
+										{...clickEvent("project_card_clicked", { project_id: project!.id, project_title: project!.data.title, card_placement: "selected_work" })}
 										class="group flex items-baseline justify-between gap-6 py-4"
 									>
 										<span

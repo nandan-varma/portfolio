@@ -1,4 +1,5 @@
 ---
+import { pageEvent } from "@/lib/analyticsEvents";
 // 404 page referenced from https://codepen.io/GLITCHXploitR/pen/OxGKrq
 import BaseHead from "@/components/layout/BaseHead.astro";
 import { SITE_TITLE } from "@/consts";
@@ -13,6 +14,7 @@ import { SITE_TITLE } from "@/consts";
         />
     </head>
 
+    <body {...pageEvent("page_not_found")}>
     <main class="scanlines">
         <div class="screen">
             <canvas id="canvas" class="picture"></canvas>
@@ -36,13 +38,7 @@ import { SITE_TITLE } from "@/consts";
             </div>
         </div>
     </main>
-
-    <script is:inline>
-      window.posthog?.capture('page_not_found', {
-        path: window.location.pathname,
-        referrer: document.referrer || null
-      });
-    </script>
+    </body>
 </html>
 <style>
     body {

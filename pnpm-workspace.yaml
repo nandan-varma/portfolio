@@ -1,6 +1,7 @@
 packages:
   - '.'
 allowBuilds:
+  '@posthog/cli': true
   core-js: true
   esbuild: true
   protobufjs: true

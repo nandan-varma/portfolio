@@ -1,4 +1,5 @@
 ---
+import { clickEvent } from "@/lib/analyticsEvents";
 
 ---
 
@@ -12,6 +13,7 @@
             <div class="flex justify-between gap-8">
                 <a
                     href="/projects"
+                    {...clickEvent("navigation_link_clicked", { nav_destination: "/projects", nav_label: "Projects" })}
                     class="duration-200 text-zinc-400 hover:text-zinc-100"
                     transition:name={"Projects-Nav"}
                 >
@@ -19,6 +21,7 @@
                 </a>
                 <a
                     href="/blog"
+                    {...clickEvent("navigation_link_clicked", { nav_destination: "/blog", nav_label: "Blog" })}
                     class="duration-200 text-zinc-400 hover:text-zinc-100"
                     transition:name={"Blog-Nav"}
                 >
@@ -26,6 +29,7 @@
                 </a>
                 <a
                     href="/contact"
+                    {...clickEvent("navigation_link_clicked", { nav_destination: "/contact", nav_label: "Contact" })}
                     class="duration-200 text-zinc-400 hover:text-zinc-100"
                     transition:name={"Contact-Nav"}
                 >
@@ -34,6 +38,7 @@
             </div>
             <a
                 href="/"
+                    {...clickEvent("navigation_link_clicked", { nav_destination: "/", nav_label: "Home" })}
                 class="duration-200 text-zinc-300 hover:text-zinc-100"
                 transition:name={"nav-back"}
             >
@@ -56,26 +61,3 @@
         </div>
     </div>
 </header>
-
-<script is:inline>
-  function setupNavTracking() {
-    var navLinks = document.querySelectorAll('header nav a, header > div > div a[href="/"], header > div > div > div a');
-    navLinks.forEach(function(link) {
-      link.removeEventListener('click', handleNavClick);
-      link.addEventListener('click', handleNavClick);
-    });
-  }
-
-  function handleNavClick(event) {
-    var link = event.currentTarget;
-    var href = link.getAttribute('href') || '';
-    var label = link.textContent?.trim() || href;
-    window.posthog?.capture('navigation_link_clicked', {
-      nav_destination: href,
-      nav_label: label
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', setupNavTracking);
-  document.addEventListener('astro:page-load', setupNavTracking);
-</script>

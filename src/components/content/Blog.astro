@@ -1,4 +1,5 @@
 ---
+import { clickEvent } from "@/lib/analyticsEvents";
 import type { Blog } from "@/content.config";
 
 interface Props {
@@ -11,7 +12,11 @@ const { id, blog, views } = Astro.props;
 ---
 
 
-<a href={`/blog/${id}`} class="block w-full h-full">
+<a
+  href={`/blog/${id}`}
+  {...clickEvent("blog_post_card_clicked", { post_id: id, post_title: blog.title, card_placement: "grid" })}
+  class="block w-full h-full"
+>
   <article class="p-4 md:p-8">
     <div class="flex justify-between gap-2 items-center">
       <span class="text-xs duration-1000 text-zinc-200 group-hover:text-white group-hover:border-zinc-200 drop-shadow-orange">

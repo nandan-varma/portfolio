@@ -7,7 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test:e2e": "pnpm build && playwright test"
+    "test:e2e": "VERCEL_ENV=production PUBLIC_POSTHOG_KEY=phc_e2e_test pnpm build && playwright test"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.3",
@@ -17,6 +17,7 @@
     "@astrojs/vercel": "^11.0.14",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.3",
+    "@vercel/functions": "^3.10.1",
     "astro": "^7.3.8",
     "astro-og-canvas": "^0.13.2",
     "canvaskit-wasm": "^0.42.0",
@@ -31,8 +32,10 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
+    "@posthog/rollup-plugin": "^1.6.1",
     "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0"
+    "@types/react-dom": "^19.3.0",
+    "serve": "^14.2.6"
   },
   "packageManager": "pnpm@12.3.4"
 }

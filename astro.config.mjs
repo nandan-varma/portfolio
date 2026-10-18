@@ -5,7 +5,14 @@ import sitemap from "@astrojs/sitemap";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import vercel from "@astrojs/vercel";
+import posthog from "@posthog/rollup-plugin";
 import prefetchSectionStyles from "./integrations/prefetchSectionStyles.mjs";
+
+// Upload source maps to PostHog error tracking when a personal API key is set
+// (production builds on Vercel). Maps are deleted after upload, never served.
+const posthogSourceMaps = process.env.POSTHOG_API_KEY
+  ? [posthog({ personalApiKey: process.env.POSTHOG_API_KEY, projectId: "322151", host: "https://us.i.posthog.com" })]
+  : [];
 
 // https://astro.build/config
 export default defineConfig({
@@ -20,16 +27,7 @@ export default defineConfig({
   ],
 
   vite: {
-    plugins: [tailwindcss()],
-  },
-
-  redirects: {
-    "/cv":
-      "https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlwdChqLZue7hJ43mSDHQtXwVdx90vZ8kIKgM5",
-    "/resume":
-      "https://qujr12qsco.ufs.sh/f/66ba979a-9fcd-4ed7-ae19-a564d45889a6-fgc05v.pdf",
-    "/resume/apple":
-      "https://2puzbcbw6l.ufs.sh/f/AmQx6INo4gSiKHDyLDPZfDvQP9eRg6xphAlI78dYFUOGJoLM",
+    plugins: [tailwindcss(), ...posthogSourceMaps],
   },
 
   adapter: vercel(),

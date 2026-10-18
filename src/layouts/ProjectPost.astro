@@ -1,4 +1,5 @@
 ---
+import { clickEvent } from "@/lib/analyticsEvents";
 import type { CollectionEntry } from "astro:content";
 import "@/styles/global.css";
 
@@ -91,6 +92,7 @@ const { title, description, date, emoji, repository, url, published } =
                             <a
                                 target="_blank"
                                 href={`https://github.com/${repository}`}
+                                {...clickEvent("external_project_link_clicked", { project_title: title, link_type: "github", link_url: `https://github.com/${repository}`, link_text: "GitHub" })}
                                 class="white-back"
                             >
                                 GitHub <span aria-hidden="true">&rarr;</span>
@@ -102,6 +104,7 @@ const { title, description, date, emoji, repository, url, published } =
                             <a
                                 target="_blank"
                                 href={url}
+                                {...clickEvent("external_project_link_clicked", { project_title: title, link_type: "website", link_url: url, link_text: "Website" })}
                                 class="white-back"
                             >
                                 Website <span aria-hidden="true">&rarr;</span>
@@ -117,35 +120,6 @@ const { title, description, date, emoji, repository, url, published } =
 <div class="container mx-auto px-2 sm:px-4 lg:px-6 max-w-full w-full">
     <slot />
 </div>
-
-<script is:inline define:vars={{ projectTitle: title }}>
-  function setupExternalLinkTracking() {
-    var externalLinks = document.querySelectorAll('header a[target="_blank"]');
-    externalLinks.forEach(function(link) {
-      var href = link.getAttribute('href') || '';
-      // Skip the generic profile GitHub icon - only track project-specific links
-      if (href === 'https://github.com/nandan-varma') return;
-      link.removeEventListener('click', handleExternalLinkClick);
-      link.addEventListener('click', handleExternalLinkClick);
-    });
-  }
-
-  function handleExternalLinkClick(event) {
-    var link = event.currentTarget;
-    var href = link.getAttribute('href') || '';
-    var linkText = link.textContent?.trim() || '';
-    var linkType = href.includes('github.com') ? 'github' : 'website';
-    window.posthog?.capture('external_project_link_clicked', {
-      project_title: projectTitle,
-      link_type: linkType,
-      link_url: href,
-      link_text: linkText
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', setupExternalLinkTracking);
-  document.addEventListener('astro:page-load', setupExternalLinkTracking);
-</script>
 
 <style>
     .white-back {

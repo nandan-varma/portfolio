@@ -15,7 +15,8 @@ export default defineConfig({
     { name: 'landscape', use: { viewport: { width: 844, height: 390 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true } },
   ],
   webServer: {
-    command: 'pnpm preview --host 127.0.0.1 --port 4322',
+    // The Vercel adapter can't `astro preview` on-demand routes, so serve the static output.
+    command: 'pnpm exec serve .vercel/output/static --listen tcp://127.0.0.1:4322 --no-clipboard',
     url: 'http://127.0.0.1:4322',
     reuseExistingServer: !process.env.CI,
   },

@@ -1,4 +1,5 @@
 ---
+import { pageEvent } from "@/lib/analyticsEvents";
 import { type CollectionEntry, getCollection } from "astro:content";
 import BlogPost from "../../layouts/BlogPost.astro";
 import "@/styles/global.css";
@@ -30,7 +31,7 @@ const { Content } = await render(post);
 			noindex={post.data.draft}
 		/>
 	</head>
-	<body>
+	<body {...pageEvent("blog_post_opened", { post_id: post.id, post_title: post.data.title })}>
 		<BlogPost {...post.data}>
 			<article
 				class="w-full md:w-3xl py-4 mx-auto prose prose-zinc prose-quoteless max-w-full px-4 sm:px-6"
@@ -40,15 +41,3 @@ const { Content } = await render(post);
 		</BlogPost>
 	</body>
 </html>
-
-<script is:inline define:vars={{ postId: post.id, postTitle: post.data.title }}>
-  function trackBlogPostOpened() {
-    window.posthog?.capture('blog_post_opened', {
-      post_id: postId,
-      post_title: postTitle
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', trackBlogPostOpened);
-  document.addEventListener('astro:page-load', trackBlogPostOpened);
-</script>

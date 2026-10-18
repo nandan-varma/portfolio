@@ -1,4 +1,5 @@
 ---
+import { pageEvent } from "@/lib/analyticsEvents";
 import { type CollectionEntry, getCollection } from "astro:content";
 import ProjectPost from "../../layouts/ProjectPost.astro";
 import "@/styles/global.css";
@@ -30,7 +31,7 @@ const { Content } = await render(post);
 			noindex={!post.data.published}
 		/>
 	</head>
-	<body>
+	<body {...pageEvent("project_opened", { project_id: post.id, project_title: post.data.title })}>
 		<ProjectPost {...post.data}>
 			<article
 				class="w-full md:w-3xl py-4 mx-auto prose prose-zinc prose-quoteless max-w-full px-4 sm:px-6"
@@ -40,15 +41,3 @@ const { Content } = await render(post);
 		</ProjectPost>
 	</body>
 </html>
-
-<script is:inline define:vars={{ postId: post.id, postTitle: post.data.title }}>
-  function trackProjectOpened() {
-    window.posthog?.capture('project_opened', {
-      project_id: postId,
-      project_title: postTitle
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', trackProjectOpened);
-  document.addEventListener('astro:page-load', trackProjectOpened);
-</script>
