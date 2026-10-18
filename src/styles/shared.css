@@ -269,3 +269,60 @@ h1, h2, h3, h4, h5, h6, .font-display {
 .card-title {
   font-weight: 550;
 }
+
+/* Hard-load entrance motion: cards rise from below, the nav drops in with a spring.
+   Named elements inside cards get a view-transition-class so their snapshots
+   travel with their container when they have no counterpart on the old page. */
+[data-rise] [data-astro-transition-scope] {
+  view-transition-class: card-rise;
+}
+
+@keyframes card-rise {
+  from { transform: translateY(100vh); }
+  to { transform: none; }
+}
+@keyframes nav-drop {
+  from { opacity: 0; transform: translateY(-120%); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    /* Lightly underdamped spring: one small overshoot, then settle. */
+    --spring: linear(0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.723 12.9%, 0.938 16.7%,
+      1.017 19.4%, 1.067, 1.099 24.3%, 1.108 26%, 1.1, 1.082 30.6%, 1.019 38.9%,
+      0.998 43.1%, 0.991 47.8%, 1.001 61.4%, 1);
+    --rise-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Sideways entrances must not add a horizontal scrollbar mid-animation. */
+  body {
+    overflow-x: clip;
+  }
+
+  [data-rise] {
+    animation: card-rise 800ms var(--rise-ease) both;
+  }
+
+  /* Plays when the nav first appears: fresh load, or arriving from the
+     nav-less homepage or a detail page. */
+  [data-nav-drop] > div {
+    animation: nav-drop 700ms var(--spring) both;
+  }
+
+  /* Client navigations choreograph these in src/lib/pageMotion.ts. */
+  html[data-client-nav] [data-rise],
+  html[data-client-nav] [data-nav-drop] > div {
+    animation: none;
+  }
+
+  /* A clicked card opening into its detail page (and closing back). */
+  ::view-transition-group(card-open) {
+    animation-duration: 480ms;
+    animation-timing-function: var(--rise-ease);
+  }
+
+  ::view-transition-new(*.card-rise):only-child {
+    animation: card-rise 800ms var(--rise-ease) both;
+  }
+}
