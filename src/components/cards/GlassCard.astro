@@ -8,52 +8,42 @@ const { class: className = "", enableHoverEffect = true } = Astro.props;
 ---
 
 <script>
-    function setupCard(cardElement: HTMLElement) {
-        let mouseX = 0;
-        let mouseY = 0;
+    // One delegated, frame-throttled handler for every glass card. It also
+    // covers cards swapped in by client-side navigation, which per-card
+    // listeners bound on DOMContentLoaded never saw.
+    let pending: { card: HTMLElement; x: number; y: number } | null = null;
 
-        function onMouseMove(event: MouseEvent) {
-            const { currentTarget, clientX, clientY } = event;
-            if (!currentTarget) return;
-            const { left, top } = (
-                currentTarget as HTMLElement
-            ).getBoundingClientRect();
-            mouseX = clientX - left;
-            mouseY = clientY - top;
-            updateStyles(currentTarget as HTMLElement);
+    function paint() {
+        if (!pending) return;
+        const { card, x, y } = pending;
+        pending = null;
+        const { left, top } = card.getBoundingClientRect();
+        const mask = `radial-gradient(240px at ${x - left}px ${y - top}px, white, transparent)`;
+        for (const el of card.querySelectorAll<HTMLElement>("[data-gradient]")) {
+            el.style.maskImage = mask;
+            el.style.webkitMaskImage = mask;
         }
-
-        function updateStyles(element: HTMLElement) {
-            const maskImage = `radial-gradient(240px at ${mouseX}px ${mouseY}px, white, transparent)`;
-            element
-                .querySelectorAll("[data-gradient]")
-                .forEach((gradientElement) => {
-                    (gradientElement as HTMLElement).style.maskImage =
-                        maskImage;
-                    (gradientElement as HTMLElement).style.webkitMaskImage =
-                        maskImage;
-                });
-        }
-
-        cardElement.addEventListener("mousemove", onMouseMove as EventListener);
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll("[data-glass-card]").forEach((card) => {
-            setupCard(card as HTMLElement);
-        });
-    });
+    document.addEventListener(
+        "pointermove",
+        (event) => {
+            const card = (event.target as Element).closest?.<HTMLElement>("[data-glass-card]");
+            if (!card) return;
+            if (!pending) requestAnimationFrame(paint);
+            pending = { card, x: event.clientX, y: event.clientY };
+        },
+        { passive: true },
+    );
 </script>
 
 <div
     data-glass-card
     data-rise
     class:list={[
-        "overflow-hidden relative duration-700 border rounded-xl group md:gap-8",
-        "border-zinc-600/30 bg-black/10 backdrop-blur-sm",
+        "glass-surface overflow-hidden relative duration-700 group md:gap-8",
         enableHoverEffect &&
             "hover:bg-zinc-800/15 hover:border-zinc-400/50 hover:backdrop-blur-md",
-        "shadow-lg shadow-black/30",
         className,
     ]}
 >

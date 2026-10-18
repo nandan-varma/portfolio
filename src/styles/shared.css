@@ -270,12 +270,44 @@ h1, h2, h3, h4, h5, h6, .font-display {
   font-weight: 550;
 }
 
-/* Hard-load entrance motion: cards rise from below, the nav drops in with a spring.
-   Named elements inside cards get a view-transition-class so their snapshots
-   travel with their container when they have no counterpart on the old page. */
-[data-rise] [data-astro-transition-scope] {
-  view-transition-class: card-rise;
+/* The glass surface shared by cards, detail panels and the frame that carries
+   one into the other (pageMotion.ts), so the handoff between them is exact.
+   In the components layer so hover utilities still override it. */
+@layer components {
+  .glass-surface {
+    border: 1px solid oklch(44.2% 0.017 285.786 / 0.3);
+    border-radius: 0.75rem;
+    background-color: rgb(0 0 0 / 0.1);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  }
 }
+
+/* While the frame stands in for a surface, the surface itself is invisible. */
+[data-surface-hidden] {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+[data-surface-hidden] > .pointer-events-none {
+  opacity: 0;
+}
+
+/* The outgoing card/panel and the live frame share this name. The old image
+   is hidden and the group tracks the live frame, which springs on its own. */
+::view-transition-old(card-frame) {
+  display: none;
+}
+html[data-frame-orphan]::view-transition-old(card-frame) {
+  display: block;
+}
+::view-transition-group(card-frame),
+::view-transition-new(card-frame) {
+  animation: none;
+}
+
+/* Hard-load entrance motion: cards rise from below, the nav drops in with a spring. */
 
 @keyframes card-rise {
   from { transform: translateY(100vh); }
@@ -301,13 +333,13 @@ h1, h2, h3, h4, h5, h6, .font-display {
   }
 
   [data-rise] {
-    animation: card-rise 800ms var(--rise-ease) both;
+    animation: card-rise 800ms var(--rise-ease) backwards;
   }
 
   /* Plays when the nav first appears: fresh load, or arriving from the
      nav-less homepage or a detail page. */
   [data-nav-drop] > div {
-    animation: nav-drop 700ms var(--spring) both;
+    animation: nav-drop 700ms var(--spring) backwards;
   }
 
   /* Client navigations choreograph these in src/lib/pageMotion.ts. */
@@ -316,13 +348,9 @@ h1, h2, h3, h4, h5, h6, .font-display {
     animation: none;
   }
 
-  /* A clicked card opening into its detail page (and closing back). */
-  ::view-transition-group(card-open) {
+  /* Card text travels with the glass frame (named in pageMotion.ts). */
+  ::view-transition-group(*.card-morph) {
     animation-duration: 480ms;
     animation-timing-function: var(--rise-ease);
-  }
-
-  ::view-transition-new(*.card-rise):only-child {
-    animation: card-rise 800ms var(--rise-ease) both;
   }
 }
