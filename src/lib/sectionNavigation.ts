@@ -13,6 +13,9 @@ document.addEventListener("astro:before-swap", (event) => {
   const travel = direction(event.from, event.to);
   if (!travel) return;
   // Section navigation uses live transforms; detail routes retain view transitions.
+  // A deliberate skip rejects the native ready promise with AbortError.
+  // Handle that promise locally rather than reporting an unhandled error.
+  void event.viewTransition.ready.catch(() => {});
   event.viewTransition.skipTransition();
   const content = event.newDocument.querySelector<HTMLElement>("[data-section-content]");
   if (content && !reducedMotion()) content.dataset.enterFrom = String(-travel * 24);

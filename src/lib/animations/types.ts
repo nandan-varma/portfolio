@@ -31,11 +31,6 @@ export interface TextBounds {
     bottom: number;
 }
 
-export interface TextPixel {
-    x: number;
-    y: number;
-}
-
 /** Logical (CSS pixel) viewport shared by the canvas animation modules. */
 export interface Viewport {
     width: number;
@@ -49,6 +44,7 @@ export interface Brick {
     y: number;
     centerX: number;
     centerY: number;
+    noise: number;
     base: Path2D;
     lineA: Path2D;
     lineB: Path2D;

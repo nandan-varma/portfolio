@@ -6,6 +6,7 @@ import { SITE_TITLE } from "@/consts";
 import { ClientRouter } from "astro:transitions";
 import Fonts from "./Fonts.astro";
 import PostHog from "@/components/posthog.astro";
+import BackgroundAnimationScript from "@/components/animations/BackgroundAnimationScript.astro";
 
 interface Props {
 	title: string;
@@ -85,6 +86,7 @@ const {
 
 <!-- view transitions -->
 <ClientRouter />
+<BackgroundAnimationScript />
 
 <!-- PostHog Analytics -->
 <PostHog />

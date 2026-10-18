@@ -34,3 +34,7 @@ coverage/
 stats.html
 .vercel
 .env*
+
+# browser test artifacts
+test-results/
+playwright-report/

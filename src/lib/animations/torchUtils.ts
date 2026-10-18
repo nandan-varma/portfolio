@@ -390,6 +390,7 @@ export class TorchEffect {
                     y: brickY,
                     centerX: brickX + width / 2,
                     centerY: brickY + height / 2,
+                    noise: this.getBrickNoise(brickX, brickY),
                     base,
                     lineA,
                     lineB,
@@ -421,16 +422,19 @@ export class TorchEffect {
 
     drawBrickWall(): void {
         for (const brick of this.bricks) {
-            const opacity = this.calculateBrickOpacity(brick);
-
-            if (opacity > 0.05) {
-                this.drawBrick(brick, opacity);
-            }
+            this.drawBrick(brick, this.calculateBrickOpacity(brick));
         }
     }
 
     private calculateBrickOpacity(brick: Brick): number {
-        const distanceFromLight = this.getDistance(brick.centerX, brick.centerY, this.mouseX, this.mouseY);
+        const dx = brick.centerX - this.mouseX;
+        const dy = brick.centerY - this.mouseY;
+        // Flame shape is clamped to 0.9, so this is the largest possible cutoff.
+        const maxDistance = TORCH_CONFIG.baseRadius * (1.4 + 0.9 * 0.4) * 1.5;
+        if (dx * dx + dy * dy >= maxDistance * maxDistance) {
+            return LIGHTING_CONFIG.baseOpacity;
+        }
+        const distanceFromLight = Math.sqrt(dx * dx + dy * dy);
 
         const flameShape = this.getFlameIntensityAt(brick.centerX, brick.centerY, this.mouseX, this.mouseY);
         const { baseOpacity, maxOpacityMultiplier } = LIGHTING_CONFIG;
@@ -446,7 +450,7 @@ export class TorchEffect {
         const shapedFalloff = falloff * (0.7 + flameShape * 0.3);
 
         let opacity = baseOpacity + (shapedFalloff * (maxOpacity - baseOpacity));
-        opacity += this.getBrickNoise(brick.x, brick.y);
+        opacity += brick.noise;
 
         return Math.max(baseOpacity, opacity);
     }
@@ -475,12 +479,6 @@ export class TorchEffect {
         // Darker bottom edge for depth
         ctx.fillStyle = this.colorTable(100)[this.alphaIndex(opacity * 0.3)];
         ctx.fill(brick.shade);
-    }
-
-    private getDistance(x1: number, y1: number, x2: number, y2: number): number {
-        const dx = x1 - x2;
-        const dy = y1 - y2;
-        return Math.sqrt(dx * dx + dy * dy);
     }
 
     drawTorchLight(): void {
@@ -542,6 +540,7 @@ export class TorchEffect {
     }
 
     cleanup(): void {
+        this.bricks = [];
         document.removeEventListener('mousemove', this.handleMouseMove);
         document.removeEventListener('touchmove', this.handleTouch);
         document.removeEventListener('touchstart', this.handleTouch);

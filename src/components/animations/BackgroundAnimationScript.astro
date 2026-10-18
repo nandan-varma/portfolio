@@ -1,78 +1,54 @@
----
-export interface Props {
-	text?: string;
-}
-
-const { text } = Astro.props;
-const textValue = text;
----
-
 <script>
 	import { BackgroundAnimationController } from "@/lib/animations/backgroundAnimationController";
 
-	// Global singleton to prevent multiple instances
 	declare global {
 		interface Window {
 			__backgroundController?: BackgroundAnimationController;
 		}
 	}
 
-	function animateBackground() {
-		document.addEventListener("astro:page-load", () => {
-			const canvas = document.getElementById(
-				"background-canvas",
-			) as HTMLCanvasElement | null;
+	let nextText: string | undefined;
 
-			if (!canvas) {
-				return;
-			}
+	function updateBackground() {
+		const canvas = document.getElementById("background-canvas") as HTMLCanvasElement | null;
+		const previous = window.__backgroundController;
 
-			// Save current mouse position before cleanup
-			let savedPosition: { x: number; y: number } | null = null;
-			if (window.__backgroundController) {
-				savedPosition = window.__backgroundController.getMousePosition();
-				window.__backgroundController.cleanup();
-				window.__backgroundController = undefined;
-			} else {
-				// Try to restore from sessionStorage
-				try {
-					const stored = sessionStorage.getItem('torchPosition');
-					if (stored) {
-						savedPosition = JSON.parse(stored);
-					}
-				} catch (e) {
-					// Silently fail if sessionStorage is unavailable
+		// Astro preserves the canvas between section pages, including its bitmap
+		// and simulation. Update the text before the destination snapshot is taken.
+		if (canvas && previous?.ownsCanvas(canvas)) {
+			previous.setText(nextText);
+			return;
+		}
+
+		previous?.saveMousePosition();
+		previous?.cleanup();
+		window.__backgroundController = undefined;
+		if (!canvas) return;
+
+		const controller = new BackgroundAnimationController(canvas, nextText);
+		try {
+			const stored = sessionStorage.getItem("torchPosition");
+			if (stored) {
+				const position = JSON.parse(stored);
+				if (Number.isFinite(position?.x) && Number.isFinite(position?.y)) {
+					controller.setMousePosition(position.x, position.y);
 				}
 			}
-
-			// Get text from data attribute
-			const text = canvas.dataset.text;
-
-			// Create new controller with optional text
-			const controller = new BackgroundAnimationController(
-				canvas,
-				text || undefined,
-			);
-			
-			// Restore mouse position if available
-			if (savedPosition) {
-				controller.setMousePosition(savedPosition.x, savedPosition.y);
-			}
-			
-			controller.start();
-
-			// Store reference globally
-			window.__backgroundController = controller;
-		});
-		
-		// Save position before page swap for view transitions
-		document.addEventListener("astro:before-swap", () => {
-			if (window.__backgroundController) {
-				window.__backgroundController.saveMousePosition();
-			}
-		});
+		} catch {
+			// Storage can be unavailable or contain an invalid previous value.
+		}
+		window.__backgroundController = controller;
+		controller.start();
 	}
 
-	// Start animation setup
-	animateBackground();
+	document.addEventListener("astro:before-swap", (event) => {
+		nextText = event.newDocument.getElementById("background-canvas")?.dataset.text;
+		window.__backgroundController?.saveMousePosition();
+	});
+	document.addEventListener("astro:after-swap", updateBackground);
+
+	// Also runs on a direct article visit, so later navigation can prepare a
+	// canvas synchronously in after-swap instead of waiting for new scripts.
+	nextText = document.getElementById("background-canvas")?.dataset.text;
+	updateBackground();
 </script>

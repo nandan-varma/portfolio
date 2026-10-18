@@ -1,7 +1,9 @@
-import type { TextBounds, TextPixel, Viewport } from './types';
+import type { TextBounds, Viewport } from './types';
 
 export class TextManager {
-    private textPixels: TextPixel[] = [];
+    private glyphs?: ImageData;
+    private originX = 0;
+    private originY = 0;
     private textBounds: TextBounds = { left: 0, right: 0, top: 0, bottom: 0 };
 
     constructor(
@@ -66,19 +68,9 @@ export class TextManager {
         ctx.fillStyle = "white";
         ctx.fillText(this.text, textX - originX, textY - originY);
 
-        const data = ctx.getImageData(0, 0, boxWidth, boxHeight).data;
-        const pixels: TextPixel[] = [];
-
-        for (let y = 0; y < boxHeight; y++) {
-            for (let x = 0; x < boxWidth; x++) {
-                const index = (y * boxWidth + x) * 4;
-                if (data[index + 3] > 0) {
-                    pixels.push({ x: originX + x, y: originY + y });
-                }
-            }
-        }
-
-        this.textPixels = pixels;
+        this.glyphs = ctx.getImageData(0, 0, boxWidth, boxHeight);
+        this.originX = originX;
+        this.originY = originY;
     }
 
     checkTextCollision(x: number, y: number, radius: number): false | { x: number; y: number } {
@@ -92,13 +84,23 @@ export class TextManager {
             return false;
         }
 
-        // Check against actual pixels
-        for (const pixel of this.textPixels) {
-            const dx = x - pixel.x;
-            const dy = y - pixel.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < radius) {
-                return { x: pixel.x, y: pixel.y };
+        const glyphs = this.glyphs;
+        if (!glyphs) return false;
+
+        // Visit only pixels inside the droplet's box, retaining the original
+        // row-major order so the first collision and splash position are exact.
+        const left = Math.max(0, Math.floor(x - radius - this.originX));
+        const right = Math.min(glyphs.width - 1, Math.ceil(x + radius - this.originX));
+        const top = Math.max(0, Math.floor(y - radius - this.originY));
+        const bottom = Math.min(glyphs.height - 1, Math.ceil(y + radius - this.originY));
+        for (let py = top; py <= bottom; py++) {
+            for (let px = left; px <= right; px++) {
+                if (glyphs.data[(py * glyphs.width + px) * 4 + 3] === 0) continue;
+                const dx = x - (this.originX + px);
+                const dy = y - (this.originY + py);
+                if (dx * dx + dy * dy < radius * radius) {
+                    return { x: this.originX + px, y: this.originY + py };
+                }
             }
         }
 

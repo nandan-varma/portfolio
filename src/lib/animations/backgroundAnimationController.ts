@@ -27,7 +27,7 @@ export class BackgroundAnimationController {
     private splashManager: SplashManager;
     private rippleManager: RippleManager;
 
-    private hasText: boolean;
+    private text?: string;
 
     constructor(
         private canvas: HTMLCanvasElement,
@@ -43,7 +43,7 @@ export class BackgroundAnimationController {
         }
         this.ctx = ctx;
         this.motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-        this.hasText = !!text;
+        this.text = text;
 
         // Size the backing store (device pixels) and set a CSS-pixel transform
         // before anything builds geometry, so all drawing code works in logical
@@ -54,7 +54,7 @@ export class BackgroundAnimationController {
         this.torchEffect = new TorchEffect(this.ctx, this.viewport);
 
         // Initialize text manager only if text is provided
-        if (this.hasText && text) {
+        if (text) {
             this.textManager = new TextManager(this.ctx, this.viewport, text);
         }
 
@@ -108,9 +108,22 @@ export class BackgroundAnimationController {
     }
 
     initialize() {
-        if (this.hasText && this.textManager) {
+        if (this.textManager) {
             this.textManager.generateTextPixels();
         }
+    }
+
+    ownsCanvas(canvas: HTMLCanvasElement): boolean {
+        return this.canvas === canvas;
+    }
+
+    setText(text?: string) {
+        if (this.text === text) return;
+        this.text = text;
+        this.canvas.dataset.text = text ?? "";
+        this.textManager = text ? new TextManager(this.ctx, this.viewport, text) : undefined;
+        this.initialize();
+        this.renderFrame(0);
     }
 
     handleResize = () => {
@@ -123,10 +136,9 @@ export class BackgroundAnimationController {
         this.dropletManager.resize();
         this.watchDpr();
 
-        // Nothing is animating when motion is reduced, so redraw the static frame.
-        if (this.isReducedMotion()) {
-            this.renderFrame(BASE_FRAME_MS);
-        }
+        // Resizing clears the bitmap. Repaint before the next browser paint,
+        // including when motion is reduced or a transition pauses animation.
+        this.renderFrame(0);
     };
 
     private watchDpr() {
@@ -138,15 +150,18 @@ export class BackgroundAnimationController {
         this.dprQuery.addEventListener("change", this.handleResize);
     }
 
-    handleMotionPreference = () => {
-        if (this.isReducedMotion()) {
-            if (this.animationFrameId !== null) {
-                cancelAnimationFrame(this.animationFrameId);
-                this.animationFrameId = null;
-            }
-            this.renderFrame(BASE_FRAME_MS);
-        } else if (this.animationFrameId === null) {
-            this.lastFrameTime = performance.now();
+    syncAnimation = () => {
+        if (this.animationFrameId !== null) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+        this.lastFrameTime = performance.now();
+        if (document.hidden) return;
+
+        // Paint synchronously before a transition snapshot, or on tab restore,
+        // without advancing the simulation by time spent offscreen.
+        this.renderFrame(0);
+        if (!this.isReducedMotion()) {
             this.animationFrameId = requestAnimationFrame(this.animate);
         }
     };
@@ -175,7 +190,7 @@ export class BackgroundAnimationController {
         this.rippleManager.update(deltaScale);
 
         // Draw the text if provided
-        if (this.hasText && this.textManager) {
+        if (this.textManager) {
             const torchPos = this.torchEffect.getMousePosition();
             this.textManager.drawText(torchPos.x, torchPos.y);
         }
@@ -199,16 +214,9 @@ export class BackgroundAnimationController {
         this.initialize();
         window.addEventListener("resize", this.handleResize);
         this.watchDpr();
-        this.motionQuery.addEventListener("change", this.handleMotionPreference);
-
-        if (this.isReducedMotion()) {
-            // Respect the OS setting: render the scene once, statically.
-            this.renderFrame(BASE_FRAME_MS);
-            return;
-        }
-
-        this.lastFrameTime = performance.now();
-        this.animationFrameId = requestAnimationFrame(this.animate);
+        this.motionQuery.addEventListener("change", this.syncAnimation);
+        document.addEventListener("visibilitychange", this.syncAnimation);
+        this.syncAnimation();
     }
 
     getMousePosition() {
@@ -236,7 +244,8 @@ export class BackgroundAnimationController {
         }
 
         window.removeEventListener("resize", this.handleResize);
-        this.motionQuery.removeEventListener("change", this.handleMotionPreference);
+        this.motionQuery.removeEventListener("change", this.syncAnimation);
+        document.removeEventListener("visibilitychange", this.syncAnimation);
         this.dprQuery?.removeEventListener("change", this.handleResize);
         this.dprQuery = null;
         this.torchEffect.cleanup();
