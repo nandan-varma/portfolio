@@ -6,6 +6,8 @@ export class DropletManager {
     private maxDroplets = 0;
     private dropletSpawnRate = 0;
     private readonly gravity = 0.3;
+    /** CSS pixels per 60 Hz frame; balance lively motion with clarity. */
+    private readonly terminalVelocity = 9;
     private readonly colors = new ColorCache();
 
     constructor(
@@ -24,7 +26,16 @@ export class DropletManager {
         // Scale based on width: baseline at 1200px
         const widthScale = Math.min(this.viewport.width / 1200, 1);
         this.maxDroplets = Math.max(5, Math.floor(this.viewport.width / 12 * widthScale));
-        this.dropletSpawnRate = 0.01 * widthScale;
+        // Slower droplets remain visible longer. Preserve the established
+        // density by scaling spawning to their expected viewport crossing time.
+        const fallDistance = this.viewport.height + 20;
+        const originalFallFrames = Math.sqrt(2 * fallDistance / this.gravity);
+        const accelerationFrames = this.terminalVelocity / this.gravity;
+        const accelerationDistance = 0.5 * this.gravity * accelerationFrames ** 2;
+        const fallFrames = fallDistance <= accelerationDistance
+            ? originalFallFrames
+            : accelerationFrames + (fallDistance - accelerationDistance) / this.terminalVelocity;
+        this.dropletSpawnRate = 0.01 * widthScale * originalFallFrames / fallFrames;
     }
 
     createDroplet(deltaTime: number) {
@@ -48,7 +59,10 @@ export class DropletManager {
             const droplet = this.droplets[i];
 
             // Apply gravity with delta time
-            droplet.velocity += this.gravity * deltaMultiplier;
+            droplet.velocity = Math.min(
+                this.terminalVelocity,
+                droplet.velocity + this.gravity * deltaMultiplier,
+            );
             droplet.y += droplet.velocity * deltaMultiplier;
 
             // Draw droplet
