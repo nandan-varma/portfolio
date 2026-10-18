@@ -1,10 +1,12 @@
 import type { Droplet, Viewport } from './types';
+import { ColorCache } from './colorCache';
 
 export class DropletManager {
     private droplets: Droplet[] = [];
     private maxDroplets = 0;
     private dropletSpawnRate = 0;
     private readonly gravity = 0.3;
+    private readonly colors = new ColorCache();
 
     constructor(
         private ctx: CanvasRenderingContext2D,
@@ -69,10 +71,7 @@ export class DropletManager {
                 droplet.radius,
             );
             dropGradient.addColorStop(0, "white");
-            dropGradient.addColorStop(
-                1,
-                `rgba(200, 200, 200, ${droplet.opacity})`,
-            );
+            dropGradient.addColorStop(1, this.colors.get(200, droplet.opacity));
 
             this.ctx.fillStyle = dropGradient;
             this.ctx.fill();
@@ -86,7 +85,7 @@ export class DropletManager {
                 0,
                 Math.PI * 2,
             );
-            this.ctx.fillStyle = `rgba(255, 255, 255, ${droplet.opacity})`;
+            this.ctx.fillStyle = this.colors.get(255, droplet.opacity);
             this.ctx.fill();
 
             // Check for collision with text

@@ -1,8 +1,10 @@
 import type { Ripple } from './types';
+import { ColorCache } from './colorCache';
 
 export class RippleManager {
     private ripples: Ripple[] = [];
     private readonly perspectiveRatio = 0.4;
+    private readonly colors = new ColorCache();
 
     constructor(
         private ctx: CanvasRenderingContext2D,
@@ -72,14 +74,14 @@ export class RippleManager {
                 ripple.y,
                 ripple.radius,
             );
-            rippleGradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
+            rippleGradient.addColorStop(0, this.colors.get(255, 0));
             rippleGradient.addColorStop(
                 0.5,
-                `rgba(255, 255, 255, ${ripple.opacity * 0.3})`,
+                this.colors.get(255, ripple.opacity * 0.3),
             );
             rippleGradient.addColorStop(
                 1,
-                `rgba(255, 255, 255, ${ripple.opacity})`,
+                this.colors.get(255, ripple.opacity),
             );
 
             this.ctx.strokeStyle = rippleGradient;

@@ -31,7 +31,7 @@ export class BackgroundAnimationController {
 
     constructor(
         private canvas: HTMLCanvasElement,
-        private text?: string
+        text?: string
     ) {
         // No `willReadFrequently`: the only pixel readback is the one-off text
         // raster in TextManager, while this context is used for a full-frame

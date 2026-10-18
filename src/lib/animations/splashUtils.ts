@@ -1,24 +1,14 @@
 import type { SplashParticle } from './types';
+import { ColorCache } from './colorCache';
 
 export class SplashManager {
     private splashParticles: SplashParticle[] = [];
-    /** rgba strings indexed by 8-bit alpha, so particles don't allocate per frame. */
-    private readonly colors = new Map<number, string>();
+    private readonly colors = new ColorCache();
 
     constructor(
         private ctx: CanvasRenderingContext2D,
         private checkCollision: (x: number, y: number, radius: number) => false | { x: number; y: number }
     ) {}
-
-    private color(alpha: number): string {
-        const index = Math.max(0, Math.min(255, Math.round(alpha * 255)));
-        let color = this.colors.get(index);
-        if (!color) {
-            color = `rgba(255, 255, 255, ${index / 255})`;
-            this.colors.set(index, color);
-        }
-        return color;
-    }
 
     createSplashAtPoint(x: number, y: number) {
         // Create splash particles at collision point
@@ -70,7 +60,7 @@ export class SplashManager {
                 0,
                 Math.PI * 2,
             );
-            this.ctx.fillStyle = this.color(particle.opacity);
+            this.ctx.fillStyle = this.colors.get(255, particle.opacity);
             this.ctx.fill();
 
             // Fade out with delta time
