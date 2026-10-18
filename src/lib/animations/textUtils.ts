@@ -1,72 +1,84 @@
-import type { TextBounds, TextPixel } from './types';
+import type { TextBounds, TextPixel, Viewport } from './types';
 
 export class TextManager {
     private textPixels: TextPixel[] = [];
     private textBounds: TextBounds = { left: 0, right: 0, top: 0, bottom: 0 };
-    
+
     constructor(
         private ctx: CanvasRenderingContext2D,
-        private canvas: HTMLCanvasElement,
+        private viewport: Viewport,
         private text: string
     ) {}
 
+    private fontSize(): number {
+        const width = this.viewport.width;
+        return width < 768
+            ? Math.min(width / 10, 72)
+            : Math.min(width / 6, 120);
+    }
+
     generateTextPixels() {
-        // Set text style - larger on desktop, smaller on mobile
-        const isMobile = this.canvas.width < 768;
-        const fontSize = isMobile 
-            ? Math.min(this.canvas.width / 10, 72)
-            : Math.min(this.canvas.width / 6, 120);
-        this.ctx.font = `bold ${fontSize}px Arial`;
-        this.ctx.textAlign = "center";
-        this.ctx.textBaseline = "middle";
-
-        // Measure text
-        const metrics = this.ctx.measureText(this.text);
-        const textWidth = metrics.width;
-        const textHeight = fontSize;
-
-        // Clear canvas temporarily to draw text for pixel detection
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = "white";
-        this.ctx.fillText(this.text, this.canvas.width / 2, this.canvas.height / 2);
-
-        if (this.canvas.width === 0 || this.canvas.height === 0) {
-            this.canvas.width = window.innerWidth;
-            this.canvas.height = window.innerHeight;
+        const { width, height } = this.viewport;
+        if (width === 0 || height === 0) {
+            return;
         }
 
-        // Get image data
-        const imageData = this.ctx.getImageData(
-            0,
-            0,
-            this.canvas.width,
-            this.canvas.height,
-        );
-        const data = imageData.data;
+        const fontSize = this.fontSize();
+        const textX = width / 2;
+        const textY = height / 2;
 
-        // Reset textPixels
-        this.textPixels = [];
+        const measureCtx = document.createElement("canvas").getContext("2d");
+        if (!measureCtx) {
+            return;
+        }
+        measureCtx.font = `bold ${fontSize}px Arial`;
+        const textWidth = measureCtx.measureText(this.text).width;
+        const textHeight = fontSize;
 
         // Calculate text boundaries
         this.textBounds = {
-            left: this.canvas.width / 2 - textWidth / 2,
-            right: this.canvas.width / 2 + textWidth / 2,
-            top: this.canvas.height / 2 - textHeight / 2,
-            bottom: this.canvas.height / 2 + textHeight / 2,
+            left: textX - textWidth / 2,
+            right: textX + textWidth / 2,
+            top: textY - textHeight / 2,
+            bottom: textY + textHeight / 2,
         };
 
-        // Store pixel positions where text exists
-        for (let y = 0; y < this.canvas.height; y++) {
-            for (let x = 0; x < this.canvas.width; x++) {
-                const index = (y * this.canvas.width + x) * 4;
+        // Rasterize only the text box (not the whole viewport) and keep glyphs at
+        // the exact subpixel position they have on the main canvas. The readback
+        // happens on a throwaway canvas so the animated one stays GPU-backed.
+        const padding = Math.ceil(fontSize * 0.6) + 4;
+        const boxWidth = Math.max(1, Math.ceil(textWidth) + padding * 2);
+        const boxHeight = Math.max(1, Math.ceil(textHeight) + padding * 2);
+        const originX = Math.floor(textX - boxWidth / 2);
+        const originY = Math.floor(textY - boxHeight / 2);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = boxWidth;
+        canvas.height = boxHeight;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        if (!ctx) {
+            return;
+        }
+
+        ctx.font = `bold ${fontSize}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "white";
+        ctx.fillText(this.text, textX - originX, textY - originY);
+
+        const data = ctx.getImageData(0, 0, boxWidth, boxHeight).data;
+        const pixels: TextPixel[] = [];
+
+        for (let y = 0; y < boxHeight; y++) {
+            for (let x = 0; x < boxWidth; x++) {
+                const index = (y * boxWidth + x) * 4;
                 if (data[index + 3] > 0) {
-                    this.textPixels.push({ x, y });
+                    pixels.push({ x: originX + x, y: originY + y });
                 }
             }
         }
 
-        // Clear canvas again
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.textPixels = pixels;
     }
 
     checkTextCollision(x: number, y: number, radius: number): false | { x: number; y: number } {
@@ -94,17 +106,15 @@ export class TextManager {
     }
 
     drawText(torchX?: number, torchY?: number) {
-        // Set text style - larger on desktop, smaller on mobile
-        const isMobile = this.canvas.width < 768;
-        const fontSize = isMobile 
-            ? Math.min(this.canvas.width / 10, 72)
-            : Math.min(this.canvas.width / 6, 120);
+        const { width, height } = this.viewport;
+        const fontSize = this.fontSize();
+
         this.ctx.font = `bold ${fontSize}px Arial`;
         this.ctx.textAlign = "center";
         this.ctx.textBaseline = "middle";
 
-        const textX = this.canvas.width / 2;
-        const textY = this.canvas.height / 2;
+        const textX = width / 2;
+        const textY = height / 2;
 
         // Draw shadow if torch position is provided
         if (torchX !== undefined && torchY !== undefined) {
@@ -112,18 +122,18 @@ export class TextManager {
             const dx = textX - torchX;
             const dy = textY - torchY;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            
+
             // Normalize and scale shadow offset
             const shadowScale = 30; // How far the shadow extends
             const shadowOffsetX = (dx / distance) * shadowScale;
             const shadowOffsetY = (dy / distance) * shadowScale;
-            
+
             // Draw shadow with blur
             this.ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
             this.ctx.shadowBlur = 12;
             this.ctx.shadowOffsetX = shadowOffsetX;
             this.ctx.shadowOffsetY = shadowOffsetY;
-            
+
             this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             this.ctx.fillText(this.text, textX, textY);
         }

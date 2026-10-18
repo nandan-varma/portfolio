@@ -1,23 +1,27 @@
-import type { Droplet } from './types';
+import type { Droplet, Viewport } from './types';
 
 export class DropletManager {
     private droplets: Droplet[] = [];
-    private readonly maxDroplets: number;
-    private readonly dropletSpawnRate: number;
+    private maxDroplets = 0;
+    private dropletSpawnRate = 0;
     private readonly gravity = 0.3;
-    private readonly dropletRadius = 10;
 
     constructor(
         private ctx: CanvasRenderingContext2D,
-        private canvas: HTMLCanvasElement,
+        private viewport: Viewport,
         private getWaterLevel: () => number,
         private checkCollision: (x: number, y: number, radius: number) => false | { x: number; y: number },
         private onSplash: (x: number, y: number) => void,
         private onRipple: (x: number, radius: number, opacity: number) => void
     ) {
+        this.resize();
+    }
+
+    /** Recompute density for the current viewport width. */
+    resize() {
         // Scale based on width: baseline at 1200px
-        const widthScale = Math.min(canvas.width / 1200, 1);
-        this.maxDroplets = Math.max(8, Math.floor(canvas.width / 8 * widthScale));
+        const widthScale = Math.min(this.viewport.width / 1200, 1);
+        this.maxDroplets = Math.max(8, Math.floor(this.viewport.width / 8 * widthScale));
         this.dropletSpawnRate = 0.02 * widthScale;
     }
 
@@ -26,7 +30,7 @@ export class DropletManager {
             this.droplets.length < this.maxDroplets &&
             Math.random() < this.dropletSpawnRate * deltaTime
         ) {
-            const x = Math.random() * this.canvas.width;
+            const x = Math.random() * this.viewport.width;
             this.droplets.push({
                 x: x,
                 y: -20,

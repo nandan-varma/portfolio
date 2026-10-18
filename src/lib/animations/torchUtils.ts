@@ -54,6 +54,11 @@ const BRICK_CONFIG = {
     noiseAmount: 0.02,
 } as const;
 
+/** Mouse smoothing factor per 60fps frame. */
+const MOUSE_LERP_PER_FRAME = 0.08;
+/** Auto-orbit speed per 60fps frame. */
+const AUTO_ORBIT_SPEED_PER_FRAME = 0.008;
+
 interface FlameParticle {
     angle: number;
     distance: number;
@@ -68,6 +73,8 @@ interface NoiseSystem {
     speeds: Float32Array;
 }
 
+import type { Brick, Viewport } from './types';
+
 export class TorchEffect {
     // Position state
     private mouseX = 0;
@@ -76,14 +83,12 @@ export class TorchEffect {
     private targetMouseY = 0;
     private torchX = 0;
     private torchY = 0;
-    
+
     // Animation state
-    private animationFrame: number | null = null;
     private autoAnimate = false;
     private animationTime = 0;
     private lastInteraction = 0;
-    private smoothingEnabled = true;
-    
+
     // Flame state
     private noiseSystem: NoiseSystem;
     private flameParticles: FlameParticle[] = [];
@@ -91,17 +96,22 @@ export class TorchEffect {
     private targetIntensity = 1;
     private nextIntensityChange = 0;
 
+    // Static geometry, rebuilt on resize. Drawing paths once per resize keeps the
+    // per-frame work to fills only, with byte-identical colours.
+    private bricks: Brick[] = [];
+    private colorTables = new Map<number, string[]>();
+
     constructor(
         private readonly ctx: CanvasRenderingContext2D,
-        private readonly canvas: HTMLCanvasElement,
+        private readonly viewport: Viewport,
         initialPosition?: { x: number; y: number }
     ) {
         this.autoAnimate = this.detectTouchDevice();
-        
+
         // Center the torch for mobile devices, offset for desktop
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        
+        const centerX = viewport.width / 2;
+        const centerY = viewport.height / 2;
+
         // Use stored position if available, otherwise use center
         if (initialPosition) {
             this.mouseX = initialPosition.x;
@@ -114,45 +124,57 @@ export class TorchEffect {
             this.targetMouseX = centerX;
             this.targetMouseY = centerY;
         }
-        
+
+        this.noiseSystem = this.initializeNoiseSystem();
+        this.flameParticles = this.initializeFlameParticles();
+        this.setupInputListeners();
+        this.scheduleNextIntensityChange();
+        this.buildBricks();
+
         if (this.autoAnimate) {
             this.torchX = centerX;
             this.torchY = centerY;
         } else {
             this.updateTorchPosition();
         }
-        
-        this.noiseSystem = this.initializeNoiseSystem();
-        this.flameParticles = this.initializeFlameParticles();
-        this.setupInputListeners();
-        this.scheduleNextIntensityChange();
-        
-        if (this.autoAnimate) {
-            this.startAutoAnimation();
-        } else {
-            this.startSmoothingAnimation();
-        }
     }
-    
+
+    /** Rebuild static geometry after a viewport change. */
+    resize(): void {
+        this.buildBricks();
+    }
+
+    /**
+     * Advance the simulation by `deltaScale` 60fps-frames, so the animation has
+     * the same speed and easing at any display refresh rate.
+     */
+    update(deltaScale: number): void {
+        if (this.autoAnimate) {
+            this.updateAutoOrbit(deltaScale);
+        }
+        this.smoothMousePosition(deltaScale);
+        this.updateFlameAnimation(deltaScale);
+    }
+
     private initializeNoiseSystem(): NoiseSystem {
         const { noiseCount } = FLAME_CONFIG;
         const seeds = new Float32Array(noiseCount);
         const offsets = new Float32Array(noiseCount);
         const speeds = new Float32Array(noiseCount);
-        
+
         for (let i = 0; i < noiseCount; i++) {
             seeds[i] = Math.random() * 1000;
             offsets[i] = Math.random() * Math.PI * 2;
             speeds[i] = 0.003 + Math.random() * 0.008;
         }
-        
+
         return { seeds, offsets, speeds };
     }
-    
+
     private initializeFlameParticles(): FlameParticle[] {
         const { particleCount } = FLAME_CONFIG;
         const { distanceBase, distanceRange, speedMin, speedRange, intensityBase, intensityRange } = PARTICLE_CONFIG;
-        
+
         return Array.from({ length: particleCount }, (_, i) => ({
             angle: (i / particleCount) * Math.PI * 2,
             distance: distanceBase + Math.random() * distanceRange,
@@ -161,11 +183,11 @@ export class TorchEffect {
             life: Math.random()
         }));
     }
-    
+
     private detectTouchDevice(): boolean {
         return 'ontouchstart' in window && !window.matchMedia('(pointer: fine)').matches;
     }
-    
+
     private scheduleNextIntensityChange(): void {
         const { intensityChangeMinDelay, intensityChangeMaxDelay, targetIntensityBase, targetIntensityRange } = FLAME_CONFIG;
         this.nextIntensityChange = performance.now() + intensityChangeMinDelay + Math.random() * intensityChangeMaxDelay;
@@ -178,35 +200,35 @@ export class TorchEffect {
         document.addEventListener('touchstart', this.handleTouch, { passive: true });
         document.addEventListener('touchend', this.handleTouchEnd);
     }
-    
+
     private handleMouseMove = (e: MouseEvent): void => {
         this.updateMousePosition(e.clientX, e.clientY);
     };
-    
+
     private handleTouch = (e: TouchEvent): void => {
         if (e.touches.length > 0) {
             this.updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
         }
     };
-    
+
     private handleTouchEnd = (): void => {
-        if (this.autoAnimate) {
-            setTimeout(() => this.startAutoAnimation(), TORCH_CONFIG.touchResumeDelay);
-        }
+        // Restart the idle orbit relative to the moment the finger lifts.
+        this.lastInteraction = performance.now();
     };
-    
+
     private updateMousePosition(x: number, y: number): void {
         this.lastInteraction = performance.now();
         this.targetMouseX = x;
         this.targetMouseY = y;
     }
-    
-    private smoothMousePosition(): void {
-        const lerpFactor = 0.08; // Smoothing speed (0-1, higher = faster)
-        
+
+    private smoothMousePosition(deltaScale: number): void {
+        // Frame-rate independent exponential smoothing: same feel at 60/120/144Hz.
+        const lerpFactor = 1 - Math.pow(1 - MOUSE_LERP_PER_FRAME, deltaScale);
+
         const dx = this.targetMouseX - this.mouseX;
         const dy = this.targetMouseY - this.mouseY;
-        
+
         // Only update if there's a meaningful distance
         if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
             this.mouseX += dx * lerpFactor;
@@ -214,100 +236,106 @@ export class TorchEffect {
             this.updateTorchPosition();
         }
     }
-    
-    private startSmoothingAnimation(): void {
-        if (this.animationFrame && this.autoAnimate) return;
-        
-        const animate = (): void => {
-            this.smoothMousePosition();
-            this.updateFlameAnimation();
-            this.animationFrame = requestAnimationFrame(animate);
-        };
-        
-        animate();
+
+    private updateAutoOrbit(deltaScale: number): void {
+        // Pause the orbit for two seconds after the last interaction.
+        if (performance.now() - this.lastInteraction < TORCH_CONFIG.touchResumeDelay * 2) {
+            return;
+        }
+
+        this.animationTime += AUTO_ORBIT_SPEED_PER_FRAME * deltaScale;
+
+        const { width, height } = this.viewport;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = Math.min(width, height) * TORCH_CONFIG.autoAnimationRadius;
+
+        this.targetMouseX = centerX + Math.cos(this.animationTime) * radius;
+        this.targetMouseY = centerY + Math.sin(this.animationTime * 0.8) * radius * 0.7;
     }
 
     private updateTorchPosition(): void {
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
+        const centerX = this.viewport.width / 2;
+        const centerY = this.viewport.height / 2;
         const angle = Math.atan2(this.mouseY - centerY, this.mouseX - centerX);
-        
+
         // Position torch opposite to mouse direction
         this.torchX = centerX - Math.cos(angle) * TORCH_CONFIG.distanceFromCenter;
         this.torchY = centerY - Math.sin(angle) * TORCH_CONFIG.distanceFromCenter;
     }
 
-    private updateFlameAnimation(): void {
+    private updateFlameAnimation(deltaScale: number): void {
         const now = performance.now();
-        
-        this.updateNoiseSystem();
-        this.updateIntensity(now);
-        this.updateParticles();
+
+        this.updateNoiseSystem(deltaScale);
+        this.updateIntensity(now, deltaScale);
+        this.updateParticles(deltaScale);
     }
-    
-    private updateNoiseSystem(): void {
+
+    private updateNoiseSystem(deltaScale: number): void {
         const { offsets, speeds } = this.noiseSystem;
         for (let i = 0; i < offsets.length; i++) {
-            offsets[i] += speeds[i];
+            offsets[i] += speeds[i] * deltaScale;
         }
     }
-    
-    private updateIntensity(now: number): void {
+
+    private updateIntensity(now: number, deltaScale: number): void {
         if (now >= this.nextIntensityChange) {
             this.scheduleNextIntensityChange();
         }
-        
+
         const { intensityLerpSpeed, microFlickerRange, intensityMin, intensityMax } = FLAME_CONFIG;
-        this.globalIntensity += (this.targetIntensity - this.globalIntensity) * intensityLerpSpeed;
-        
-        const microFlicker = (Math.random() - 0.5) * microFlickerRange;
+        const lerpFactor = 1 - Math.pow(1 - intensityLerpSpeed, deltaScale);
+        this.globalIntensity += (this.targetIntensity - this.globalIntensity) * lerpFactor;
+
+        const microFlicker = (Math.random() - 0.5) * microFlickerRange * deltaScale;
         this.globalIntensity = Math.max(intensityMin, Math.min(intensityMax, this.globalIntensity + microFlicker));
     }
-    
-    private updateParticles(): void {
+
+    private updateParticles(deltaScale: number): void {
         const { angleVariation, noiseInfluence, resetProbability, speedMin, speedRange } = PARTICLE_CONFIG;
-        
+
         this.flameParticles.forEach((particle, i) => {
-            particle.angle += particle.speed * (0.5 + Math.random() * angleVariation);
+            particle.angle += particle.speed * (0.5 + Math.random() * angleVariation) * deltaScale;
             const noise1 = this.getNoiseValue(i * 2);
             const noise2 = this.getNoiseValue(i * 2 + 1);
             particle.distance = 0.5 + (noise1 + 1) * 0.5 * noiseInfluence;
             particle.intensity = 0.4 + (noise2 + 1) * 0.5 * noiseInfluence;
-            particle.life += 0.01;
-            
-            if (Math.random() < resetProbability) {
+            particle.life += 0.01 * deltaScale;
+
+            if (Math.random() < resetProbability * deltaScale) {
                 particle.angle = Math.random() * Math.PI * 2;
                 particle.speed = speedMin + Math.random() * speedRange;
                 particle.life = 0;
             }
         });
     }
-    
+
     private getNoiseValue(index: number): number {
         const { seeds, offsets } = this.noiseSystem;
         const idx = index % seeds.length;
         const t = offsets[idx];
-        
+
         const n1 = Math.sin(t + seeds[idx]);
         const n2 = Math.sin(t * 1.7 + seeds[idx] * 2.3);
         const n3 = Math.sin(t * 2.3 + seeds[idx] * 1.7);
-        
+
         return (n1 + n2 * 0.5 + n3 * 0.3) / 1.8;
     }
-    
+
     private getFlameIntensityAt(x: number, y: number, centerX: number, centerY: number): number {
         const dx = x - centerX;
         const dy = y - centerY;
         const angle = Math.atan2(dy, dx);
-        
+
         // Smooth blending across all particles instead of selective closest ones
         let totalInfluence = 0;
         let totalWeight = 0;
-        
+
         this.flameParticles.forEach(particle => {
             const angleDiff = Math.abs(angle - particle.angle);
             const normalizedAngleDiff = Math.min(angleDiff, Math.PI * 2 - angleDiff);
-            
+
             // Use wider angle range and smoother falloff
             const angleFactor = Math.cos(normalizedAngleDiff / 2);
             const weight = Math.max(0, angleFactor) * particle.intensity;
@@ -315,146 +343,140 @@ export class TorchEffect {
             totalInfluence += influence * weight;
             totalWeight += weight;
         });
-        
+
         // Clamp the result to prevent extreme values
         const avgInfluence = totalWeight > 0 ? totalInfluence / totalWeight : 0.75;
         return Math.max(0.6, Math.min(0.9, avgInfluence));
     }
 
-    private startAutoAnimation(): void {
-        if (this.animationFrame) return;
-        
-        const animate = (): void => {
-            const timeSinceInteraction = performance.now() - this.lastInteraction;
-            
-            if (timeSinceInteraction < 2000 && this.autoAnimate) {
-                this.animationFrame = requestAnimationFrame(animate);
-                return;
+    /**
+     * Pre-build brick paths (in CSS pixels) once per resize. Paths are re-used by
+     * every frame; only fill colours change with the torch position.
+     */
+    private buildBricks(): void {
+        const { width, height, mortarSize } = BRICK_CONFIG;
+        const { width: viewWidth, height: viewHeight } = this.viewport;
+        const radius = 3;
+        const brickWidth = width - mortarSize * 2;
+        const brickHeight = height - mortarSize * 2;
+        const bricks: Brick[] = [];
+
+        for (let y = 0; y < viewHeight + height; y += height) {
+            const offset = (Math.floor(y / height) % 2) * (width / 2);
+
+            for (let x = -width; x < viewWidth + width; x += width) {
+                const brickX = x + offset;
+                const brickY = y;
+                const x0 = brickX + mortarSize;
+                const y0 = brickY + mortarSize;
+
+                const base = new Path2D();
+                base.roundRect(x0, y0, brickWidth, brickHeight, radius);
+
+                const lineA = new Path2D();
+                lineA.roundRect(x0 + 5, y0 + brickHeight * 0.3, brickWidth - 10, 1.5, 0.5);
+
+                const lineB = new Path2D();
+                lineB.roundRect(x0 + 8, y0 + brickHeight * 0.65, brickWidth - 16, 1, 0.5);
+
+                const highlight = new Path2D();
+                highlight.roundRect(x0 + 3, y0 + 2, brickWidth - 6, brickHeight * 0.2, radius - 1);
+
+                const shade = new Path2D();
+                shade.roundRect(x0 + 3, y0 + brickHeight * 0.8, brickWidth - 6, brickHeight * 0.18, radius - 1);
+
+                bricks.push({
+                    x: brickX,
+                    y: brickY,
+                    centerX: brickX + width / 2,
+                    centerY: brickY + height / 2,
+                    base,
+                    lineA,
+                    lineB,
+                    highlight,
+                    shade,
+                });
             }
-            
-            this.animationTime += 0.008;
-            const centerX = this.canvas.width / 2;
-            const centerY = this.canvas.height / 2;
-            const radius = Math.min(this.canvas.width, this.canvas.height) * TORCH_CONFIG.autoAnimationRadius;
-            
-            this.targetMouseX = centerX + Math.cos(this.animationTime) * radius;
-            this.targetMouseY = centerY + Math.sin(this.animationTime * 0.8) * radius * 0.7;
-            
-            this.smoothMousePosition();
-            
-            this.animationFrame = requestAnimationFrame(animate);
-        };
-        
-        animate();
+        }
+
+        this.bricks = bricks;
+    }
+
+    /** rgba() strings indexed by 8-bit alpha, cached per base brightness. */
+    private colorTable(base: number): string[] {
+        let table = this.colorTables.get(base);
+        if (!table) {
+            table = new Array(256);
+            for (let i = 0; i < 256; i++) {
+                table[i] = `rgba(${base}, ${base}, ${base}, ${i / 255})`;
+            }
+            this.colorTables.set(base, table);
+        }
+        return table;
+    }
+
+    private alphaIndex(alpha: number): number {
+        return Math.max(0, Math.min(255, Math.round(alpha * 255)));
     }
 
     drawBrickWall(): void {
-        const { width, height, mortarSize } = BRICK_CONFIG;
+        for (const brick of this.bricks) {
+            const opacity = this.calculateBrickOpacity(brick);
 
-        for (let y = 0; y < this.canvas.height + height; y += height) {
-            const offset = (Math.floor(y / height) % 2) * (width / 2);
-            
-            for (let x = -width; x < this.canvas.width + width; x += width) {
-                const brickX = x + offset;
-                const brickY = y;
-                const opacity = this.calculateBrickOpacity(brickX, brickY, width, height);
-
-                if (opacity > 0.05) {
-                    this.drawBrick(brickX, brickY, width, height, mortarSize, opacity);
-                }
+            if (opacity > 0.05) {
+                this.drawBrick(brick, opacity);
             }
         }
     }
-    
-    private calculateBrickOpacity(brickX: number, brickY: number, width: number, height: number): number {
-        const brickCenterX = brickX + width / 2;
-        const brickCenterY = brickY + height / 2;
-        const distanceFromLight = this.getDistance(brickCenterX, brickCenterY, this.mouseX, this.mouseY);
-        
-        const flameShape = this.getFlameIntensityAt(brickCenterX, brickCenterY, this.mouseX, this.mouseY);
+
+    private calculateBrickOpacity(brick: Brick): number {
+        const distanceFromLight = this.getDistance(brick.centerX, brick.centerY, this.mouseX, this.mouseY);
+
+        const flameShape = this.getFlameIntensityAt(brick.centerX, brick.centerY, this.mouseX, this.mouseY);
         const { baseOpacity, maxOpacityMultiplier } = LIGHTING_CONFIG;
         const maxOpacity = maxOpacityMultiplier * this.globalIntensity;
         const effectiveRadius = TORCH_CONFIG.baseRadius * (1.4 + flameShape * 0.4);
-        
+
         if (distanceFromLight >= effectiveRadius * 1.5) {
             return baseOpacity;
         }
-        
+
         const normalizedDistance = distanceFromLight / effectiveRadius;
         const falloff = Math.pow(Math.max(0, 1 - normalizedDistance), 2.5);
         const shapedFalloff = falloff * (0.7 + flameShape * 0.3);
-        
+
         let opacity = baseOpacity + (shapedFalloff * (maxOpacity - baseOpacity));
-        opacity += this.getBrickNoise(brickX, brickY);
-        
+        opacity += this.getBrickNoise(brick.x, brick.y);
+
         return Math.max(baseOpacity, opacity);
     }
-    
+
     private getBrickNoise(brickX: number, brickY: number): number {
         const { noiseScale, noiseAmount } = BRICK_CONFIG;
         return Math.sin(brickX * noiseScale) * Math.cos(brickY * noiseScale) * noiseAmount;
     }
-    
-    private drawBrick(x: number, y: number, width: number, height: number, mortarSize: number, opacity: number): void {
-        const borderRadius = 3;
-        const brickX = x + mortarSize;
-        const brickY = y + mortarSize;
-        const brickWidth = width - mortarSize * 2;
-        const brickHeight = height - mortarSize * 2;
-        
-        // Main brick base
-        this.ctx.fillStyle = `rgba(180, 180, 180, ${opacity})`;
-        this.ctx.beginPath();
-        this.ctx.roundRect(brickX, brickY, brickWidth, brickHeight, borderRadius);
-        this.ctx.fill();
 
-        // Subtle horizontal lines for texture
-        this.ctx.fillStyle = `rgba(140, 140, 140, ${opacity * 0.25})`;
-        this.ctx.beginPath();
-        this.ctx.roundRect(
-            brickX + 5,
-            brickY + brickHeight * 0.3,
-            brickWidth - 10,
-            1.5,
-            0.5
-        );
-        this.ctx.fill();
-        
-        this.ctx.beginPath();
-        this.ctx.roundRect(
-            brickX + 8,
-            brickY + brickHeight * 0.65,
-            brickWidth - 16,
-            1,
-            0.5
-        );
-        this.ctx.fill();
+    private drawBrick(brick: Brick, opacity: number): void {
+        const ctx = this.ctx;
+
+        // Main brick base
+        ctx.fillStyle = this.colorTable(180)[this.alphaIndex(opacity)];
+        ctx.fill(brick.base);
+
+        // Subtle horizontal lines for texture (same style for both lines)
+        ctx.fillStyle = this.colorTable(140)[this.alphaIndex(opacity * 0.25)];
+        ctx.fill(brick.lineA);
+        ctx.fill(brick.lineB);
 
         // Light highlight on top edge
-        this.ctx.fillStyle = `rgba(200, 200, 200, ${opacity * 0.4})`;
-        this.ctx.beginPath();
-        this.ctx.roundRect(
-            brickX + 3,
-            brickY + 2,
-            brickWidth - 6,
-            brickHeight * 0.2,
-            borderRadius - 1
-        );
-        this.ctx.fill();
-        
+        ctx.fillStyle = this.colorTable(200)[this.alphaIndex(opacity * 0.4)];
+        ctx.fill(brick.highlight);
+
         // Darker bottom edge for depth
-        this.ctx.fillStyle = `rgba(100, 100, 100, ${opacity * 0.3})`;
-        this.ctx.beginPath();
-        this.ctx.roundRect(
-            brickX + 3,
-            brickY + brickHeight * 0.8,
-            brickWidth - 6,
-            brickHeight * 0.18,
-            borderRadius - 1
-        );
-        this.ctx.fill();
+        ctx.fillStyle = this.colorTable(100)[this.alphaIndex(opacity * 0.3)];
+        ctx.fill(brick.shade);
     }
-    
+
     private getDistance(x1: number, y1: number, x2: number, y2: number): number {
         const dx = x1 - x2;
         const dy = y1 - y2;
@@ -462,52 +484,44 @@ export class TorchEffect {
     }
 
     drawTorchLight(): void {
-        if (!this.animationFrame) {
-            this.updateFlameAnimation();
-        }
-        
         this.flameParticles.forEach((particle, i) => {
             if (i % 2 === 0) {
                 this.drawParticleLight(particle);
             }
         });
     }
-    
+
     private drawParticleLight(particle: FlameParticle): void {
         const { particleOffsetX, particleOffsetY, particleRadiusBase, particleRadiusRange } = LIGHTING_CONFIG;
-        
+
         const offsetX = Math.cos(particle.angle) * particle.distance * particleOffsetX;
         const offsetY = Math.sin(particle.angle) * particle.distance * particleOffsetY;
         const radius = TORCH_CONFIG.baseRadius * (particleRadiusBase + particle.distance * particleRadiusRange);
-        
+
         const centerX = this.mouseX + offsetX;
         const centerY = this.mouseY + offsetY;
-        
+
         const gradient = this.createParticleGradient(centerX, centerY, radius, particle);
-        
+
         this.ctx.fillStyle = gradient;
         this.ctx.beginPath();
         this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
         this.ctx.fill();
     }
-    
+
     private createParticleGradient(x: number, y: number, radius: number, particle: FlameParticle): CanvasGradient {
         const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, radius);
         const alpha = Math.min(particle.intensity * this.globalIntensity, 0.8);
-        
+
         LIGHTING_CONFIG.gradientStops.forEach(({ stop, color, alpha: stopAlpha }) => {
             const finalAlpha = stopAlpha * alpha;
             gradient.addColorStop(stop, `rgba(${color}, ${finalAlpha})`);
         });
-        
+
         return gradient;
     }
 
     draw(): void {
-        if (!this.animationFrame) {
-            this.updateFlameAnimation();
-        }
-        
         this.drawBrickWall();
         this.drawTorchLight();
     }
@@ -519,7 +533,7 @@ export class TorchEffect {
     getMousePosition(): { x: number; y: number } {
         return { x: this.mouseX, y: this.mouseY };
     }
-    
+
     setMousePosition(x: number, y: number): void {
         this.mouseX = x;
         this.mouseY = y;
@@ -528,11 +542,6 @@ export class TorchEffect {
     }
 
     cleanup(): void {
-        if (this.animationFrame) {
-            cancelAnimationFrame(this.animationFrame);
-            this.animationFrame = null;
-        }
-        
         document.removeEventListener('mousemove', this.handleMouseMove);
         document.removeEventListener('touchmove', this.handleTouch);
         document.removeEventListener('touchstart', this.handleTouch);
