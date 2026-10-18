@@ -23,8 +23,8 @@ export class DropletManager {
     resize() {
         // Scale based on width: baseline at 1200px
         const widthScale = Math.min(this.viewport.width / 1200, 1);
-        this.maxDroplets = Math.max(8, Math.floor(this.viewport.width / 8 * widthScale));
-        this.dropletSpawnRate = 0.02 * widthScale;
+        this.maxDroplets = Math.max(5, Math.floor(this.viewport.width / 12 * widthScale));
+        this.dropletSpawnRate = 0.01 * widthScale;
     }
 
     createDroplet(deltaTime: number) {
@@ -36,7 +36,7 @@ export class DropletManager {
             this.droplets.push({
                 x: x,
                 y: -20,
-                radius: 3 + Math.random() * 3,
+                radius: 4 + Math.random() * 2,
                 velocity: 0,
                 opacity: 0.8 + Math.random() * 0.2,
             });
