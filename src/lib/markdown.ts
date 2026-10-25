@@ -10,6 +10,10 @@ export const markdownHeaders = {
 
 export const absolute = (path: string) => new URL(path, SITE).href;
 
+/** Every markdown response starts with a pointer to the site index, so agents landing on one page can find the rest. */
+export const markdownResponse = (body: string) =>
+	new Response(`> Site index for LLMs: ${absolute("/llms.txt")}\n\n${body}`, { headers: markdownHeaders });
+
 /** Markdown twin of an HTML pathname: `/` -> `/index.md`, `/blog/x` -> `/blog/x.md`. */
 export const markdownPath = (pathname: string) => {
 	const trimmed = pathname.replace(/\/+$/, "");

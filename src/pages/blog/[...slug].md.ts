@@ -1,5 +1,5 @@
 import type { APIRoute, GetStaticPaths } from "astro";
-import { entryToMarkdown, getBlogPosts, markdownHeaders } from "@/lib/markdown";
+import { entryToMarkdown, getBlogPosts, markdownResponse } from "@/lib/markdown";
 
 export const getStaticPaths = (async () =>
 	(await getBlogPosts()).map((post) => ({
@@ -8,4 +8,4 @@ export const getStaticPaths = (async () =>
 	}))) satisfies GetStaticPaths;
 
 export const GET: APIRoute = ({ props }) =>
-	new Response(entryToMarkdown(props.post, "blog"), { headers: markdownHeaders });
+	markdownResponse(entryToMarkdown(props.post, "blog"));
