@@ -3,7 +3,7 @@ import { next, rewrite } from "@vercel/functions";
 // Vercel serves prerendered files before vercel.json rewrites run, so `Accept: text/markdown`
 // negotiation has to happen here. Browsers (text/html first, or */*) are untouched.
 export const config = {
-	matcher: ["/", "/blog", "/projects", "/contact", "/blog/:slug", "/projects/:slug"],
+	matcher: ["/", "/blog", "/projects", "/contact", "/resume", "/blog/:slug", "/projects/:slug"],
 };
 
 const quality = (accept: string, type: string) => {

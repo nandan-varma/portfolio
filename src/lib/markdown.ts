@@ -23,7 +23,7 @@ export const markdownPath = (pathname: string) => {
 
 /** Pathnames that have a markdown twin, used for the `<link rel="alternate">` hint. */
 export const hasMarkdownTwin = (pathname: string) =>
-	/^\/(?:(?:blog|projects)(?:\/[^/]+)?|contact)?\/?$/.test(pathname);
+	/^\/(?:(?:blog|projects)(?:\/[^/]+)?|contact|resume)?\/?$/.test(pathname);
 
 export const getBlogPosts = async () =>
 	(await getCollection("blog"))
@@ -101,6 +101,7 @@ Every page on this site has a markdown version at the same URL with \`.md\` appe
 - [Projects](${absolute(markdownPath("/projects"))}): All published projects
 - [Blog](${absolute(markdownPath("/blog"))}): All published posts
 - [Contact](${absolute(markdownPath("/contact"))}): Email, GitHub and LinkedIn
+- [Resume](${absolute(markdownPath("/resume"))}): Education, experience, full technical skills
 
 ## Projects
 
@@ -112,7 +113,7 @@ ${section(posts.map((p) => listLine(`/blog/${p.id}`, p.data.title, p.data.descri
 
 ## Optional
 
-- [Resume](${absolute("/resume")}): Resume (PDF)
+- [Resume (PDF)](${absolute("/resume")}): Printable version
 - [RSS feed](${absolute("/rss.xml")}): Projects feed
 - [Sitemap](${absolute("/sitemap-index.xml")}): All HTML pages
 `;

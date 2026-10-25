@@ -22,7 +22,7 @@ export function openResume(context: APIContext): Response {
   if (POSTHOG_KEY && POSTHOG_ENABLED && context.request.method === "GET" && !BOT_AGENT.test(userAgent)) {
     waitUntil(captureResumeOpened(context, POSTHOG_KEY, variant, userAgent).catch((error) => console.error("resume_opened capture failed", error)));
   }
-  return new Response(null, { status: 302, headers: { Location: destination, "Cache-Control": "no-store" } });
+  return new Response(null, { status: 302, headers: { Location: destination, "Cache-Control": "no-store", ...(variant === "/resume" && { Link: '</resume.md>; rel="alternate"; type="text/markdown"' }) } });
 }
 
 async function captureResumeOpened({ url, request, cookies, clientAddress }: APIContext, key: string, variant: string, userAgent: string) {
